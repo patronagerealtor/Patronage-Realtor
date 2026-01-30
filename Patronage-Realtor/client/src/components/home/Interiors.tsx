@@ -4,8 +4,15 @@ import { ArrowRight } from "lucide-react";
 
 export function Interiors() {
   return (
-    <section className="py-16 md:py-24 bg-secondary/30 border-y border-border">
-      <div className="container mx-auto px-4">
+    <section className="relative py-16 md:py-24 overflow-hidden border-y border-border">
+      {/* Background Image with Overlay */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url("/interiors/interior-bg.png")' }}
+      >
+        <div className="absolute inset-0 bg-secondary/90" />
+      </div>
+      <div className="container relative z-10 mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-center">
           
           {/* Mobile Order: Text First, then Image */}
