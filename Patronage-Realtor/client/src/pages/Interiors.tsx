@@ -1,4 +1,5 @@
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-react";
@@ -79,6 +80,7 @@ export default function Interiors() {
           <Button size="lg" className="rounded-full px-8">Talk to our Designers</Button>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

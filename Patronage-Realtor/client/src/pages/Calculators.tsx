@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calculator, Home, Landmark, Coins, Scale, Paintbrush } from "lucide-react";
@@ -86,6 +87,7 @@ export default function Calculators() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
