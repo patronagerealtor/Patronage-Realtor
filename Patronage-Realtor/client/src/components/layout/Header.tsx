@@ -22,7 +22,7 @@ export function Header() {
           <img
             src="/logo/logo-full.png"
             alt="Patronage Realtor"
-            className="h-10 w-auto object-contain"
+            className="h-17 w-auto object-contain"
             data-testid="img-logo"
           />
         </div>
@@ -75,8 +75,14 @@ export function Header() {
                   About Us
                 </a>
               </NavigationMenuItem>
+              <NavigationMenuItem>
+                <a href="#" className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                  Calculators
+                </a>
+              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
+          
         </div>
 
         {/* Desktop Actions */}
@@ -102,7 +108,6 @@ export function Header() {
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-2">Properties</h4>
                   <a href="#" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">Buy</a>
-                  <a href="#" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">Rent</a>
                   <a href="#" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">Commercial</a>
                   <a href="#" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">New Projects</a>
                 </div>
