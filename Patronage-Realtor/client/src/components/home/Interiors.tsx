@@ -10,7 +10,7 @@ export function Interiors() {
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: 'url("/interiors/interior-bg.png")' }}
       >
-        <div className="absolute inset-0 bg-secondary/90" />
+        <div className="absolute inset-0 bg-secondary/10" />
       </div>
       <div className="container relative z-10 mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-center">

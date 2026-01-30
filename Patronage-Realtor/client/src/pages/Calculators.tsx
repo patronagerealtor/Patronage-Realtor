@@ -83,7 +83,8 @@ export default function Calculators() {
       totalRent += currentRent * 12;
       const totalEmi = rvbEmi * 12 * i;
       const futureValue = rvbPrice * Math.pow(1.1, i);
-      const netBuyingCost = totalEmi - futureValue;
+      const appreciation = futureValue - rvbPrice;
+      const netBuyingCost = totalEmi - appreciation;
 
       if (breakEvenYear === -1 && netBuyingCost < totalRent) {
         breakEvenYear = i;
