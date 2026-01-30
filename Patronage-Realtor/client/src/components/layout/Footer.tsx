@@ -24,10 +24,10 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="font-heading font-semibold text-lg">Quick Links</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">Properties</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Interiors</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Contact</a></li>
+              <li><a href="/" className="hover:text-foreground transition-colors">Properties</a></li>
+              <li><a href="/interiors" className="hover:text-foreground transition-colors">Interiors</a></li>
+              <li><a href="/about-us" className="hover:text-foreground transition-colors">About Us</a></li>
+              <li><a href="/calculators" className="hover:text-foreground transition-colors">Calculators</a></li>
               <li><a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
             </ul>
           </div>
