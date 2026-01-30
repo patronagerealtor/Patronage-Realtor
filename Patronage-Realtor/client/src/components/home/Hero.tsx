@@ -57,7 +57,7 @@ export function Hero() {
              <img 
                src="/Hero/hero-1.png"
                alt="Modern Luxury Villa"
-               className="w-full h-[400px] md:h-[500px] lg:h-[600px] object-cover shadow-xl border-4 border-background rounded-lg animate-in fade-in duration-700 ease-out fill-mode-forwards"
+               className="w-full h-[400px] md:h-[500px] lg:h-[600px] object-cover shadow-xl border-4 border-background rounded-lg transition-transform duration-500 ease-out hover:scale-[1.02] hover:shadow-2xl"
              />
           </div>
 
