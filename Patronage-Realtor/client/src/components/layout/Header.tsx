@@ -22,7 +22,7 @@ export function Header() {
           <img
             src="/logo/logo-full.png"
             alt="Patronage Realtor"
-            className="w-8 h-8 object-contain"
+            className="h-10 w-auto object-contain"
             data-testid="img-logo"
           />
         </div>
