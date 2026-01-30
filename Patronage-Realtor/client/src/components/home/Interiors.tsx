@@ -8,11 +8,10 @@ export function Interiors() {
       {/* Background Image with Overlay */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url("/interiors/interior-bg.png")' }}
+        style={{ backgroundImage: 'url("/interiors/interior-bg-1.png")' }}
       >
-        <div className="absolute inset-0 bg-secondary/65" />
+        <div className="absolute inset-0 bg-secondary/80" />
       </div>
-
       <div className="container relative z-10 mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-center">
           
