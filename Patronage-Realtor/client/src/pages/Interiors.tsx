@@ -89,6 +89,7 @@ export default function Interiors() {
           <Button size="lg" className="rounded-full px-8">Talk to our Designers</Button>
         </div>
       </main>
+      </div>
       <Footer />
     </div>
   );
