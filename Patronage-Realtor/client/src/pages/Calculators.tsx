@@ -35,7 +35,7 @@ export default function Calculators() {
   const [rvbPrice, setRvbPrice] = useState(5000000);
   const [rvbEmi, setRvbEmi] = useState(35000);
   const [rvbHorizon, setRvbHorizon] = useState(10);
-  const [rvbResults, setRvbResults] = useState({ totalRent: 0, totalEmi: 0, futureValue: 0, result: "" });
+  const [rvbResults, setRvbResults] = useState({ totalRent: 0, totalEmi: 0, futureValue: 0, result: "", breakEven: -1 });
 
   const calculateAffordability = () => {
     const disposable = affIncome - affEmi;
@@ -64,7 +64,7 @@ export default function Calculators() {
 
   const calculateOwnership = () => {
     const stampDuty = costPrice * 0.07;
-    const gst = 0; // Removed Property Type logic, defaulting to 0 or fixed if needed
+    const gst = costPrice * 0.05;
     const parking = costParking === "yes" ? 300000 : 0;
     setCostResults({
       stampDuty: Math.round(stampDuty),
@@ -77,20 +77,29 @@ export default function Calculators() {
   const calculateRentVsBuy = () => {
     let totalRent = 0;
     let currentRent = rvbRent;
-    for (let i = 0; i < rvbHorizon; i++) {
+    let breakEvenYear = -1;
+
+    for (let i = 1; i <= 30; i++) {
       totalRent += currentRent * 12;
+      const totalEmi = rvbEmi * 12 * i;
+      const futureValue = rvbPrice * Math.pow(1.1, i);
+      const netBuyingCost = totalEmi - futureValue;
+
+      if (breakEvenYear === -1 && netBuyingCost < totalRent) {
+        breakEvenYear = i;
+      }
+
+      if (i === rvbHorizon) {
+        setRvbResults({
+          totalRent: Math.round(totalRent),
+          totalEmi: Math.round(totalEmi),
+          futureValue: Math.round(futureValue),
+          result: totalRent < netBuyingCost ? "Renting is cheaper" : "Buying is better",
+          breakEven: breakEvenYear
+        });
+      }
       currentRent *= 1.1;
     }
-    const totalEmi = rvbEmi * 12 * rvbHorizon;
-    const futureValue = rvbPrice * Math.pow(1.1, rvbHorizon);
-    const netBuyingCost = totalEmi - futureValue;
-    
-    setRvbResults({
-      totalRent: Math.round(totalRent),
-      totalEmi: Math.round(totalEmi),
-      futureValue: Math.round(futureValue),
-      result: totalRent < netBuyingCost ? "Renting is cheaper" : "Buying is better"
-    });
   };
 
   useEffect(() => {
@@ -180,6 +189,7 @@ export default function Calculators() {
               </Card>
               <Card className="bg-primary/5 border-primary/20 p-8 flex flex-col justify-center space-y-6">
                 <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">Stamp Duty (7%)</span><span className="font-bold">{formatCurrency(costResults.stampDuty)}</span></div>
+                <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">GST (5%)</span><span className="font-bold">{formatCurrency(costResults.gst)}</span></div>
                 <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">Parking Cost</span><span className="font-bold">{formatCurrency(costResults.parking)}</span></div>
                 <div className="flex justify-between items-center pt-4 border-t border-primary/10"><span className="text-base font-bold uppercase tracking-widest">Total Ownership Cost</span><span className="text-3xl font-bold text-primary">{formatCurrency(costResults.total)}</span></div>
               </Card>
@@ -204,6 +214,12 @@ export default function Calculators() {
                 <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">Total Rent Paid</span><span className="font-bold">{formatCurrency(rvbResults.totalRent)}</span></div>
                 <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">Total EMI Paid</span><span className="font-bold">{formatCurrency(rvbResults.totalEmi)}</span></div>
                 <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">Future Property Value</span><span className="font-bold">{formatCurrency(rvbResults.futureValue)}</span></div>
+                {rvbResults.breakEven !== -1 && (
+                  <div className="flex justify-between items-center border-t border-primary/10 pt-4">
+                    <span className="text-sm text-muted-foreground uppercase tracking-widest">Break-even Point</span>
+                    <span className="font-bold text-green-600">{rvbResults.breakEven} Years</span>
+                  </div>
+                )}
                 <div className="text-center pt-6 border-t border-primary/10">
                   <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2 font-bold">Recommendation</p>
                   <p className={`text-3xl font-bold ${rvbResults.result === "Buying is better" ? "text-green-600" : "text-primary"}`}>{rvbResults.result}</p>
