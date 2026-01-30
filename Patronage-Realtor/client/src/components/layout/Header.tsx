@@ -34,11 +34,11 @@ export function Header() {
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-transparent font-medium">Properties</NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                    <li className="row-span-3">
+                  <ul className="grid w-[400px] gap-3 p-4 md:w-[600px] md:grid-cols-2 lg:w-[700px]">
+                    <li>
                       <div className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md">
-                        <MapPin className="h-6 w-6" />
-                        <div className="mb-2 mt-4 text-lg font-medium">
+                        <MapPin className="h-6 w-6 mb-2" />
+                        <div className="mb-2 text-lg font-medium">
                           New Projects
                         </div>
                         <p className="text-sm leading-tight text-muted-foreground">
@@ -47,20 +47,15 @@ export function Header() {
                       </div>
                     </li>
                     <li>
-                      <a href="#" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                        <div className="text-sm font-medium leading-none">Buy</div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Find your perfect home.
+                      <div className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md">
+                        <Search className="h-6 w-6 mb-2" />
+                        <div className="mb-2 text-lg font-medium">
+                          Buy
+                        </div>
+                        <p className="text-sm leading-tight text-muted-foreground">
+                          Find your perfect home in our listings.
                         </p>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-                        <div className="text-sm font-medium leading-none">Rent</div>
-                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                          Explore rental properties.
-                        </p>
-                      </a>
+                      </div>
                     </li>
                   </ul>
                 </NavigationMenuContent>
@@ -108,7 +103,6 @@ export function Header() {
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-2">Properties</h4>
                   <a href="#" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">Buy</a>
-                  <a href="#" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">Commercial</a>
                   <a href="#" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">New Projects</a>
                 </div>
                 
