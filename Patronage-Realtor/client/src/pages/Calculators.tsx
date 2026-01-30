@@ -79,17 +79,26 @@ export default function Calculators() {
     let currentRent = rvbRent;
     let breakEvenYear = -1;
 
+    // Use a 30-year projection to find break-even
     for (let i = 1; i <= 30; i++) {
       totalRent += currentRent * 12;
       const totalEmi = rvbEmi * 12 * i;
+      
+      // Property appreciation (10% per year)
       const futureValue = rvbPrice * Math.pow(1.1, i);
       const appreciation = futureValue - rvbPrice;
+      
+      // Net Buying Cost = Total EMI paid minus the equity/gain from appreciation
+      // We also consider the opportunity cost or initial price if we want to be more realistic, 
+      // but for this simple model: Net Cost = Total Paid - Value Gain
       const netBuyingCost = totalEmi - appreciation;
 
+      // Break-even is when the cumulative cost of buying becomes less than cumulative rent
       if (breakEvenYear === -1 && netBuyingCost < totalRent) {
         breakEvenYear = i;
       }
 
+      // Set results for the user-selected horizon
       if (i === rvbHorizon) {
         setRvbResults({
           totalRent: Math.round(totalRent),
@@ -99,6 +108,8 @@ export default function Calculators() {
           breakEven: breakEvenYear
         });
       }
+      
+      // Rent increases 10% annually
       currentRent *= 1.1;
     }
   };
