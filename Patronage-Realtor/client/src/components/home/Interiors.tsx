@@ -10,17 +10,19 @@ export function Interiors() {
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: 'url("/interiors/interior-bg.png")' }}
       >
-        <div className="absolute inset-0 bg-secondary/10" />
+        <div className="absolute inset-0 bg-secondary/65" />
       </div>
+
       <div className="container relative z-10 mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-center">
           
           {/* Mobile Order: Text First, then Image */}
           <div className="order-1 md:order-2">
-            <div className="relative p-2 border-2 border-border rounded-xl bg-background">
-               <PlaceholderImage 
-                 height="h-[300px] md:h-[400px] lg:h-[500px]" 
-                 text="Interior Design Showcase" 
+            <div className="relative p-2 border-2 border-border rounded-xl bg-background overflow-hidden group">
+               <img 
+                 src="/interiors/interior-hero.png"
+                 alt="Interior Design Showcase"
+                 className="w-full h-[300px] md:h-[400px] lg:h-[500px] object-cover rounded-lg transition-transform duration-700 md:group-hover:scale-105"
                />
             </div>
           </div>
