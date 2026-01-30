@@ -37,9 +37,18 @@ const packages = [
 
 export default function Interiors() {
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="container mx-auto px-4 py-16">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat fixed"
+        style={{ backgroundImage: 'url("/interiors/interior-bg-1.png")' }}
+      >
+        <div className="absolute inset-0 bg-background/90" />
+      </div>
+
+      <div className="relative z-10">
+        <Header />
+        <main className="container mx-auto px-4 py-16">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h1 className="text-4xl font-heading font-bold mb-6 tracking-tight">
             Interiors that make your neighbor's <span className="text-primary italic">"accidental"</span> peeking worthwhile.
