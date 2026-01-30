@@ -4,8 +4,15 @@ import { ArrowRight } from "lucide-react";
 
 export function Hero() {
   return (
-    <section className="w-full py-12 md:py-20 lg:py-24 bg-background">
-      <div className="container mx-auto px-4">
+    <section className="relative w-full py-12 md:py-20 lg:py-24 overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: 'url("/hero/hero-background.png")' }}
+      >
+        <div className="absolute inset-0 bg-background/80" />
+      </div>
+      <div className="container relative z-10 mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           
           {/* Left Column - Text Content */}
