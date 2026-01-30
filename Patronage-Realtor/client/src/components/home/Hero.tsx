@@ -54,10 +54,10 @@ export function Hero() {
           {/* Right Column - Hero Image */}
           <div className="relative">
              <div className="absolute -inset-4 bg-secondary/30 rounded-2xl transform rotate-3 -z-10" />
-             <PlaceholderImage 
-               height="h-[400px] md:h-[500px] lg:h-[600px]" 
-               text="Hero Image: Modern Luxury Villa" 
-               className="shadow-xl border-4 border-background"
+             <img 
+               src="/Hero/her0-1.png"
+               alt="Modern Luxury Villa"
+               className="w-full h-[400px] md:h-[500px] lg:h-[600px] object-cover shadow-xl border-4 border-background rounded-lg"
              />
           </div>
 
