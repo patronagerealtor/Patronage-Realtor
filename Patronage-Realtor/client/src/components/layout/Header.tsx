@@ -66,7 +66,7 @@ export function Header() {
                 </a>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <a href="#" className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                <a href="/about-us" className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
                   About Us
                 </a>
               </NavigationMenuItem>
@@ -108,7 +108,7 @@ export function Header() {
                 
                 <div className="space-y-2 mt-4">
                    <a href="/interiors" className="block py-2 text-lg font-medium hover:text-primary/70">Interiors</a>
-                   <a href="#" className="block py-2 text-lg font-medium hover:text-primary/70">About Us</a>
+                   <a href="/about-us" className="block py-2 text-lg font-medium hover:text-primary/70">About Us</a>
                    <a href="#" className="block py-2 text-lg font-medium hover:text-primary/70">Contact Us</a>
                 </div>
 
