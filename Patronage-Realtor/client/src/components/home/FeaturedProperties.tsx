@@ -8,9 +8,6 @@ const FEATURED_PROPERTIES = [
   { id: 1, title: "Modern Villa", location: "Beverly Hills, CA", price: "$2,500,000", beds: 4, baths: 3, sqft: "3,200", status: "For Sale" },
   { id: 2, title: "Downtown Loft", location: "New York, NY", price: "$1,200,000", beds: 2, baths: 2, sqft: "1,400", status: "For Rent" },
   { id: 3, title: "Seaside Condo", location: "Miami, FL", price: "$850,000", beds: 3, baths: 2, sqft: "1,800", status: "For Sale" },
-  { id: 4, title: "Mountain Cabin", location: "Aspen, CO", price: "$3,100,000", beds: 5, baths: 4, sqft: "4,500", status: "New" },
-  { id: 5, title: "Urban Townhouse", location: "Chicago, IL", price: "$950,000", beds: 3, baths: 2.5, sqft: "2,100", status: "For Sale" },
-  { id: 6, title: "Suburban Family Home", location: "Austin, TX", price: "$650,000", beds: 4, baths: 2, sqft: "2,400", status: "For Sale" },
 ];
 
 export function FeaturedProperties() {

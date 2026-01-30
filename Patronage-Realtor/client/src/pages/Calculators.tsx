@@ -1,91 +1,225 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calculator, Home, Landmark, Coins, Scale, Paintbrush } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Home, Landmark, Coins, Scale, Paintbrush } from "lucide-react";
 
 export default function Calculators() {
   const [activeTab, setActiveTab] = useState("affordability");
 
-  const calculatorList = [
-    { id: "affordability", name: "Property Affordability", icon: Home },
-    { id: "eligibility", name: "Loan Eligibility", icon: Landmark },
-    { id: "ownership", name: "Total Cost of Ownership", icon: Coins },
-    { id: "rent-vs-buy", name: "Rent vs Buy", icon: Scale },
-    { id: "interior", name: "Interior Quote", icon: Paintbrush },
-  ];
+  // 1. Property Affordability
+  const [affIncome, setAffIncome] = useState(100000);
+  const [affEmi, setAffEmi] = useState(0);
+  const [affDownPayment, setAffDownPayment] = useState(500000);
+  const [affTenure, setAffTenure] = useState("20");
+  const [affResults, setAffResults] = useState({ maxEmi: 0, loanAmount: 0, propertyPrice: 0 });
+
+  // 2. Loan Eligibility
+  const [eligIncome, setEligIncome] = useState(100000);
+  const [eligEmi, setEligEmi] = useState(0);
+  const [eligTenure, setEligTenure] = useState("20");
+  const [eligResults, setEligResults] = useState({ loanAmount: 0, monthlyEmi: 0 });
+
+  // 3. Total Cost of Ownership
+  const [costPrice, setCostPrice] = useState(5000000);
+  const [costType, setCostType] = useState("ready");
+  const [costParking, setCostParking] = useState("no");
+  const [costResults, setCostResults] = useState({ stampDuty: 0, gst: 0, parking: 0, total: 0 });
+
+  // 4. Rent vs Buy
+  const [rvbRent, setRvbRent] = useState(20000);
+  const [rvbPrice, setRvbPrice] = useState(5000000);
+  const [rvbEmi, setRvbEmi] = useState(35000);
+  const [rvbHorizon, setRvbHorizon] = useState(10);
+  const [rvbResults, setRvbResults] = useState({ totalRent: 0, totalEmi: 0, futureValue: 0, result: "" });
+
+  const calculateAffordability = () => {
+    const disposable = affIncome - affEmi;
+    const maxEmi = disposable * 0.7;
+    const rate = 0.08 / 12;
+    const months = parseInt(affTenure) * 12;
+    const loanAmount = maxEmi * ((Math.pow(1 + rate, months) - 1) / (rate * Math.pow(1 + rate, months)));
+    setAffResults({
+      maxEmi: Math.round(maxEmi),
+      loanAmount: Math.round(loanAmount),
+      propertyPrice: Math.round(loanAmount + affDownPayment)
+    });
+  };
+
+  const calculateEligibility = () => {
+    const disposable = eligIncome - eligEmi;
+    const maxEmi = disposable * 0.7;
+    const rate = 0.08 / 12;
+    const months = parseInt(eligTenure) * 12;
+    const loanAmount = maxEmi * ((Math.pow(1 + rate, months) - 1) / (rate * Math.pow(1 + rate, months)));
+    setEligResults({
+      loanAmount: Math.round(loanAmount),
+      monthlyEmi: Math.round(maxEmi)
+    });
+  };
+
+  const calculateOwnership = () => {
+    const stampDuty = costPrice * 0.07;
+    const gst = costType === "under-construction" ? costPrice * 0.05 : 0;
+    const parking = costParking === "yes" ? 300000 : 0;
+    setCostResults({
+      stampDuty: Math.round(stampDuty),
+      gst: Math.round(gst),
+      parking,
+      total: Math.round(costPrice + stampDuty + gst + parking)
+    });
+  };
+
+  const calculateRentVsBuy = () => {
+    let totalRent = 0;
+    let currentRent = rvbRent;
+    for (let i = 0; i < rvbHorizon; i++) {
+      totalRent += currentRent * 12;
+      currentRent *= 1.1;
+    }
+    const totalEmi = rvbEmi * 12 * rvbHorizon;
+    const futureValue = rvbPrice * Math.pow(1.1, rvbHorizon);
+    const netBuyingCost = totalEmi - futureValue;
+    
+    setRvbResults({
+      totalRent: Math.round(totalRent),
+      totalEmi: Math.round(totalEmi),
+      futureValue: Math.round(futureValue),
+      result: totalRent < netBuyingCost ? "Renting is cheaper" : "Buying is better"
+    });
+  };
+
+  useEffect(() => {
+    calculateAffordability();
+    calculateEligibility();
+    calculateOwnership();
+    calculateRentVsBuy();
+  }, [affIncome, affEmi, affDownPayment, affTenure, eligIncome, eligEmi, eligTenure, costPrice, costType, costParking, rvbRent, rvbPrice, rvbEmi, rvbHorizon]);
+
+  const formatCurrency = (val: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Header />
-      <main className="container mx-auto px-4 py-16">
+      <main className="container mx-auto px-4 py-16 flex-grow">
         <div className="max-w-4xl mx-auto text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-heading font-bold tracking-tight mb-4">
-            Financial Planning
-          </h1>
-          <p className="text-2xl font-serif italic text-primary">
-            Safe Home Budget Calculator
-          </p>
+          <h1 className="text-4xl md:text-5xl font-heading font-bold tracking-tight mb-4">Financial Planning</h1>
+          <p className="text-2xl font-serif italic text-primary">Safe Home Budget Calculator</p>
         </div>
 
-        <div className="max-w-5xl mx-auto">
-          <Tabs defaultValue="affordability" className="w-full" onValueChange={setActiveTab}>
-            <div className="flex justify-center mb-8 overflow-x-auto pb-2">
-              <TabsList className="bg-secondary/50 h-auto p-1 flex-wrap justify-center">
-                {calculatorList.map((calc) => (
-                  <TabsTrigger
-                    key={calc.id}
-                    value={calc.id}
-                    className="flex flex-col gap-2 py-4 px-6 data-[state=active]:bg-background data-[state=active]:shadow-sm min-w-[120px]"
-                  >
-                    <calc.icon className="h-5 w-5" />
-                    <span className="text-xs font-semibold">{calc.name}</span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </div>
-
-            {calculatorList.map((calc) => (
-              <TabsContent key={calc.id} value={calc.id} className="mt-0 outline-none">
-                <Card className="border-2 border-primary/10 shadow-xl overflow-hidden">
-                  <CardHeader className="bg-primary/5 border-b border-primary/10">
-                    <div className="flex items-center gap-3">
-                      <calc.icon className="h-6 w-6 text-primary" />
-                      <CardTitle className="text-2xl">{calc.name}</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-12 text-center">
-                    <div className="max-w-md mx-auto space-y-6">
-                      <div className="p-8 bg-secondary/20 rounded-2xl border-2 border-dashed border-primary/20">
-                        <Calculator className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                        <h3 className="text-lg font-semibold mb-2">{calc.name} Interface</h3>
-                        <p className="text-sm text-muted-foreground">
-                          This calculator is being prepared with the latest market rates and financial formulas.
-                        </p>
-                      </div>
-                      <p className="text-sm italic text-muted-foreground">
-                        Our experts are fine-tuning the algorithms to ensure your home budget stays "Safe".
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            ))}
-          </Tabs>
-        </div>
-
-        <div className="mt-20 max-w-3xl mx-auto bg-secondary/30 p-8 rounded-3xl border border-border text-center">
-          <h2 className="text-xl font-bold mb-3">Need Personalized Advice?</h2>
-          <p className="text-muted-foreground mb-6">
-            Our financial consultants can help you navigate through complex mortgage structures and tax benefits.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-2 rounded-full font-medium transition-colors">
-              Schedule Free Consultation
-            </button>
+        <Tabs defaultValue="affordability" className="max-w-5xl mx-auto w-full" onValueChange={setActiveTab}>
+          <div className="flex justify-center mb-12 overflow-x-auto pb-2">
+            <TabsList className="bg-secondary/50 h-auto p-1 flex-wrap justify-center">
+              <TabsTrigger value="affordability" className="flex flex-col gap-2 py-4 px-6 min-w-[150px]"><Home className="h-5 w-5" /><span className="text-xs font-semibold">Affordability</span></TabsTrigger>
+              <TabsTrigger value="eligibility" className="flex flex-col gap-2 py-4 px-6 min-w-[150px]"><Landmark className="h-5 w-5" /><span className="text-xs font-semibold">Eligibility</span></TabsTrigger>
+              <TabsTrigger value="ownership" className="flex flex-col gap-2 py-4 px-6 min-w-[150px]"><Coins className="h-5 w-5" /><span className="text-xs font-semibold">Ownership Cost</span></TabsTrigger>
+              <TabsTrigger value="rent-vs-buy" className="flex flex-col gap-2 py-4 px-6 min-w-[150px]"><Scale className="h-5 w-5" /><span className="text-xs font-semibold">Rent vs Buy</span></TabsTrigger>
+            </TabsList>
           </div>
-        </div>
+
+          <TabsContent value="affordability">
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="border-2 shadow-sm p-6 space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2"><Label>Net Monthly Income (₹)</Label><Input type="number" value={affIncome} onChange={e => setAffIncome(Number(e.target.value))} /></div>
+                  <div className="space-y-2"><Label>Existing Monthly EMIs (₹)</Label><Input type="number" value={affEmi} onChange={e => setAffEmi(Number(e.target.value))} /></div>
+                  <div className="space-y-2"><Label>Down Payment (₹)</Label><Input type="number" value={affDownPayment} onChange={e => setAffDownPayment(Number(e.target.value))} /></div>
+                  <div className="space-y-2"><Label>Loan Tenure (Years)</Label>
+                    <Select value={affTenure} onValueChange={setAffTenure}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent><SelectItem value="20">20 Years</SelectItem><SelectItem value="25">25 Years</SelectItem><SelectItem value="30">30 Years</SelectItem></SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </Card>
+              <Card className="bg-primary/5 border-primary/20 p-8 flex flex-col justify-center space-y-8">
+                <div className="text-center"><p className="text-sm text-muted-foreground uppercase tracking-widest mb-1">Max Monthly EMI</p><p className="text-3xl font-bold text-primary">{formatCurrency(affResults.maxEmi)}</p></div>
+                <div className="text-center"><p className="text-sm text-muted-foreground uppercase tracking-widest mb-1">Estimated Loan Amount</p><p className="text-3xl font-bold text-primary">{formatCurrency(affResults.loanAmount)}</p></div>
+                <div className="text-center pt-4 border-t border-primary/10"><p className="text-sm text-muted-foreground uppercase tracking-widest mb-1">Affordable Property Price</p><p className="text-4xl font-bold text-primary">{formatCurrency(affResults.propertyPrice)}</p></div>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="eligibility">
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="border-2 shadow-sm p-6 space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2"><Label>Net Monthly Income (₹)</Label><Input type="number" value={eligIncome} onChange={e => setEligIncome(Number(e.target.value))} /></div>
+                  <div className="space-y-2"><Label>Existing Monthly EMIs (₹)</Label><Input type="number" value={eligEmi} onChange={e => setEligEmi(Number(e.target.value))} /></div>
+                  <div className="space-y-2"><Label>Loan Tenure (Years)</Label>
+                    <Select value={eligTenure} onValueChange={setEligTenure}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent><SelectItem value="20">20 Years</SelectItem><SelectItem value="25">25 Years</SelectItem><SelectItem value="30">30 Years</SelectItem></SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </Card>
+              <Card className="bg-primary/5 border-primary/20 p-8 flex flex-col justify-center space-y-8">
+                <div className="text-center"><p className="text-sm text-muted-foreground uppercase tracking-widest mb-1">Eligible Loan Amount</p><p className="text-4xl font-bold text-primary">{formatCurrency(eligResults.loanAmount)}</p></div>
+                <div className="text-center pt-4 border-t border-primary/10"><p className="text-sm text-muted-foreground uppercase tracking-widest mb-1">Estimated Monthly EMI</p><p className="text-4xl font-bold text-primary">{formatCurrency(eligResults.monthlyEmi)}</p></div>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="ownership">
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="border-2 shadow-sm p-6 space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2"><Label>Property Price (₹)</Label><Input type="number" value={costPrice} onChange={e => setCostPrice(Number(e.target.value))} /></div>
+                  <div className="space-y-2"><Label>Property Type</Label>
+                    <RadioGroup value={costType} onValueChange={setCostType} className="flex gap-4 pt-2">
+                      <div className="flex items-center space-x-2"><RadioGroupItem value="ready" id="ready" /><Label htmlFor="ready">Ready</Label></div>
+                      <div className="flex items-center space-x-2"><RadioGroupItem value="under-construction" id="uc" /><Label htmlFor="uc">Under-Construction</Label></div>
+                    </RadioGroup>
+                  </div>
+                  <div className="space-y-2"><Label>Parking Required</Label>
+                    <RadioGroup value={costParking} onValueChange={setCostParking} className="flex gap-4 pt-2">
+                      <div className="flex items-center space-x-2"><RadioGroupItem value="yes" id="pyes" /><Label htmlFor="pyes">Yes</Label></div>
+                      <div className="flex items-center space-x-2"><RadioGroupItem value="no" id="pno" /><Label htmlFor="pno">No</Label></div>
+                    </RadioGroup>
+                  </div>
+                </div>
+              </Card>
+              <Card className="bg-primary/5 border-primary/20 p-8 flex flex-col justify-center space-y-6">
+                <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">Stamp Duty (7%)</span><span className="font-bold">{formatCurrency(costResults.stampDuty)}</span></div>
+                <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">GST (5% if UC)</span><span className="font-bold">{formatCurrency(costResults.gst)}</span></div>
+                <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">Parking Cost</span><span className="font-bold">{formatCurrency(costResults.parking)}</span></div>
+                <div className="flex justify-between items-center pt-4 border-t border-primary/10"><span className="text-base font-bold uppercase tracking-widest">Total Ownership Cost</span><span className="text-3xl font-bold text-primary">{formatCurrency(costResults.total)}</span></div>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="rent-vs-buy">
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="border-2 shadow-sm p-6 space-y-6">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Monthly Rent (₹)</Label><Input type="number" value={rvbRent} onChange={e => setRvbRent(Number(e.target.value))} /></div>
+                    <div className="space-y-2"><Label>Property Price (₹)</Label><Input type="number" value={rvbPrice} onChange={e => setRvbPrice(Number(e.target.value))} /></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Monthly EMI (₹)</Label><Input type="number" value={rvbEmi} onChange={e => setRvbEmi(Number(e.target.value))} /></div>
+                    <div className="space-y-2"><Label>Time Horizon (Years)</Label><Input type="number" value={rvbHorizon} onChange={e => setRvbHorizon(Number(e.target.value))} /></div>
+                  </div>
+                </div>
+              </Card>
+              <Card className="bg-primary/5 border-primary/20 p-8 flex flex-col justify-center space-y-6">
+                <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">Total Rent Paid</span><span className="font-bold">{formatCurrency(rvbResults.totalRent)}</span></div>
+                <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">Total EMI Paid</span><span className="font-bold">{formatCurrency(rvbResults.totalEmi)}</span></div>
+                <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">Future Property Value</span><span className="font-bold">{formatCurrency(rvbResults.futureValue)}</span></div>
+                <div className="text-center pt-6 border-t border-primary/10">
+                  <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2 font-bold">Recommendation</p>
+                  <p className={`text-3xl font-bold ${rvbResults.result === "Buying is better" ? "text-green-600" : "text-primary"}`}>{rvbResults.result}</p>
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
       <Footer />
     </div>
