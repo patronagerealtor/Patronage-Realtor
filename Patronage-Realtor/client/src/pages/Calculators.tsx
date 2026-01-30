@@ -27,7 +27,6 @@ export default function Calculators() {
 
   // 3. Total Cost of Ownership
   const [costPrice, setCostPrice] = useState(5000000);
-  const [costType, setCostType] = useState("ready");
   const [costParking, setCostParking] = useState("no");
   const [costResults, setCostResults] = useState({ stampDuty: 0, gst: 0, parking: 0, total: 0 });
 
@@ -65,7 +64,7 @@ export default function Calculators() {
 
   const calculateOwnership = () => {
     const stampDuty = costPrice * 0.07;
-    const gst = costType === "under-construction" ? costPrice * 0.05 : 0;
+    const gst = 0; // Removed Property Type logic, defaulting to 0 or fixed if needed
     const parking = costParking === "yes" ? 300000 : 0;
     setCostResults({
       stampDuty: Math.round(stampDuty),
@@ -99,7 +98,7 @@ export default function Calculators() {
     calculateEligibility();
     calculateOwnership();
     calculateRentVsBuy();
-  }, [affIncome, affEmi, affDownPayment, affTenure, eligIncome, eligEmi, eligTenure, costPrice, costType, costParking, rvbRent, rvbPrice, rvbEmi, rvbHorizon]);
+  }, [affIncome, affEmi, affDownPayment, affTenure, eligIncome, eligEmi, eligTenure, costPrice, costParking, rvbRent, rvbPrice, rvbEmi, rvbHorizon]);
 
   const formatCurrency = (val: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
 
@@ -126,9 +125,9 @@ export default function Calculators() {
             <div className="grid md:grid-cols-2 gap-8">
               <Card className="border-2 shadow-sm p-6 space-y-6">
                 <div className="space-y-4">
-                  <div className="space-y-2"><Label>Net Monthly Income (₹)</Label><Input type="number" value={affIncome} onChange={e => setAffIncome(Number(e.target.value))} /></div>
-                  <div className="space-y-2"><Label>Existing Monthly EMIs (₹)</Label><Input type="number" value={affEmi} onChange={e => setAffEmi(Number(e.target.value))} /></div>
-                  <div className="space-y-2"><Label>Down Payment (₹)</Label><Input type="number" value={affDownPayment} onChange={e => setAffDownPayment(Number(e.target.value))} /></div>
+                  <div className="space-y-2"><Label>Net Monthly Income (₹)</Label><Input type="text" className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value={affIncome.toLocaleString('en-IN')} onChange={e => setAffIncome(Number(e.target.value.replace(/,/g, '')))} /></div>
+                  <div className="space-y-2"><Label>Existing Monthly EMIs (₹)</Label><Input type="text" className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value={affEmi.toLocaleString('en-IN')} onChange={e => setAffEmi(Number(e.target.value.replace(/,/g, '')))} /></div>
+                  <div className="space-y-2"><Label>Down Payment (₹)</Label><Input type="text" className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value={affDownPayment.toLocaleString('en-IN')} onChange={e => setAffDownPayment(Number(e.target.value.replace(/,/g, '')))} /></div>
                   <div className="space-y-2"><Label>Loan Tenure (Years)</Label>
                     <Select value={affTenure} onValueChange={setAffTenure}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
@@ -149,8 +148,8 @@ export default function Calculators() {
             <div className="grid md:grid-cols-2 gap-8">
               <Card className="border-2 shadow-sm p-6 space-y-6">
                 <div className="space-y-4">
-                  <div className="space-y-2"><Label>Net Monthly Income (₹)</Label><Input type="number" value={eligIncome} onChange={e => setEligIncome(Number(e.target.value))} /></div>
-                  <div className="space-y-2"><Label>Existing Monthly EMIs (₹)</Label><Input type="number" value={eligEmi} onChange={e => setEligEmi(Number(e.target.value))} /></div>
+                  <div className="space-y-2"><Label>Net Monthly Income (₹)</Label><Input type="text" className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value={eligIncome.toLocaleString('en-IN')} onChange={e => setEligIncome(Number(e.target.value.replace(/,/g, '')))} /></div>
+                  <div className="space-y-2"><Label>Existing Monthly EMIs (₹)</Label><Input type="text" className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value={eligEmi.toLocaleString('en-IN')} onChange={e => setEligEmi(Number(e.target.value.replace(/,/g, '')))} /></div>
                   <div className="space-y-2"><Label>Loan Tenure (Years)</Label>
                     <Select value={eligTenure} onValueChange={setEligTenure}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
@@ -170,13 +169,7 @@ export default function Calculators() {
             <div className="grid md:grid-cols-2 gap-8">
               <Card className="border-2 shadow-sm p-6 space-y-6">
                 <div className="space-y-4">
-                  <div className="space-y-2"><Label>Property Price (₹)</Label><Input type="number" value={costPrice} onChange={e => setCostPrice(Number(e.target.value))} /></div>
-                  <div className="space-y-2"><Label>Property Type</Label>
-                    <RadioGroup value={costType} onValueChange={setCostType} className="flex gap-4 pt-2">
-                      <div className="flex items-center space-x-2"><RadioGroupItem value="ready" id="ready" /><Label htmlFor="ready">Ready</Label></div>
-                      <div className="flex items-center space-x-2"><RadioGroupItem value="under-construction" id="uc" /><Label htmlFor="uc">Under-Construction</Label></div>
-                    </RadioGroup>
-                  </div>
+                  <div className="space-y-2"><Label>Property Price (₹)</Label><Input type="text" className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value={costPrice.toLocaleString('en-IN')} onChange={e => setCostPrice(Number(e.target.value.replace(/,/g, '')))} /></div>
                   <div className="space-y-2"><Label>Parking Required</Label>
                     <RadioGroup value={costParking} onValueChange={setCostParking} className="flex gap-4 pt-2">
                       <div className="flex items-center space-x-2"><RadioGroupItem value="yes" id="pyes" /><Label htmlFor="pyes">Yes</Label></div>
@@ -187,7 +180,6 @@ export default function Calculators() {
               </Card>
               <Card className="bg-primary/5 border-primary/20 p-8 flex flex-col justify-center space-y-6">
                 <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">Stamp Duty (7%)</span><span className="font-bold">{formatCurrency(costResults.stampDuty)}</span></div>
-                <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">GST (5% if UC)</span><span className="font-bold">{formatCurrency(costResults.gst)}</span></div>
                 <div className="flex justify-between items-center"><span className="text-sm text-muted-foreground uppercase tracking-widest">Parking Cost</span><span className="font-bold">{formatCurrency(costResults.parking)}</span></div>
                 <div className="flex justify-between items-center pt-4 border-t border-primary/10"><span className="text-base font-bold uppercase tracking-widest">Total Ownership Cost</span><span className="text-3xl font-bold text-primary">{formatCurrency(costResults.total)}</span></div>
               </Card>
@@ -199,12 +191,12 @@ export default function Calculators() {
               <Card className="border-2 shadow-sm p-6 space-y-6">
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Monthly Rent (₹)</Label><Input type="number" value={rvbRent} onChange={e => setRvbRent(Number(e.target.value))} /></div>
-                    <div className="space-y-2"><Label>Property Price (₹)</Label><Input type="number" value={rvbPrice} onChange={e => setRvbPrice(Number(e.target.value))} /></div>
+                    <div className="space-y-2"><Label>Monthly Rent (₹)</Label><Input type="text" className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value={rvbRent.toLocaleString('en-IN')} onChange={e => setRvbRent(Number(e.target.value.replace(/,/g, '')))} /></div>
+                    <div className="space-y-2"><Label>Property Price (₹)</Label><Input type="text" className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value={rvbPrice.toLocaleString('en-IN')} onChange={e => setRvbPrice(Number(e.target.value.replace(/,/g, '')))} /></div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Monthly EMI (₹)</Label><Input type="number" value={rvbEmi} onChange={e => setRvbEmi(Number(e.target.value))} /></div>
-                    <div className="space-y-2"><Label>Time Horizon (Years)</Label><Input type="number" value={rvbHorizon} onChange={e => setRvbHorizon(Number(e.target.value))} /></div>
+                    <div className="space-y-2"><Label>Monthly EMI (₹)</Label><Input type="text" className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value={rvbEmi.toLocaleString('en-IN')} onChange={e => setRvbEmi(Number(e.target.value.replace(/,/g, '')))} /></div>
+                    <div className="space-y-2"><Label>Time Horizon (Years)</Label><Input type="number" className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" value={rvbHorizon} onChange={e => setRvbHorizon(Number(e.target.value))} /></div>
                   </div>
                 </div>
               </Card>
