@@ -34,7 +34,7 @@ export function Header() {
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-transparent font-medium">Properties</NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[600px] md:grid-cols-2 lg:w-[700px]">
+                  <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[500px]">
                     <li>
                       <div className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md">
                         <MapPin className="h-6 w-6 mb-2" />
