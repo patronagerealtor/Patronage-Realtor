@@ -10,10 +10,7 @@ export function Footer() {
           {/* Brand Column */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 font-heading font-bold text-xl tracking-tight">
-              <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-primary-foreground">
-                <MapPin className="h-4 w-4" />
-              </div>
-              <span>ESTATE.CO</span>
+              <span>Patronage Realtor</span>
             </div>
             <p className="text-muted-foreground text-sm max-w-xs">
               Premium real estate services for modern living. Find your dream home with us today.
