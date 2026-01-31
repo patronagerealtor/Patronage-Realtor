@@ -61,6 +61,20 @@ export default function Calculators() {
     breakEven: -1,
   });
 
+  // 5. Smart EMI Planner
+  const [smartLoanAmount, setSmartLoanAmount] = useState(5000000);
+  const [smartInterestRate, setSmartInterestRate] = useState(8.5);
+  const [smartTenure, setSmartTenure] = useState(20);
+  const [smartIncome, setSmartIncome] = useState(100000);
+  const [smartExistingEmi, setSmartExistingEmi] = useState(0);
+  const [smartResults, setSmartResults] = useState({
+    monthlyEmi: 0,
+    totalInterest: 0,
+    totalPayment: 0,
+    emiToIncomeRatio: 0,
+    riskLevel: "Safe" as "Safe" | "Moderate" | "High Risk",
+  });
+
   const calculateAffordability = () => {
     const disposable = affIncome - affEmi;
     const maxEmi = disposable * 0.7;
@@ -143,11 +157,38 @@ export default function Calculators() {
       currentRent *= 1.1;
     }
   };
+  const calculateSmartEmi = () => {
+    const rate = smartInterestRate / 12 / 100;
+    const months = smartTenure * 12;
+    const emi =
+      (smartLoanAmount * rate * Math.pow(1 + rate, months)) /
+      (Math.pow(1 + rate, months) - 1);
+    
+    const totalPayment = emi * months;
+    const totalInterest = totalPayment - smartLoanAmount;
+    
+    const totalEmiLoad = emi + smartExistingEmi;
+    const ratio = (totalEmiLoad / smartIncome) * 100;
+    
+    let risk: "Safe" | "Moderate" | "High Risk" = "Safe";
+    if (ratio > 40) risk = "High Risk";
+    else if (ratio > 30) risk = "Moderate";
+
+    setSmartResults({
+      monthlyEmi: Math.round(emi),
+      totalInterest: Math.round(totalInterest),
+      totalPayment: Math.round(totalPayment),
+      emiToIncomeRatio: Math.round(ratio * 10) / 10,
+      riskLevel: risk,
+    });
+  };
+
   useEffect(() => {
+    calculateRentVsBuy();
     calculateAffordability();
     calculateEligibility();
     calculateOwnership();
-    calculateRentVsBuy();
+    calculateSmartEmi();
   }, [
     affIncome,
     affEmi,
@@ -162,6 +203,11 @@ export default function Calculators() {
     rvbPrice,
     rvbEmi,
     rvbHorizon,
+    smartLoanAmount,
+    smartInterestRate,
+    smartTenure,
+    smartIncome,
+    smartExistingEmi,
   ]);
 
   const formatCurrency = (val: number) =>
@@ -218,6 +264,13 @@ export default function Calculators() {
               >
                 <Scale className="h-5 w-5" />
                 <span className="text-xs font-semibold">Rent vs Buy</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="smart-emi"
+                className="flex flex-col gap-2 py-4 px-6 min-w-[150px]"
+              >
+                <Landmark className="h-5 w-5" />
+                <span className="text-xs font-semibold">Smart EMI Planner</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -542,6 +595,232 @@ export default function Calculators() {
                   >
                     {rvbResults.result}
                   </p>
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="smart-emi">
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="border-2 shadow-sm p-6 space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Loan Amount (₹)</Label>
+                    <Input
+                      type="text"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      value={smartLoanAmount.toLocaleString("en-IN")}
+                      onChange={(e) =>
+                        setSmartLoanAmount(Number(e.target.value.replace(/,/g, "")))
+                      }
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Interest Rate (%)</Label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        value={smartInterestRate}
+                        onChange={(e) => setSmartInterestRate(Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Tenure (Years)</Label>
+                      <Select
+                        value={smartTenure.toString()}
+                        onValueChange={(val) => setSmartTenure(Number(val))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="15">15 Years</SelectItem>
+                          <SelectItem value="20">20 Years</SelectItem>
+                          <SelectItem value="25">25 Years</SelectItem>
+                          <SelectItem value="30">30 Years</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Monthly Net Income (₹)</Label>
+                    <Input
+                      type="text"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      value={smartIncome.toLocaleString("en-IN")}
+                      onChange={(e) =>
+                        setSmartIncome(Number(e.target.value.replace(/,/g, "")))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Existing Monthly EMIs (₹)</Label>
+                    <Input
+                      type="text"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      value={smartExistingEmi.toLocaleString("en-IN")}
+                      onChange={(e) =>
+                        setSmartExistingEmi(Number(e.target.value.replace(/,/g, "")))
+                      }
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bg-primary/5 border-primary/20 p-8 flex flex-col justify-center space-y-6">
+                <div className="text-center mb-4">
+                  <p className="text-sm text-muted-foreground uppercase tracking-widest mb-1">
+                    Monthly EMI
+                  </p>
+                  <p className="text-4xl font-bold text-primary">
+                    {formatCurrency(smartResults.monthlyEmi)}
+                  </p>
+                </div>
+
+                <div className="space-y-4 border-t border-primary/10 pt-6">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Total Interest</span>
+                    <span className="font-bold">{formatCurrency(smartResults.totalInterest)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Total Amount</span>
+                    <span className="font-bold">{formatCurrency(smartResults.totalPayment)}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4 border-t border-primary/10 pt-6 text-center">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-muted-foreground uppercase tracking-widest">
+                      EMI-to-Income Ratio
+                    </span>
+                    <span className={`font-bold text-lg ${
+                      smartResults.riskLevel === "Safe" ? "text-green-600" : 
+                      smartResults.riskLevel === "Moderate" ? "text-yellow-600" : "text-red-600"
+                    }`}>
+                      {smartResults.emiToIncomeRatio}%
+                    </span>
+                  </div>
+                  
+                  <div className={`py-2 px-4 rounded-full text-sm font-bold uppercase tracking-widest inline-block ${
+                    smartResults.riskLevel === "Safe" ? "bg-green-100 text-green-700" : 
+                    smartResults.riskLevel === "Moderate" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
+                  }`}>
+                    Risk Level: {smartResults.riskLevel}
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="smart-emi">
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="border-2 shadow-sm p-6 space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Loan Amount (₹)</Label>
+                    <Input
+                      type="text"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      value={smartLoanAmount.toLocaleString("en-IN")}
+                      onChange={(e) =>
+                        setSmartLoanAmount(Number(e.target.value.replace(/,/g, "")))
+                      }
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Interest Rate (%)</Label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        value={smartInterestRate}
+                        onChange={(e) => setSmartInterestRate(Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Tenure (Years)</Label>
+                      <Select
+                        value={smartTenure.toString()}
+                        onValueChange={(val) => setSmartTenure(Number(val))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="15">15 Years</SelectItem>
+                          <SelectItem value="20">20 Years</SelectItem>
+                          <SelectItem value="25">25 Years</SelectItem>
+                          <SelectItem value="30">30 Years</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Monthly Net Income (₹)</Label>
+                    <Input
+                      type="text"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      value={smartIncome.toLocaleString("en-IN")}
+                      onChange={(e) =>
+                        setSmartIncome(Number(e.target.value.replace(/,/g, "")))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Existing Monthly EMIs (₹)</Label>
+                    <Input
+                      type="text"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      value={smartExistingEmi.toLocaleString("en-IN")}
+                      onChange={(e) =>
+                        setSmartExistingEmi(Number(e.target.value.replace(/,/g, "")))
+                      }
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="bg-primary/5 border-primary/20 p-8 flex flex-col justify-center space-y-6">
+                <div className="text-center mb-4">
+                  <p className="text-sm text-muted-foreground uppercase tracking-widest mb-1">
+                    Monthly EMI
+                  </p>
+                  <p className="text-4xl font-bold text-primary">
+                    {formatCurrency(smartResults.monthlyEmi)}
+                  </p>
+                </div>
+
+                <div className="space-y-4 border-t border-primary/10 pt-6">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Total Interest</span>
+                    <span className="font-bold">{formatCurrency(smartResults.totalInterest)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Total Amount</span>
+                    <span className="font-bold">{formatCurrency(smartResults.totalPayment)}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4 border-t border-primary/10 pt-6 text-center">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm text-muted-foreground uppercase tracking-widest">
+                      EMI-to-Income Ratio
+                    </span>
+                    <span className={`font-bold text-lg ${
+                      smartResults.riskLevel === "Safe" ? "text-green-600" : 
+                      smartResults.riskLevel === "Moderate" ? "text-yellow-600" : "text-red-600"
+                    }`}>
+                      {smartResults.emiToIncomeRatio}%
+                    </span>
+                  </div>
+                  
+                  <div className={`py-2 px-4 rounded-full text-sm font-bold uppercase tracking-widest inline-block ${
+                    smartResults.riskLevel === "Safe" ? "bg-green-100 text-green-700" : 
+                    smartResults.riskLevel === "Moderate" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
+                  }`}>
+                    Risk Level: {smartResults.riskLevel}
+                  </div>
                 </div>
               </Card>
             </div>
