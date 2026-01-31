@@ -41,7 +41,7 @@ export default function Interiors() {
       {/* Background Image with Overlay */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat fixed"
-        style={{ backgroundImage: 'url("/interiors/interior-bg-1.png")' }}
+        style={{ backgroundImage: 'url("/interiors/interior-bg-2.png")' }}
       >
         <div className="absolute inset-0 bg-background/90" />
       </div>
