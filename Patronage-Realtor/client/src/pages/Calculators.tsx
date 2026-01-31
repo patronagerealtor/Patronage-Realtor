@@ -480,12 +480,20 @@ export default function Calculators() {
                     </div>
                     <div className="space-y-2">
                       <Label>Time Horizon (Years)</Label>
-                      <Input
-                        type="number"
-                        className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        value={rvbHorizon}
-                        onChange={(e) => setRvbHorizon(Number(e.target.value))}
-                      />
+                      <Select
+                        value={rvbHorizon.toString()}
+                        onValueChange={(val) => setRvbHorizon(Number(val))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="15">15 Years</SelectItem>
+                          <SelectItem value="20">20 Years</SelectItem>
+                          <SelectItem value="25">25 Years</SelectItem>
+                          <SelectItem value="30">30 Years</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
