@@ -13,11 +13,11 @@ export function Footer() {
               <img 
                 src="/logo/logo-full.png" 
                 alt="Patronage Realtor" 
-                className="h-30 w-auto object-contain"
+                className="h-16 w-auto object-contain"
               />
             </div>
-            <p className="text-muted-foreground text-base max-w-xs">
-              Dream it ! Own it ! Style it !
+            <p className="text-muted-foreground text-sm max-w-xs">
+              Premium real estate services for modern living. Find your dream home with us today.
             </p>
           </div>
 
