@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,10 @@ const packages = [
 ];
 
 export default function Interiors() {
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Background Image with Overlay */}
