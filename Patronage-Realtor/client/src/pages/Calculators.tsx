@@ -123,7 +123,7 @@ export default function Calculators() {
 
       // 4. Set Results for the selected Horizon
       if (i === rvbHorizon) {
-        const houseFutureValue = rvbPrice * Math.pow(1.1, i);
+        const houseFutureValue = rvbPrice * Math.pow(1.07, i);
 
         setRvbResults({
           totalRent: Math.round(totalRentOutflow),
