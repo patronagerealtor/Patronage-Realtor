@@ -68,12 +68,15 @@ export default function Calculators() {
   const [smartTenure, setSmartTenure] = useState(20);
   const [smartIncome, setSmartIncome] = useState(100000);
   const [smartExistingEmi, setSmartExistingEmi] = useState(0);
+  const [smartPrepayment, setSmartPrepayment] = useState(0);
   const [smartResults, setSmartResults] = useState({
     monthlyEmi: 0,
     totalInterest: 0,
     totalPayment: 0,
     emiToIncomeRatio: 0,
     riskLevel: "Safe" as "Safe" | "Moderate" | "High Risk",
+    revisedTenure: 0,
+    interestSaved: 0,
   });
 
   const calculateAffordability = () => {
@@ -187,12 +190,37 @@ export default function Calculators() {
     if (ratio > 40) risk = "High Risk";
     else if (ratio > 30) risk = "Moderate";
 
+    // Prepayment logic
+    let revisedMonths = 0;
+    let totalInterestWithPrepayment = 0;
+    let remainingPrincipal = smartLoanAmount;
+    
+    if (smartPrepayment > 0) {
+      while (remainingPrincipal > 0 && revisedMonths < months) {
+        revisedMonths++;
+        const interestForMonth = remainingPrincipal * rate;
+        totalInterestWithPrepayment += interestForMonth;
+        const principalFromEmi = Math.min(emi - interestForMonth, remainingPrincipal);
+        remainingPrincipal -= principalFromEmi;
+        
+        if (remainingPrincipal > 0) {
+          const extraPayment = Math.min(smartPrepayment, remainingPrincipal);
+          remainingPrincipal -= extraPayment;
+        }
+      }
+    } else {
+      revisedMonths = months;
+      totalInterestWithPrepayment = totalInterest;
+    }
+
     setSmartResults({
       monthlyEmi: Math.round(emi),
       totalInterest: Math.round(totalInterest),
       totalPayment: Math.round(totalPayment),
       emiToIncomeRatio: Math.round(ratio * 10) / 10,
       riskLevel: risk,
+      revisedTenure: revisedMonths,
+      interestSaved: Math.max(0, Math.round(totalInterest - totalInterestWithPrepayment)),
     });
   };
 
@@ -221,6 +249,7 @@ export default function Calculators() {
     smartTenure,
     smartIncome,
     smartExistingEmi,
+    smartPrepayment,
   ]);
 
   const formatCurrency = (val: number) =>
@@ -678,6 +707,17 @@ export default function Calculators() {
                       }
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label>Monthly Extra Prepayment (₹)</Label>
+                    <Input
+                      type="text"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      value={smartPrepayment.toLocaleString("en-IN")}
+                      onChange={(e) =>
+                        setSmartPrepayment(Number(e.target.value.replace(/,/g, "")))
+                      }
+                    />
+                  </div>
                 </div>
               </Card>
 
@@ -693,9 +733,23 @@ export default function Calculators() {
 
                 <div className="space-y-4 border-t border-primary/10 pt-6">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Total Interest</span>
+                    <span className="text-sm text-muted-foreground">Original Interest</span>
                     <span className="font-bold">{formatCurrency(smartResults.totalInterest)}</span>
                   </div>
+                  {smartPrepayment > 0 && (
+                    <>
+                      <div className="flex justify-between items-center text-green-600">
+                        <span className="text-sm font-semibold">Interest Saved</span>
+                        <span className="font-bold">{formatCurrency(smartResults.interestSaved)}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-green-600">
+                        <span className="text-sm font-semibold">Revised Tenure</span>
+                        <span className="font-bold">
+                          {Math.floor(smartResults.revisedTenure / 12)}Y {smartResults.revisedTenure % 12}M
+                        </span>
+                      </div>
+                    </>
+                  )}
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Total Amount</span>
                     <span className="font-bold">{formatCurrency(smartResults.totalPayment)}</span>
