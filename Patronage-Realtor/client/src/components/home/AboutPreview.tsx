@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/shared/PlaceholderImage";
 import { ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 
 export function AboutPreview() {
   return (
@@ -17,9 +18,11 @@ export function AboutPreview() {
             We believe that finding a home should be an exciting journey, not a stressful task.
           </p>
           <div className="pt-4">
-            <Button variant="outline" size="lg" className="border-2">
-              Read More About Us
-            </Button>
+            <Link href="/about-us">
+              <Button variant="outline" size="lg" className="border-2">
+                Read More About Us
+              </Button>
+            </Link>
           </div>
         </div>
 
