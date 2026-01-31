@@ -42,18 +42,18 @@ export default function Interiors() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="min-h-screen bg-background relative overflow-hidden flex flex-col">
       {/* Background Image with Overlay */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat fixed"
         style={{ backgroundImage: 'url("/interiors/interior-bg-2.png")' }}
       >
-        <div className="absolute inset-0 bg-background/65" />
+        <div className="absolute inset-0 bg-background/90" />
       </div>
 
-      <div className="relative z-10">
+      <div className="relative z-10 flex flex-col flex-grow">
         <Header />
-        <main className="container mx-auto px-4 py-16">
+        <main className="container mx-auto px-4 py-16 flex-grow">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h1 className="text-4xl font-heading font-bold mb-6 tracking-tight">
             Interiors that make your neighbor's <span className="text-primary italic">"accidental"</span> peeking worthwhile.
@@ -94,8 +94,8 @@ export default function Interiors() {
           <Button size="lg" className="rounded-full px-8">Talk to our Designers</Button>
         </div>
       </main>
-      </div>
       <Footer />
+      </div>
     </div>
   );
 }
