@@ -43,7 +43,7 @@ export default function Interiors() {
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat fixed"
         style={{ backgroundImage: 'url("/interiors/interior-bg-2.png")' }}
       >
-        <div className="absolute inset-0 bg-background/90" />
+        <div className="absolute inset-0 bg-background/65" />
       </div>
 
       <div className="relative z-10">

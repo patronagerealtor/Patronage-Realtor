@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { PlaceholderImage } from "@/components/shared/PlaceholderImage";
 import { ArrowRight } from "lucide-react";
+import { useLocation } from "wouter";
 
 export function Interiors() {
+  const [, setLocation] = useLocation();
+
   return (
     <section className="relative py-16 md:py-24 overflow-hidden border-y border-border">
       {/* Background Image with Overlay */}
@@ -50,7 +52,7 @@ export function Interiors() {
               </li>
             </ul>
 
-            <Button className="mt-4" size="lg">
+            <Button className="mt-4" size="lg" onClick={() => setLocation("/interiors")}>
               Explore Interiors <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
