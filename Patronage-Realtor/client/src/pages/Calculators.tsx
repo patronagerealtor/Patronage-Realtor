@@ -170,6 +170,8 @@ export default function Calculators() {
         totalPayment: 0,
         emiToIncomeRatio: 0,
         riskLevel: "Safe",
+        revisedTenure: 0,
+        interestSaved: 0,
       });
       return;
     }
