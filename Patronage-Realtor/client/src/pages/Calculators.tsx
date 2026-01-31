@@ -57,6 +57,7 @@ export default function Calculators() {
     totalRent: 0,
     totalEmi: 0,
     futureValue: 0,
+    netBuyingPosition: 0,
     result: "",
     breakEven: -1,
   });
