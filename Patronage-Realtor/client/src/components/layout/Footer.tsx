@@ -13,19 +13,19 @@ export function Footer() {
               <img 
                 src="/logo/logo-full.png" 
                 alt="Patronage Realtor" 
-                className="h-16 w-auto object-contain"
+                className="h-30 w-auto object-contain"
               />
             </div>
             <p className="text-muted-foreground text-sm max-w-xs">
-              Premium real estate services for modern living. Find your dream home with us today.
+              Dream it ! Own it ! Style it !
             </p>
-          </div>
+          </div> 
 
           {/* Quick Links */}
           <div className="space-y-4">
             <h4 className="font-heading font-semibold text-lg">Quick Links</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="/" className="hover:text-foreground transition-colors">Properties</a></li>
+              <li><a href="/" className="hover:text-foreground transition-colors">Home</a></li>
               <li><a href="/interiors" className="hover:text-foreground transition-colors">Interiors</a></li>
               <li><a href="/about-us" className="hover:text-foreground transition-colors">About Us</a></li>
               <li><a href="/calculators" className="hover:text-foreground transition-colors">Calculators</a></li>
