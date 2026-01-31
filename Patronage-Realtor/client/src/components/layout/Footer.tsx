@@ -25,7 +25,7 @@ export function Footer() {
           <div className="space-y-4">
             <h4 className="font-heading font-semibold text-lg">Quick Links</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="/" className="hover:text-foreground transition-colors">Home</a></li>
+              <li><a href="/" className="hover:text-foreground transition-colors">Properties</a></li>
               <li><a href="/interiors" className="hover:text-foreground transition-colors">Interiors</a></li>
               <li><a href="/about-us" className="hover:text-foreground transition-colors">About Us</a></li>
               <li><a href="/calculators" className="hover:text-foreground transition-colors">Calculators</a></li>
@@ -39,15 +39,16 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 mt-0.5" />
-                <span>123 Design District,<br />Creative City, NY 10012</span>
+                <span>09, IT-59 office spaces & food 
+                court, Phase I Hinjewadi, Pune</span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5" />
-                <span>+1 (555) 123-4567</span>
+                <span>+91 88880 50348</span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5" />
-                <span>hello@estate.co</span>
+                <span>patronagerealtor@gmail.com</span>
               </li>
             </ul>
           </div>
@@ -62,7 +63,7 @@ export function Footer() {
             </div>
             <div className="flex gap-4 mt-6">
               <a href="#" className="text-muted-foreground hover:text-foreground"><Facebook className="h-5 w-5" /></a>
-              <a href="#" className="text-muted-foreground hover:text-foreground"><Instagram className="h-5 w-5" /></a>
+              <a href="https://www.instagram.com/patronage_realtor?igsh=ejZ1YXZ5MGsxdm55&utm_source=qr" className="text-muted-foreground hover:text-foreground"><Instagram className="h-5 w-5" /></a>
               <a href="#" className="text-muted-foreground hover:text-foreground"><Linkedin className="h-5 w-5" /></a>
             </div>
           </div>
