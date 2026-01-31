@@ -10,7 +10,11 @@ export function Footer() {
           {/* Brand Column */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 font-heading font-bold text-xl tracking-tight">
-              <span>Patronage Realtor</span>
+              <img 
+                src="/logo/logo-full.png" 
+                alt="Patronage Realtor" 
+                className="h-12 w-auto object-contain"
+              />
             </div>
             <p className="text-muted-foreground text-sm max-w-xs">
               Premium real estate services for modern living. Find your dream home with us today.
