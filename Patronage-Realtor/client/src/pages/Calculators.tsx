@@ -159,6 +159,18 @@ export default function Calculators() {
     }
   };
   const calculateSmartEmi = () => {
+    // Basic input validation
+    if (smartLoanAmount <= 0 || smartInterestRate <= 0 || smartTenure <= 0 || smartIncome <= 0) {
+      setSmartResults({
+        monthlyEmi: 0,
+        totalInterest: 0,
+        totalPayment: 0,
+        emiToIncomeRatio: 0,
+        riskLevel: "Safe",
+      });
+      return;
+    }
+
     const rate = smartInterestRate / 12 / 100;
     const months = smartTenure * 12;
     const emi =
@@ -645,7 +657,7 @@ export default function Calculators() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label>Monthly Net Income (₹)</Label>
+                    <Label>Monthly Net Income (₹) (After tax)</Label>
                     <Input
                       type="text"
                       className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
