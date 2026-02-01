@@ -79,6 +79,9 @@ export default function Calculators() {
     riskLevel: "Safe" as "Safe" | "Moderate" | "High Risk",
     revisedTenure: 0,
     interestSaved: 0,
+    safeMonthlyEmi: 0,
+    maxAffordableLoan: 0,
+    purchaseVerdict: "Affordable" as "Affordable" | "Stretch" | "Risky",
   });
 
   const calculateAffordability = () => {
@@ -185,6 +188,9 @@ export default function Calculators() {
         riskLevel: "Safe",
         revisedTenure: 0,
         interestSaved: 0,
+        safeMonthlyEmi: 0,
+        maxAffordableLoan: 0,
+        purchaseVerdict: "Affordable",
       });
       return;
     }
@@ -204,6 +210,20 @@ export default function Calculators() {
     let risk: "Safe" | "Moderate" | "High Risk" = "Safe";
     if (ratio > 40) risk = "High Risk";
     else if (ratio > 30) risk = "Moderate";
+
+    // Affordability Logic Integration
+    const disposableIncome = smartIncome - smartExistingEmi;
+    const safeMonthlyEmi = Math.max(0, disposableIncome * 0.4);
+    
+    // Invert EMI formula to get max affordable loan
+    // P = (EMI * ((1 + r)^n - 1)) / (r * (1 + r)^n)
+    const maxAffordableLoan = safeMonthlyEmi > 0 
+      ? safeMonthlyEmi * ((Math.pow(1 + rate, months) - 1) / (rate * Math.pow(1 + rate, months)))
+      : 0;
+
+    let verdict: "Affordable" | "Stretch" | "Risky" = "Affordable";
+    if (emi > disposableIncome * 0.5) verdict = "Risky";
+    else if (emi > safeMonthlyEmi) verdict = "Stretch";
 
     // Prepayment logic
     let revisedMonths = 0;
@@ -236,6 +256,9 @@ export default function Calculators() {
       riskLevel: risk,
       revisedTenure: revisedMonths,
       interestSaved: Math.max(0, Math.round(totalInterest - totalInterestWithPrepayment)),
+      safeMonthlyEmi: Math.round(safeMonthlyEmi),
+      maxAffordableLoan: Math.round(maxAffordableLoan),
+      purchaseVerdict: verdict,
     });
   };
 
@@ -785,6 +808,28 @@ export default function Calculators() {
                   </div>
                 </div>
 
+                <div className="space-y-4 border-t border-primary/10 pt-6">
+                  <p className="text-sm font-bold uppercase tracking-widest text-primary text-center">
+                    Affordability Insight
+                  </p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Safe Monthly EMI</span>
+                    <span className="font-bold">{formatCurrency(smartResults.safeMonthlyEmi)}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">Max Affordable Loan</span>
+                    <span className="font-bold">{formatCurrency(smartResults.maxAffordableLoan)}</span>
+                  </div>
+                  <div className="bg-secondary/30 p-3 rounded-lg text-center mt-2">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">
+                      Safe Purchase Range
+                    </p>
+                    <p className="text-sm font-bold">
+                      {formatCurrency(smartResults.maxAffordableLoan * 0.8)} – {formatCurrency(smartResults.maxAffordableLoan)}
+                    </p>
+                  </div>
+                </div>
+
                 <div className="space-y-4 border-t border-primary/10 pt-6 text-center">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm text-muted-foreground uppercase tracking-widest">
@@ -803,6 +848,36 @@ export default function Calculators() {
                     smartResults.riskLevel === "Moderate" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
                   }`}>
                     Risk Level: {smartResults.riskLevel}
+                  </div>
+                </div>
+
+                <div className="space-y-4 border-t border-primary/10 pt-6 bg-primary/5 -mx-8 px-8 pb-8 rounded-b-xl mt-auto">
+                  <p className="text-xs font-bold uppercase tracking-widest text-primary text-center">
+                    Bank-Style Summary
+                  </p>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Recommended EMI Limit (40%)</span>
+                      <span className="font-semibold">{formatCurrency(smartResults.safeMonthlyEmi)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Your EMI</span>
+                      <span className="font-semibold">{formatCurrency(smartResults.monthlyEmi)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">EMI Status</span>
+                      <span className={`font-bold ${
+                        smartResults.riskLevel === "Safe" ? "text-green-600" : 
+                        smartResults.riskLevel === "Moderate" ? "text-yellow-600" : "text-red-600"
+                      }`}>{smartResults.riskLevel}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Purchase Verdict</span>
+                      <span className={`font-bold ${
+                        smartResults.purchaseVerdict === "Affordable" ? "text-green-600" : 
+                        smartResults.purchaseVerdict === "Stretch" ? "text-yellow-600" : "text-red-600"
+                      }`}>{smartResults.purchaseVerdict}</span>
+                    </div>
                   </div>
                 </div>
               </Card>
