@@ -1,4 +1,12 @@
-import { MapPin, Phone, Mail, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -10,26 +18,50 @@ export function Footer() {
           {/* Brand Column */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 font-heading font-bold text-xl tracking-tight">
-              <img 
-                src="/logo/logo-full.png" 
-                alt="Patronage Realtor" 
+              <img
+                src="/logo/logo-full.png"
+                alt="Patronage Realtor"
                 className="h-30 w-auto object-contain"
               />
             </div>
             <p className="text-muted-foreground text-sm max-w-xs">
               Dream it ! Own it ! Style it !
             </p>
-          </div> 
+          </div>
 
           {/* Quick Links */}
           <div className="space-y-4">
             <h4 className="font-heading font-semibold text-lg">Quick Links</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="/" className="hover:text-foreground transition-colors">Properties</a></li>
-              <li><a href="/interiors" className="hover:text-foreground transition-colors">Interiors</a></li>
-              <li><a href="/about-us" className="hover:text-foreground transition-colors">About Us</a></li>
-              <li><a href="/calculators" className="hover:text-foreground transition-colors">Calculators</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a></li>
+              <li>
+                <a href="/" className="hover:text-foreground transition-colors">
+                  Properties
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/interiors"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Interiors
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/about-us"
+                  className="hover:text-foreground transition-colors"
+                >
+                  About Us
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/calculators"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Calculators
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -39,8 +71,9 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 mt-0.5" />
-                <span>09, IT-59 office spaces & food 
-                court, Phase I Hinjewadi, Pune</span>
+                <span>
+                  09, IT-59 office spaces & food court, Phase I Hinjewadi, Pune
+                </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5" />
@@ -56,25 +89,48 @@ export function Footer() {
           {/* Newsletter */}
           <div className="space-y-4">
             <h4 className="font-heading font-semibold text-lg">Stay Updated</h4>
-            <p className="text-sm text-muted-foreground">Subscribe to get the latest property news.</p>
+            <p className="text-sm text-muted-foreground">
+              Subscribe to get the latest property news.
+            </p>
             <div className="flex gap-2">
               <Input placeholder="Enter your email" className="bg-background" />
               <Button>Subscribe</Button>
             </div>
             <div className="flex gap-4 mt-6">
-              <a href="#" className="text-muted-foreground hover:text-foreground"><Facebook className="h-5 w-5" /></a>
-              <a href="https://www.instagram.com/patronage_realtor?igsh=ejZ1YXZ5MGsxdm55&utm_source=qr" className="text-muted-foreground hover:text-foreground"><Instagram className="h-5 w-5" /></a>
-              <a href="#" className="text-muted-foreground hover:text-foreground"><Linkedin className="h-5 w-5" /></a>
+              <a
+                href="#"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a
+                href="https://www.instagram.com/patronage_realtor?igsh=ejZ1YXZ5MGsxdm55&utm_source=qr"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a
+                href="#"
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Linkedin className="h-5 w-5" />
+              </a>
             </div>
           </div>
         </div>
 
         <div className="border-t border-border/50 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
-          <p>&copy; 2026 Estate.co. All rights reserved.</p>
+          <p>&copy; 2026 Patronage.co. All rights reserved.</p>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-foreground">Terms</a>
-            <a href="#" className="hover:text-foreground">Privacy</a>
-            <a href="#" className="hover:text-foreground">Cookies</a>
+            <a href="#" className="hover:text-foreground">
+              Terms
+            </a>
+            <a href="#" className="hover:text-foreground">
+              Privacy
+            </a>
+            <a href="#" className="hover:text-foreground">
+              Cookies
+            </a>
           </div>
         </div>
       </div>

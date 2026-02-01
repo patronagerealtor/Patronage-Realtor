@@ -16,8 +16,8 @@ export default function Home() {
       
       <main className="flex-grow">
         <Hero />
-        <PropertySearch />
         <FeaturedProperties />
+        <PropertySearch />
         <Interiors />
         <WhyChooseUs />
         <AboutPreview />
