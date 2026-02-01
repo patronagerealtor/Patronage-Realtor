@@ -29,11 +29,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       <Header />
-      
+
       <main className="flex-grow">
         <Hero />
         <FeaturedProperties />
-        <PropertySearch />
         <Interiors />
         <WhyChooseUs />
         <AboutPreview />

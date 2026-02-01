@@ -25,14 +25,29 @@ export function Hero() {
               Discover a curated selection of premium properties, luxury apartments, and modern homes designed for your lifestyle.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button size="lg" className="h-14 px-8 text-base shadow-sm" data-testid="button-explore">
-                Explore Properties <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button size="lg" variant="outline" className="h-14 px-8 text-base border-2" data-testid="button-contact">
-                Contact Us
-              </Button>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <Button
+              size="lg"
+              onClick={() => router.push("/properties")}
+              className="h-14 px-8 text-base shadow-sm transition-all duration-300 ease-out
+                         hover:-translate-y-1 hover:shadow-lg hover:scale-[1.02]"
+              data-testid="button-explore"
+            >
+              Explore Properties
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            </Button>
+
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => router.push("/contact")}
+              className="h-14 px-8 text-base border-2 transition-all duration-300 ease-out
+                         hover:-translate-y-1 hover:shadow-md hover:scale-[1.02]"
+              data-testid="button-contact"
+            >
+              Contact Us
+            </Button>
+          </div>
             
             {/* Trust Indicators / Stats (Optional enhancement for wireframe) */}
             <div className="grid grid-cols-3 gap-8 pt-8 border-t border-border mt-8">

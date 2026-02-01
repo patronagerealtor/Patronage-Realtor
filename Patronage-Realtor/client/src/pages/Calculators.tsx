@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -282,6 +283,13 @@ export default function Calculators() {
                 <span className="text-xs font-semibold">Smart EMI Planner</span>
               </TabsTrigger>
               <TabsTrigger
+                value="rent-vs-buy"
+                className="flex flex-col gap-2 py-4 px-6 min-w-[150px]"
+              >
+                <Scale className="h-5 w-5" />
+                <span className="text-xs font-semibold">Rent vs Buy</span>
+              </TabsTrigger>
+              <TabsTrigger
                 value="eligibility"
                 className="flex flex-col gap-2 py-4 px-6 min-w-[150px]"
               >
@@ -295,15 +303,302 @@ export default function Calculators() {
                 <Coins className="h-5 w-5" />
                 <span className="text-xs font-semibold">Ownership Cost</span>
               </TabsTrigger>
-              <TabsTrigger
-                value="rent-vs-buy"
-                className="flex flex-col gap-2 py-4 px-6 min-w-[150px]"
-              >
-                <Scale className="h-5 w-5" />
-                <span className="text-xs font-semibold">Rent vs Buy</span>
-              </TabsTrigger>
             </TabsList>
           </div>
+
+          <TabsContent value="smart-emi">
+            <div className="grid lg:grid-cols-3 gap-8">
+              <Card className="border-2 shadow-sm p-6 space-y-6 lg:col-span-1">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Loan Amount (₹)</Label>
+                    <Input
+                      type="text"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      value={smartLoanAmount.toLocaleString("en-IN")}
+                      onChange={(e) =>
+                        setSmartLoanAmount(Number(e.target.value.replace(/,/g, "")))
+                      }
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Interest Rate (%)</Label>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        value={smartInterestRate}
+                        onChange={(e) => setSmartInterestRate(Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Tenure (Years)</Label>
+                      <Input
+                        type="number"
+                        value={smartTenure}
+                        onChange={(e) => setSmartTenure(Number(e.target.value))}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Monthly Income (₹)</Label>
+                    <Input
+                      type="text"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      value={smartIncome.toLocaleString("en-IN")}
+                      onChange={(e) =>
+                        setSmartIncome(Number(e.target.value.replace(/,/g, "")))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Existing EMIs (₹)</Label>
+                    <Input
+                      type="text"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      value={smartExistingEmi.toLocaleString("en-IN")}
+                      onChange={(e) =>
+                        setSmartExistingEmi(Number(e.target.value.replace(/,/g, "")))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Monthly Prepayment (Optional ₹)</Label>
+                    <Input
+                      type="text"
+                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      value={smartPrepayment.toLocaleString("en-IN")}
+                      onChange={(e) =>
+                        setSmartPrepayment(Number(e.target.value.replace(/,/g, "")))
+                      }
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              <div className="lg:col-span-2 space-y-8">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card className="bg-primary/5 border-primary/20 p-6 flex flex-col justify-center space-y-4">
+                    <div className="text-center">
+                      <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">
+                        Monthly EMI
+                      </p>
+                      <p className="text-3xl font-bold text-primary">
+                        {formatCurrency(smartResults.monthlyEmi)}
+                      </p>
+                    </div>
+                    <div className="text-center pt-4 border-t border-primary/10">
+                      <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">
+                        Total Interest
+                      </p>
+                      <p className="text-2xl font-bold text-primary">
+                        {formatCurrency(smartResults.totalInterest)}
+                      </p>
+                    </div>
+                    <div className="text-center pt-4 border-t border-primary/10">
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        <p className="text-xs text-muted-foreground uppercase tracking-widest">
+                          EMI to Income Ratio
+                        </p>
+                        <Badge
+                          variant={
+                            smartResults.riskLevel === "Safe"
+                              ? "outline"
+                              : smartResults.riskLevel === "Moderate"
+                                ? "secondary"
+                                : "destructive"
+                          }
+                          className="text-[10px] py-0 h-4"
+                        >
+                          {smartResults.riskLevel}
+                        </Badge>
+                      </div>
+                      <p className="text-2xl font-bold text-primary">
+                        {smartResults.emiToIncomeRatio}%
+                      </p>
+                    </div>
+                  </Card>
+
+                  <Card className="bg-secondary/20 border-secondary p-6 flex flex-col justify-center space-y-4">
+                    <div className="text-center">
+                      <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">
+                        Max Affordable Loan
+                      </p>
+                      <p className="text-3xl font-bold text-primary">
+                        {formatCurrency(smartResults.maxAffordableLoan)}
+                      </p>
+                    </div>
+                    <div className="text-center pt-4 border-t border-primary/10">
+                      <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">
+                        Safe Monthly EMI
+                      </p>
+                      <p className="text-2xl font-bold text-primary">
+                        {formatCurrency(smartResults.safeMonthlyEmi)}
+                      </p>
+                    </div>
+                    <div className="text-center pt-4 border-t border-primary/10">
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        <p className="text-xs text-muted-foreground uppercase tracking-widest">
+                          Purchase Verdict
+                        </p>
+                        <Badge
+                          className={`text-[10px] py-0 h-4 ${
+                            smartResults.purchaseVerdict === "Affordable"
+                              ? "bg-green-600 hover:bg-green-700"
+                              : smartResults.purchaseVerdict === "Stretch"
+                                ? "bg-orange-500 hover:bg-orange-600"
+                                : "bg-red-600 hover:bg-red-700"
+                          }`}
+                        >
+                          {smartResults.purchaseVerdict}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {smartResults.purchaseVerdict === "Affordable"
+                          ? "Well within your safe budget"
+                          : smartResults.purchaseVerdict === "Stretch"
+                            ? "Slightly above recommended limit"
+                            : "High financial risk detected"}
+                      </p>
+                    </div>
+                  </Card>
+                </div>
+
+                {smartPrepayment > 0 && (
+                  <Card className="bg-green-50 border-green-200 p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="text-xs text-green-800 uppercase tracking-widest font-bold">
+                          Prepayment Impact
+                        </p>
+                        <p className="text-sm text-green-700">
+                          Tenure reduced from {smartTenure * 12} to{" "}
+                          {smartResults.revisedTenure} months
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-green-800 uppercase tracking-widest font-bold">
+                          Interest Saved
+                        </p>
+                        <p className="text-2xl font-bold text-green-600">
+                          {formatCurrency(smartResults.interestSaved)}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="rent-vs-buy">
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="border-2 shadow-sm p-6 space-y-6">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Monthly Rent (₹)</Label>
+                      <Input
+                        type="text"
+                        className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        value={rvbRent.toLocaleString("en-IN")}
+                        onChange={(e) =>
+                          setRvbRent(Number(e.target.value.replace(/,/g, "")))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Property Price (₹)</Label>
+                      <Input
+                        type="text"
+                        className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        value={rvbPrice.toLocaleString("en-IN")}
+                        onChange={(e) =>
+                          setRvbPrice(Number(e.target.value.replace(/,/g, "")))
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Monthly EMI (₹)</Label>
+                      <Input
+                        type="text"
+                        className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        value={rvbEmi.toLocaleString("en-IN")}
+                        onChange={(e) =>
+                          setRvbEmi(Number(e.target.value.replace(/,/g, "")))
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Time Horizon (Years)</Label>
+                      <Select
+                        value={rvbHorizon.toString()}
+                        onValueChange={(val) => setRvbHorizon(Number(val))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="15">15 Years</SelectItem>
+                          <SelectItem value="20">20 Years</SelectItem>
+                          <SelectItem value="25">25 Years</SelectItem>
+                          <SelectItem value="30">30 Years</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+              <Card className="bg-primary/5 border-primary/20 p-8 flex flex-col justify-center space-y-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground uppercase tracking-widest">
+                    Total Rent Paid
+                  </span>
+                  <span className="font-bold">
+                    {formatCurrency(rvbResults.totalRent)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground uppercase tracking-widest">
+                    Total EMI Paid
+                  </span>
+                  <span className="font-bold">
+                    {formatCurrency(rvbResults.totalEmi)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground uppercase tracking-widest">
+                    Future Property Value
+                  </span>
+                  <span className="font-bold">
+                    {formatCurrency(rvbResults.futureValue)}
+                  </span>
+                </div>
+                {rvbResults.breakEven !== -1 && (
+                  <div className="flex justify-between items-center border-t border-primary/10 pt-4">
+                    <span className="text-sm text-muted-foreground uppercase tracking-widest">
+                      Break-even Point
+                    </span>
+                    <span className="font-bold text-green-600">
+                      {rvbResults.breakEven} Years
+                    </span>
+                  </div>
+                )}
+                <div className="text-center pt-6 border-t border-primary/10">
+                  <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2 font-bold">
+                    Recommendation
+                  </p>
+                  <p
+                    className={`text-3xl font-bold ${rvbResults.result === "Buying is better" ? "text-green-600" : "text-primary"}`}
+                  >
+                    {rvbResults.result}
+                  </p>
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
 
           <TabsContent value="eligibility">
             <div className="grid md:grid-cols-2 gap-8">

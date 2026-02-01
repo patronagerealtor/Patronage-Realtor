@@ -138,13 +138,13 @@ export function Header() {
               <nav className="flex flex-col gap-4">
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-2">
-                    Properties
+                    Featured Properties
                   </h4>
                   <a
                     href="/properties"
                     className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50"
                   >
-                    Buy
+                    Explore
                   </a>
                   <a
                     href="/#featured-properties"
@@ -159,7 +159,7 @@ export function Header() {
                     }}
                     className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50"
                   >
-                    New Projects
+                    Featured
                   </a>
                 </div>
 
