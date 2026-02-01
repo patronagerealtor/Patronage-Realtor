@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/home/Hero";
@@ -10,6 +11,21 @@ import { ContactCTA } from "@/components/home/ContactCTA";
 import { Chatbot } from "@/components/shared/Chatbot";
 
 export default function Home() {
+  useEffect(() => {
+    // Check if there's a hash in the URL and scroll to the element
+    if (window.location.hash === "#featured-properties") {
+      const element = document.getElementById("featured-properties");
+      if (element) {
+        // Delay slightly to ensure content is rendered
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth" });
+        }, 100);
+      }
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       <Header />
