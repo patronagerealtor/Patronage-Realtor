@@ -17,21 +17,9 @@ import {
 import { Home, Landmark, Coins, Scale, Paintbrush } from "lucide-react";
 
 export default function Calculators() {
-  const [activeTab, setActiveTab] = useState("affordability");
+  const [activeTab, setActiveTab] = useState("smart-emi");
 
-  // 1. Property Affordability
-  const [affIncome, setAffIncome] = useState(100000);
-  const [affEmi, setAffEmi] = useState(0);
-  const [affDownPayment, setAffDownPayment] = useState(500000);
-  const [affTenure, setAffTenure] = useState("20");
-  const [affInterestRate, setAffInterestRate] = useState(8.5);
-  const [affResults, setAffResults] = useState({
-    maxEmi: 0,
-    loanAmount: 0,
-    propertyPrice: 0,
-  });
-
-  // 2. Loan Eligibility
+  // 1. Loan Eligibility
   const [eligIncome, setEligIncome] = useState(100000);
   const [eligEmi, setEligEmi] = useState(0);
   const [eligTenure, setEligTenure] = useState("20");
@@ -40,7 +28,7 @@ export default function Calculators() {
     monthlyEmi: 0,
   });
 
-  // 3. Total Cost of Ownership
+  // 2. Total Cost of Ownership
   const [costPrice, setCostPrice] = useState(5000000);
   const [costParking, setCostParking] = useState("no");
   const [costResults, setCostResults] = useState({
@@ -50,7 +38,7 @@ export default function Calculators() {
     total: 0,
   });
 
-  // 4. Rent vs Buy
+  // 3. Rent vs Buy
   const [rvbRent, setRvbRent] = useState(20000);
   const [rvbPrice, setRvbPrice] = useState(5000000);
   const [rvbEmi, setRvbEmi] = useState(35000);
@@ -64,7 +52,7 @@ export default function Calculators() {
     breakEven: -1,
   });
 
-  // 5. Smart EMI Planner
+  // 4. Smart EMI Planner
   const [smartLoanAmount, setSmartLoanAmount] = useState(5000000);
   const [smartInterestRate, setSmartInterestRate] = useState(8.5);
   const [smartTenure, setSmartTenure] = useState(20);
@@ -83,32 +71,6 @@ export default function Calculators() {
     maxAffordableLoan: 0,
     purchaseVerdict: "Affordable" as "Affordable" | "Stretch" | "Risky",
   });
-
-  const calculateAffordability = () => {
-    const disposable = affIncome - affEmi;
-    if (disposable <= 0 || affInterestRate <= 0 || parseInt(affTenure) <= 0) {
-      setAffResults({
-        maxEmi: 0,
-        loanAmount: 0,
-        propertyPrice: 0,
-      });
-      return;
-    }
-
-    const maxEmi = disposable * 0.4;
-    const rate = affInterestRate / 12 / 100;
-    const months = parseInt(affTenure) * 12;
-    
-    const loanAmount =
-      maxEmi *
-      ((Math.pow(1 + rate, months) - 1) / (rate * Math.pow(1 + rate, months)));
-      
-    setAffResults({
-      maxEmi: Math.round(maxEmi),
-      loanAmount: Math.round(loanAmount),
-      propertyPrice: Math.round(loanAmount + affDownPayment),
-    });
-  };
 
   const calculateEligibility = () => {
     const disposable = eligIncome - eligEmi;
@@ -264,15 +226,10 @@ export default function Calculators() {
 
   useEffect(() => {
     calculateRentVsBuy();
-    calculateAffordability();
     calculateEligibility();
     calculateOwnership();
     calculateSmartEmi();
   }, [
-    affIncome,
-    affEmi,
-    affDownPayment,
-    affTenure,
     eligIncome,
     eligEmi,
     eligTenure,
@@ -288,7 +245,6 @@ export default function Calculators() {
     smartIncome,
     smartExistingEmi,
     smartPrepayment,
-    affInterestRate,
   ]);
 
   const formatCurrency = (val: number) =>
@@ -312,18 +268,18 @@ export default function Calculators() {
         </div>
 
         <Tabs
-          defaultValue="affordability"
+          defaultValue="smart-emi"
           className="max-w-5xl mx-auto w-full"
           onValueChange={setActiveTab}
         >
           <div className="flex justify-center mb-12 overflow-x-auto pb-2">
             <TabsList className="bg-secondary/50 h-auto p-1 flex-wrap justify-center">
               <TabsTrigger
-                value="affordability"
+                value="smart-emi"
                 className="flex flex-col gap-2 py-4 px-6 min-w-[150px]"
               >
-                <Home className="h-5 w-5" />
-                <span className="text-xs font-semibold">Affordability</span>
+                <Landmark className="h-5 w-5" />
+                <span className="text-xs font-semibold">Smart EMI Planner</span>
               </TabsTrigger>
               <TabsTrigger
                 value="eligibility"
@@ -346,111 +302,8 @@ export default function Calculators() {
                 <Scale className="h-5 w-5" />
                 <span className="text-xs font-semibold">Rent vs Buy</span>
               </TabsTrigger>
-              <TabsTrigger
-                value="smart-emi"
-                className="flex flex-col gap-2 py-4 px-6 min-w-[150px]"
-              >
-                <Landmark className="h-5 w-5" />
-                <span className="text-xs font-semibold">Smart EMI Planner</span>
-              </TabsTrigger>
             </TabsList>
           </div>
-
-          <TabsContent value="affordability">
-            <div className="grid md:grid-cols-2 gap-8">
-              <Card className="border-2 shadow-sm p-6 space-y-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Net Monthly Income (₹)</Label>
-                    <Input
-                      type="text"
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      value={affIncome.toLocaleString("en-IN")}
-                      onChange={(e) =>
-                        setAffIncome(Number(e.target.value.replace(/,/g, "")))
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Existing Monthly EMIs (₹)</Label>
-                    <Input
-                      type="text"
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      value={affEmi.toLocaleString("en-IN")}
-                      onChange={(e) =>
-                        setAffEmi(Number(e.target.value.replace(/,/g, "")))
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Down Payment (₹)</Label>
-                    <Input
-                      type="text"
-                      className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      value={affDownPayment.toLocaleString("en-IN")}
-                      onChange={(e) =>
-                        setAffDownPayment(
-                          Number(e.target.value.replace(/,/g, "")),
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Loan Tenure (Years)</Label>
-                    <Select value={affTenure} onValueChange={setAffTenure}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="20">20 Years</SelectItem>
-                        <SelectItem value="25">25 Years</SelectItem>
-                        <SelectItem value="30">30 Years</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-4 pt-2">
-                    <div className="flex justify-between">
-                      <Label>Interest Rate (%)</Label>
-                      <span className="text-sm font-bold text-primary">{affInterestRate}%</span>
-                    </div>
-                    <Slider
-                      value={[affInterestRate]}
-                      min={6}
-                      max={12}
-                      step={0.1}
-                      onValueChange={(vals) => setAffInterestRate(vals[0])}
-                    />
-                  </div>
-                </div>
-              </Card>
-              <Card className="bg-primary/5 border-primary/20 p-8 flex flex-col justify-center space-y-8">
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground uppercase tracking-widest mb-1">
-                    Max Monthly EMI
-                  </p>
-                  <p className="text-3xl font-bold text-primary">
-                    {formatCurrency(affResults.maxEmi)}
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground uppercase tracking-widest mb-1">
-                    Estimated Loan Amount
-                  </p>
-                  <p className="text-3xl font-bold text-primary">
-                    {formatCurrency(affResults.loanAmount)}
-                  </p>
-                </div>
-                <div className="text-center pt-4 border-t border-primary/10">
-                  <p className="text-sm text-muted-foreground uppercase tracking-widest mb-1">
-                    Affordable Property Price
-                  </p>
-                  <p className="text-4xl font-bold text-primary">
-                    {formatCurrency(affResults.propertyPrice)}
-                  </p>
-                </div>
-              </Card>
-            </div>
-          </TabsContent>
 
           <TabsContent value="eligibility">
             <div className="grid md:grid-cols-2 gap-8">

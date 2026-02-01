@@ -50,10 +50,12 @@ export function Header() {
                       <a
                         href="/#featured-properties"
                         onClick={(e) => {
-                          if (window.location.pathname === '/') {
+                          if (window.location.pathname === "/") {
                             e.preventDefault();
-                            const el = document.getElementById('featured-properties');
-                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                            const el = document.getElementById(
+                              "featured-properties",
+                            );
+                            if (el) el.scrollIntoView({ behavior: "smooth" });
                           }
                         }}
                         className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md hover:bg-secondary/80 transition-colors"
@@ -85,7 +87,7 @@ export function Header() {
               <NavigationMenuItem>
                 <a
                   href="/interiors"
-                  className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                  className="bg-transparent font-medium group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline"
                 >
                   Interiors
                 </a>
@@ -93,7 +95,7 @@ export function Header() {
               <NavigationMenuItem>
                 <a
                   href="/about-us"
-                  className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                  className="bg-transparent font-medium group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline"
                 >
                   About Us
                 </a>
@@ -101,7 +103,7 @@ export function Header() {
               <NavigationMenuItem>
                 <a
                   href="/calculators"
-                  className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                  className="bg-transparent font-medium group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline"
                 >
                   Calculators
                 </a>
@@ -148,9 +150,11 @@ export function Header() {
                     href="/#featured-properties"
                     onClick={() => {
                       setIsOpen(false);
-                      if (window.location.pathname === '/') {
-                        const el = document.getElementById('featured-properties');
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      if (window.location.pathname === "/") {
+                        const el = document.getElementById(
+                          "featured-properties",
+                        );
+                        if (el) el.scrollIntoView({ behavior: "smooth" });
                       }
                     }}
                     className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50"
