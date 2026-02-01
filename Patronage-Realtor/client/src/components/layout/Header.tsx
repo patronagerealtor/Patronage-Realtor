@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { Menu, X, ChevronDown, User, Search, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -18,7 +23,11 @@ export function Header() {
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2 font-heading font-bold text-xl tracking-tight hover:opacity-90 transition-opacity" data-testid="logo">
+        <a
+          href="/"
+          className="flex items-center gap-2 font-heading font-bold text-xl tracking-tight hover:opacity-90 transition-opacity"
+          data-testid="logo"
+        >
           <img
             src="/logo/logo-full.png"
             alt="Patronage Realtor"
@@ -32,15 +41,24 @@ export function Header() {
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="bg-transparent font-medium">Properties</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="bg-transparent font-medium">
+                  Properties
+                </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid w-[400px] gap-3 p-4 md:w-[600px] md:grid-cols-2 lg:w-[700px]">
                     <li>
-                      <a 
-                        href="/#featured-properties" 
+                      <a
+                        href="/#featured-properties"
+                        onClick={(e) => {
+                          if (window.location.pathname === '/') {
+                            e.preventDefault();
+                            const el = document.getElementById('featured-properties');
+                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
                         className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md hover:bg-secondary/80 transition-colors"
                       >
-                        <MapPin className="h-6 w-6 mb-2" />
+                        <MapPin className="h-4 w-4 mb-2" />
                         <div className="mb-2 text-lg font-medium">
                           New Projects
                         </div>
@@ -50,14 +68,12 @@ export function Header() {
                       </a>
                     </li>
                     <li>
-                      <a 
-                        href="/properties" 
+                      <a
+                        href="/properties"
                         className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md hover:bg-secondary/80 transition-colors"
                       >
-                        <Search className="h-6 w-6 mb-2" />
-                        <div className="mb-2 text-lg font-medium">
-                          Buy
-                        </div>
+                        <Search className="h-4 w-4 mb-2" />
+                        <div className="mb-2 text-lg font-medium">Buy</div>
                         <p className="text-sm leading-tight text-muted-foreground">
                           Find your perfect home in our listings.
                         </p>
@@ -67,23 +83,31 @@ export function Header() {
                 </NavigationMenuContent>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <a href="/interiors" className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                <a
+                  href="/interiors"
+                  className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                >
                   Interiors
                 </a>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <a href="/about-us" className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                <a
+                  href="/about-us"
+                  className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                >
                   About Us
                 </a>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <a href="/calculators" className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50">
+                <a
+                  href="/calculators"
+                  className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+                >
                   Calculators
                 </a>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
-          
         </div>
 
         {/* Desktop Actions */}
@@ -91,7 +115,9 @@ export function Header() {
           <Button variant="outline" className="gap-2">
             Contact Us
           </Button>
-          <Button className="shadow-sm" data-testid="button-book-call">Book a Call</Button>
+          <Button className="shadow-sm" data-testid="button-book-call">
+            Book a Call
+          </Button>
         </div>
 
         {/* Mobile Menu */}
@@ -104,22 +130,60 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <SheetTitle className="font-heading font-bold text-xl mb-6">Menu</SheetTitle>
+              <SheetTitle className="font-heading font-bold text-xl mb-6">
+                Menu
+              </SheetTitle>
               <nav className="flex flex-col gap-4">
                 <div className="space-y-2">
-                  <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-2">Properties</h4>
-                  <a href="/properties" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">Buy</a>
-                  <a href="/#featured-properties" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">New Projects</a>
+                  <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-2">
+                    Properties
+                  </h4>
+                  <a
+                    href="/properties"
+                    className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50"
+                  >
+                    Buy
+                  </a>
+                  <a
+                    href="/#featured-properties"
+                    onClick={() => {
+                      setIsOpen(false);
+                      if (window.location.pathname === '/') {
+                        const el = document.getElementById('featured-properties');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50"
+                  >
+                    New Projects
+                  </a>
                 </div>
-                
+
                 <div className="space-y-2 mt-4">
-                   <a href="/interiors" className="block py-2 text-lg font-medium hover:text-primary/70">Interiors</a>
-                   <a href="/about-us" className="block py-2 text-lg font-medium hover:text-primary/70">About Us</a>
-                   <a href="#" className="block py-2 text-lg font-medium hover:text-primary/70">Contact Us</a>
+                  <a
+                    href="/interiors"
+                    className="block py-2 text-lg font-medium hover:text-primary/70"
+                  >
+                    Interiors
+                  </a>
+                  <a
+                    href="/about-us"
+                    className="block py-2 text-lg font-medium hover:text-primary/70"
+                  >
+                    About Us
+                  </a>
+                  <a
+                    href="#"
+                    className="block py-2 text-lg font-medium hover:text-primary/70"
+                  >
+                    Contact Us
+                  </a>
                 </div>
 
                 <div className="mt-8">
-                  <Button className="w-full mb-3" size="lg">Book a Call</Button>
+                  <Button className="w-full mb-3" size="lg">
+                    Book a Call
+                  </Button>
                 </div>
               </nav>
             </SheetContent>
