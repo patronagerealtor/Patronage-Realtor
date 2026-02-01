@@ -12,7 +12,7 @@ const FEATURED_PROPERTIES = [
 
 export function FeaturedProperties() {
   return (
-    <section className="container mx-auto px-4 py-16 md:py-24">
+    <section id="featured-properties" className="container mx-auto px-4 py-16 md:py-24">
       <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
         <div className="space-y-2">
           <Badge variant="outline" className="text-xs tracking-widest uppercase">Latest Listings</Badge>

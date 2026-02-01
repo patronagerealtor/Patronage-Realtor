@@ -36,7 +36,10 @@ export function Header() {
                 <NavigationMenuContent>
                   <ul className="grid w-[400px] gap-3 p-4 md:w-[600px] md:grid-cols-2 lg:w-[700px]">
                     <li>
-                      <div className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md">
+                      <a 
+                        href="/#featured-properties" 
+                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md hover:bg-secondary/80 transition-colors"
+                      >
                         <MapPin className="h-6 w-6 mb-2" />
                         <div className="mb-2 text-lg font-medium">
                           New Projects
@@ -44,7 +47,7 @@ export function Header() {
                         <p className="text-sm leading-tight text-muted-foreground">
                           Discover our latest luxury developments.
                         </p>
-                      </div>
+                      </a>
                     </li>
                     <li>
                       <div className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md">
@@ -103,7 +106,7 @@ export function Header() {
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-2">Properties</h4>
                   <a href="#" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">Buy</a>
-                  <a href="#" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">New Projects</a>
+                  <a href="/#featured-properties" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">New Projects</a>
                 </div>
                 
                 <div className="space-y-2 mt-4">
