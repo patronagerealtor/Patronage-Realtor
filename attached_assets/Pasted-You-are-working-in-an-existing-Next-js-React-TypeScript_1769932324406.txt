@@ -1,0 +1,120 @@
+You are working in an existing Next.js + React (TypeScript) project.
+
+File to modify:
+calculator.tsx
+
+Context:
+- Smart EMI Planner logic is correct and must NOT be changed.
+- All calculations, states, and effects are already implemented and working.
+- The current Smart EMI Planner UI is vertically long.
+- Styling, colors, typography, spacing utilities, and components must remain unchanged.
+
+IMPORTANT:
+❌ DO NOT change any calculation logic
+❌ DO NOT change colors, fonts, or component styles
+❌ DO NOT modify other calculators or tabs
+✅ ONLY adjust layout structure (grid / flex)
+
+------------------------------------------------
+GOAL
+------------------------------------------------
+
+Refactor the Smart EMI Planner layout to make it more compact and balanced:
+
+1. Shift input fields to the LEFT (no change to inputs themselves)
+2. Split the result summary into TWO SIDE-BY-SIDE BOXES on the RIGHT
+
+------------------------------------------------
+TARGET LAYOUT (SMART EMI TAB ONLY)
+------------------------------------------------
+
+Overall structure:
+- 3-column layout on desktop
+
+[ LEFT COLUMN ]      [ RIGHT COLUMN – BOX 1 ]      [ RIGHT COLUMN – BOX 2 ]
+
+------------------------------------------------
+LEFT COLUMN (UNCHANGED CONTENT)
+------------------------------------------------
+- Loan Amount
+- Interest Rate
+- Tenure
+- Monthly Net Income
+- Existing EMIs
+- Monthly Extra Prepayment
+
+Rules:
+- Same Card
+- Same spacing
+- Same input order
+- Just occupies a narrower left column
+
+------------------------------------------------
+RIGHT COLUMN – SPLIT INTO TWO CARDS
+------------------------------------------------
+
+Wrap the right-side content inside a grid with 2 columns on desktop.
+
+------------------------------------------------
+BOX 1 (LEFT RESULT BOX)
+------------------------------------------------
+Contains:
+- Monthly EMI (headline)
+- Original Interest
+- Total Amount
+- EMI-to-Income Ratio
+- Risk Level badge
+- Safe Purchase Range
+
+Rules:
+- Use existing Card component
+- No new styling
+- Preserve existing typography and colors
+- Keep section order logical and compact
+
+------------------------------------------------
+BOX 2 (RIGHT RESULT BOX)
+------------------------------------------------
+Contains:
+- Affordability Insight
+  - Safe Monthly EMI
+  - Max Affordable Loan
+- Bank-Style Summary
+  - Recommended EMI Limit
+  - Your EMI
+  - EMI Status
+  - Purchase Verdict
+
+Rules:
+- Use existing Card component
+- Same background, borders, padding style
+- No content or wording changes
+- Just move content into this second card
+
+------------------------------------------------
+RESPONSIVENESS
+------------------------------------------------
+- Desktop: 3-column layout
+- Tablet: Inputs on top, result boxes side-by-side
+- Mobile: Stack everything vertically (existing behavior)
+
+------------------------------------------------
+IMPLEMENTATION NOTES
+------------------------------------------------
+- Use existing Tailwind grid utilities already used in the file
+- Prefer grid over flex for layout clarity
+- Do NOT duplicate JSX unnecessarily
+- Do NOT introduce new components
+- Keep JSX readable and minimal
+
+------------------------------------------------
+FINAL CHECKLIST
+------------------------------------------------
+✅ Smart EMI logic untouched
+✅ Styling unchanged
+✅ Colors unchanged
+✅ No regression in functionality
+✅ Only Smart EMI Planner affected
+✅ Cleaner, shorter canvas height
+
+Proceed carefully and apply layout changes only.

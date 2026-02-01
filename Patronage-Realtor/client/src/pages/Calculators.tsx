@@ -695,8 +695,8 @@ export default function Calculators() {
           </TabsContent>
 
           <TabsContent value="smart-emi">
-            <div className="grid md:grid-cols-2 gap-8">
-              <Card className="border-2 shadow-sm p-6 space-y-6">
+            <div className="grid lg:grid-cols-3 gap-8">
+              <Card className="border-2 shadow-sm p-6 space-y-6 lg:col-span-1">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Loan Amount (₹)</Label>
@@ -773,53 +773,63 @@ export default function Calculators() {
                 </div>
               </Card>
 
-              <Card className="bg-primary/5 border-primary/20 p-8 flex flex-col justify-center space-y-6">
-                <div className="text-center mb-4">
-                  <p className="text-sm text-muted-foreground uppercase tracking-widest mb-1">
-                    Monthly EMI
-                  </p>
-                  <p className="text-4xl font-bold text-primary">
-                    {formatCurrency(smartResults.monthlyEmi)}
-                  </p>
-                </div>
+              <div className="lg:col-span-2 grid md:grid-cols-2 gap-8 h-fit">
+                <Card className="bg-primary/5 border-primary/20 p-8 flex flex-col space-y-6">
+                  <div className="text-center mb-4">
+                    <p className="text-sm text-muted-foreground uppercase tracking-widest mb-1">
+                      Monthly EMI
+                    </p>
+                    <p className="text-4xl font-bold text-primary">
+                      {formatCurrency(smartResults.monthlyEmi)}
+                    </p>
+                  </div>
 
-                <div className="space-y-4 border-t border-primary/10 pt-6">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Original Interest</span>
-                    <span className="font-bold">{formatCurrency(smartResults.totalInterest)}</span>
+                  <div className="space-y-4 border-t border-primary/10 pt-6">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Original Interest</span>
+                      <span className="font-bold">{formatCurrency(smartResults.totalInterest)}</span>
+                    </div>
+                    {smartPrepayment > 0 && (
+                      <>
+                        <div className="flex justify-between items-center text-green-600">
+                          <span className="text-sm font-semibold">Interest Saved</span>
+                          <span className="font-bold">{formatCurrency(smartResults.interestSaved)}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-green-600">
+                          <span className="text-sm font-semibold">Revised Tenure</span>
+                          <span className="font-bold">
+                            {Math.floor(smartResults.revisedTenure / 12)}Y {smartResults.revisedTenure % 12}M
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Total Amount</span>
+                      <span className="font-bold">{formatCurrency(smartResults.totalPayment)}</span>
+                    </div>
                   </div>
-                  {smartPrepayment > 0 && (
-                    <>
-                      <div className="flex justify-between items-center text-green-600">
-                        <span className="text-sm font-semibold">Interest Saved</span>
-                        <span className="font-bold">{formatCurrency(smartResults.interestSaved)}</span>
-                      </div>
-                      <div className="flex justify-between items-center text-green-600">
-                        <span className="text-sm font-semibold">Revised Tenure</span>
-                        <span className="font-bold">
-                          {Math.floor(smartResults.revisedTenure / 12)}Y {smartResults.revisedTenure % 12}M
-                        </span>
-                      </div>
-                    </>
-                  )}
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Total Amount</span>
-                    <span className="font-bold">{formatCurrency(smartResults.totalPayment)}</span>
-                  </div>
-                </div>
 
-                <div className="space-y-4 border-t border-primary/10 pt-6">
-                  <p className="text-sm font-bold uppercase tracking-widest text-primary text-center">
-                    Affordability Insight
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Safe Monthly EMI</span>
-                    <span className="font-bold">{formatCurrency(smartResults.safeMonthlyEmi)}</span>
+                  <div className="space-y-4 border-t border-primary/10 pt-6 text-center">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-muted-foreground uppercase tracking-widest">
+                        EMI-to-Income Ratio
+                      </span>
+                      <span className={`font-bold text-lg ${
+                        smartResults.riskLevel === "Safe" ? "text-green-600" : 
+                        smartResults.riskLevel === "Moderate" ? "text-yellow-600" : "text-red-600"
+                      }`}>
+                        {smartResults.emiToIncomeRatio}%
+                      </span>
+                    </div>
+                    
+                    <div className={`py-2 px-4 rounded-full text-sm font-bold uppercase tracking-widest inline-block ${
+                      smartResults.riskLevel === "Safe" ? "bg-green-100 text-green-700" : 
+                      smartResults.riskLevel === "Moderate" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
+                    }`}>
+                      Risk Level: {smartResults.riskLevel}
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">Max Affordable Loan</span>
-                    <span className="font-bold">{formatCurrency(smartResults.maxAffordableLoan)}</span>
-                  </div>
+
                   <div className="bg-secondary/30 p-3 rounded-lg text-center mt-2">
                     <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1">
                       Safe Purchase Range
@@ -828,59 +838,54 @@ export default function Calculators() {
                       {formatCurrency(smartResults.maxAffordableLoan * 0.8)} – {formatCurrency(smartResults.maxAffordableLoan)}
                     </p>
                   </div>
-                </div>
+                </Card>
 
-                <div className="space-y-4 border-t border-primary/10 pt-6 text-center">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-muted-foreground uppercase tracking-widest">
-                      EMI-to-Income Ratio
-                    </span>
-                    <span className={`font-bold text-lg ${
-                      smartResults.riskLevel === "Safe" ? "text-green-600" : 
-                      smartResults.riskLevel === "Moderate" ? "text-yellow-600" : "text-red-600"
-                    }`}>
-                      {smartResults.emiToIncomeRatio}%
-                    </span>
+                <Card className="bg-primary/5 border-primary/20 p-8 flex flex-col space-y-6">
+                  <div className="space-y-4">
+                    <p className="text-sm font-bold uppercase tracking-widest text-primary text-center">
+                      Affordability Insight
+                    </p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Safe Monthly EMI</span>
+                      <span className="font-bold">{formatCurrency(smartResults.safeMonthlyEmi)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Max Affordable Loan</span>
+                      <span className="font-bold">{formatCurrency(smartResults.maxAffordableLoan)}</span>
+                    </div>
                   </div>
-                  
-                  <div className={`py-2 px-4 rounded-full text-sm font-bold uppercase tracking-widest inline-block ${
-                    smartResults.riskLevel === "Safe" ? "bg-green-100 text-green-700" : 
-                    smartResults.riskLevel === "Moderate" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"
-                  }`}>
-                    Risk Level: {smartResults.riskLevel}
-                  </div>
-                </div>
 
-                <div className="space-y-4 border-t border-primary/10 pt-6 bg-primary/5 -mx-8 px-8 pb-8 rounded-b-xl mt-auto">
-                  <p className="text-xs font-bold uppercase tracking-widest text-primary text-center">
-                    Bank-Style Summary
-                  </p>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">Recommended EMI Limit (40%)</span>
-                      <span className="font-semibold">{formatCurrency(smartResults.safeMonthlyEmi)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">Your EMI</span>
-                      <span className="font-semibold">{formatCurrency(smartResults.monthlyEmi)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">EMI Status</span>
-                      <span className={`font-bold ${
-                        smartResults.riskLevel === "Safe" ? "text-green-600" : 
-                        smartResults.riskLevel === "Moderate" ? "text-yellow-600" : "text-red-600"
-                      }`}>{smartResults.riskLevel}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">Purchase Verdict</span>
-                      <span className={`font-bold ${
-                        smartResults.purchaseVerdict === "Affordable" ? "text-green-600" : 
-                        smartResults.purchaseVerdict === "Stretch" ? "text-yellow-600" : "text-red-600"
-                      }`}>{smartResults.purchaseVerdict}</span>
+                  <div className="space-y-4 border-t border-primary/10 pt-6 bg-primary/5 -mx-8 px-8 pb-8 rounded-b-xl mt-auto">
+                    <p className="text-xs font-bold uppercase tracking-widest text-primary text-center">
+                      Bank-Style Summary
+                    </p>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Recommended EMI Limit (40%)</span>
+                        <span className="font-semibold">{formatCurrency(smartResults.safeMonthlyEmi)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Your EMI</span>
+                        <span className="font-semibold">{formatCurrency(smartResults.monthlyEmi)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">EMI Status</span>
+                        <span className={`font-bold ${
+                          smartResults.riskLevel === "Safe" ? "text-green-600" : 
+                          smartResults.riskLevel === "Moderate" ? "text-yellow-600" : "text-red-600"
+                        }`}>{smartResults.riskLevel}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Purchase Verdict</span>
+                        <span className={`font-bold ${
+                          smartResults.purchaseVerdict === "Affordable" ? "text-green-600" : 
+                          smartResults.purchaseVerdict === "Stretch" ? "text-yellow-600" : "text-red-600"
+                        }`}>{smartResults.purchaseVerdict}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
