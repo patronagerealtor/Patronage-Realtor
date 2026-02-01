@@ -3,7 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, Users, Target, CheckCircle2 } from "lucide-react";
-
+import { useEffect } from "react";
 
 const stats = [
   { label: "Years Experience", value: "15+", icon: Award },
@@ -31,6 +31,14 @@ const team = [
 ];
 
 export default function AboutUs() {
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth", // change to "auto" if you want instant
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
