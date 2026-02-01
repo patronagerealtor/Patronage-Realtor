@@ -50,7 +50,10 @@ export function Header() {
                       </a>
                     </li>
                     <li>
-                      <div className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md">
+                      <a 
+                        href="/properties" 
+                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md hover:bg-secondary/80 transition-colors"
+                      >
                         <Search className="h-6 w-6 mb-2" />
                         <div className="mb-2 text-lg font-medium">
                           Buy
@@ -58,7 +61,7 @@ export function Header() {
                         <p className="text-sm leading-tight text-muted-foreground">
                           Find your perfect home in our listings.
                         </p>
-                      </div>
+                      </a>
                     </li>
                   </ul>
                 </NavigationMenuContent>
@@ -105,7 +108,7 @@ export function Header() {
               <nav className="flex flex-col gap-4">
                 <div className="space-y-2">
                   <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-2">Properties</h4>
-                  <a href="#" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">Buy</a>
+                  <a href="/properties" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">Buy</a>
                   <a href="/#featured-properties" className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50">New Projects</a>
                 </div>
                 

@@ -19,7 +19,9 @@ export function FeaturedProperties() {
           <h2 className="text-3xl md:text-4xl font-heading font-bold">Featured Properties</h2>
           <p className="text-muted-foreground max-w-lg">Handpicked selection of the finest properties available this week.</p>
         </div>
-        <Button variant="outline" className="hidden md:flex gap-2">View All Properties <ArrowRight className="h-4 w-4" /></Button>
+        <a href="/properties">
+          <Button variant="outline" className="hidden md:flex gap-2">View All Properties <ArrowRight className="h-4 w-4" /></Button>
+        </a>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -60,7 +62,9 @@ export function FeaturedProperties() {
       </div>
 
       <div className="mt-8 md:hidden">
-        <Button className="w-full" variant="outline">View All Properties</Button>
+        <a href="/properties">
+          <Button className="w-full" variant="outline">View All Properties</Button>
+        </a>
       </div>
     </section>
   );
