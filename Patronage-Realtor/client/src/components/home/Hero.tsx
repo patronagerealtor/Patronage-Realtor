@@ -34,7 +34,10 @@ export function Hero() {
               <Button
                 size="lg"
                 onClick={() => setLocation("/properties")}
-                className="h-14 px-8 text-base shadow-sm"
+                className="h-14 px-8 text-base shadow-sm
+                transition-all duration-300 ease-out
+                hover:-translate-y-1 hover:shadow-lg
+                active:translate-y-0.5"
                 data-testid="button-explore"
               >
                 Explore Properties <ArrowRight className="ml-2 h-4 w-4" />
