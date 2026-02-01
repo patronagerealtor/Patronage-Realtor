@@ -1,0 +1,112 @@
+You are working in an existing Next.js + React (TypeScript) project.
+
+File to modify:
+calculator.tsx
+
+Context:
+- The project has multiple calculators inside tabs.
+- Smart EMI Planner already exists and is visually correct.
+- Affordability calculator logic already exists separately.
+- DO NOT change global layout, header, footer, tabs, or theme.
+- DO NOT redesign UI.
+- DO NOT remove any existing Smart EMI functionality.
+
+Goal (Phase 1):
+Enhance the Smart EMI Planner by embedding affordability insights
+inside the RIGHT-SIDE RESULT CARD, while keeping the original UI style.
+
+------------------------------------------------
+FUNCTIONAL REQUIREMENTS
+------------------------------------------------
+
+1. MERGE AFFORDABILITY LOGIC INTO SMART EMI
+- Reuse the existing affordability logic principles:
+  - Disposable Income = Monthly Income - Existing EMIs
+  - Safe EMI = 40% of Disposable Income
+- DO NOT create a new form or inputs.
+- Use Smart EMI inputs only:
+  - Interest Rate
+  - Tenure
+  - Income
+  - Existing EMIs
+
+2. CALCULATE THESE NEW DERIVED VALUES:
+- safeMonthlyEmi
+- maxAffordableLoan (invert EMI formula)
+- affordablePropertyPrice = maxAffordableLoan + downPayment (if available, else omit)
+
+3. ADD RESULTS TO SMART EMI RIGHT PANEL
+Below the existing EMI / Interest / Risk block, add a new section titled:
+
+"AFFORDABILITY INSIGHT"
+
+Display:
+- Safe Monthly EMI
+- Maximum Affordable Loan
+- Affordable Property Price
+
+Use:
+- Same Card
+- Same typography
+- Same spacing
+- Same currency formatter
+- Muted labels, bold values
+
+------------------------------------------------
+SAFE PURCHASE RANGE VISUAL
+------------------------------------------------
+
+Add a small visual indicator (text-based, not a chart):
+
+Label:
+"Safe Purchase Range"
+
+Example:
+₹45L – ₹62L
+
+Logic:
+- Lower bound = 80% of maxAffordableLoan
+- Upper bound = maxAffordableLoan
+
+Style:
+- Neutral background
+- Rounded pill or soft bordered box
+- Same design language as Risk Level badge
+
+------------------------------------------------
+BANK-STYLE SUMMARY BLOCK
+------------------------------------------------
+
+Add a compact summary box at the bottom of the right panel:
+
+Title:
+"Bank-Style Summary"
+
+Show 4 rows:
+- Recommended EMI Limit (40%)
+- Your EMI
+- EMI Status (Safe / Moderate / High Risk)
+- Purchase Verdict (Affordable / Stretch / Risky)
+
+Rules:
+- If EMI ≤ Safe EMI → "Affordable"
+- If EMI ≤ 50% Disposable → "Stretch"
+- Else → "Risky"
+
+Use:
+- Clean alignment
+- No animations
+- Professional tone
+
+------------------------------------------------
+IMPORTANT CONSTRAINTS
+------------------------------------------------
+
+- DO NOT remove the existing Affordability tab yet
+- DO NOT duplicate interest rate or tenure
+- DO NOT change existing Smart EMI calculations
+- All new calculations must be derived, not user-entered
+- No console errors
+- TypeScript-safe
+
+Proceed step-by-step and ensure Smart EMI remains fully functional.
