@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -23,6 +24,7 @@ export default function Calculators() {
   const [affEmi, setAffEmi] = useState(0);
   const [affDownPayment, setAffDownPayment] = useState(500000);
   const [affTenure, setAffTenure] = useState("20");
+  const [affInterestRate, setAffInterestRate] = useState(8.5);
   const [affResults, setAffResults] = useState({
     maxEmi: 0,
     loanAmount: 0,
@@ -81,12 +83,23 @@ export default function Calculators() {
 
   const calculateAffordability = () => {
     const disposable = affIncome - affEmi;
-    const maxEmi = disposable * 0.7;
-    const rate = 0.08 / 12;
+    if (disposable <= 0 || affInterestRate <= 0 || parseInt(affTenure) <= 0) {
+      setAffResults({
+        maxEmi: 0,
+        loanAmount: 0,
+        propertyPrice: 0,
+      });
+      return;
+    }
+
+    const maxEmi = disposable * 0.4;
+    const rate = affInterestRate / 12 / 100;
     const months = parseInt(affTenure) * 12;
+    
     const loanAmount =
       maxEmi *
       ((Math.pow(1 + rate, months) - 1) / (rate * Math.pow(1 + rate, months)));
+      
     setAffResults({
       maxEmi: Math.round(maxEmi),
       loanAmount: Math.round(loanAmount),
@@ -252,6 +265,7 @@ export default function Calculators() {
     smartIncome,
     smartExistingEmi,
     smartPrepayment,
+    affInterestRate,
   ]);
 
   const formatCurrency = (val: number) =>
@@ -370,6 +384,19 @@ export default function Calculators() {
                         <SelectItem value="30">30 Years</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="space-y-4 pt-2">
+                    <div className="flex justify-between">
+                      <Label>Interest Rate (%)</Label>
+                      <span className="text-sm font-bold text-primary">{affInterestRate}%</span>
+                    </div>
+                    <Slider
+                      value={[affInterestRate]}
+                      min={6}
+                      max={12}
+                      step={0.1}
+                      onValueChange={(vals) => setAffInterestRate(vals[0])}
+                    />
                   </div>
                 </div>
               </Card>
