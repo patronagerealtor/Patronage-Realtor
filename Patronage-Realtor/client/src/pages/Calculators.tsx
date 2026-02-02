@@ -455,9 +455,9 @@ export default function Calculators() {
                 </div>
               </Card>
 
-              <div className="lg:col-span-7 grid md:grid-cols-2 gap-6">
+              <div className="lg:col-span-7 grid md:grid-cols-2 gap-6 h-fit">
                 {/* Visuals */}
-                <Card className="p-6 flex flex-col justify-center items-center">
+                <Card className="p-6 flex flex-col justify-center items-center h-full">
                   <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                     Total Cost Breakdown
                   </h3>
@@ -501,7 +501,7 @@ export default function Calculators() {
 
                 {/* Stats */}
                 <Card
-                  className={`p-6 flex flex-col justify-between ${
+                  className={`p-6 flex flex-col justify-between h-full ${
                     smartResults.riskLevel === "Safe"
                       ? "bg-green-50/50 dark:bg-green-900/10"
                       : "bg-red-50/50 dark:bg-red-900/10"
@@ -641,7 +641,7 @@ export default function Calculators() {
                 </div>
               </Card>
 
-              <Card className="lg:col-span-7 p-6 flex flex-col">
+              <Card className="lg:col-span-7 p-6 flex flex-col h-fit">
                 {/* Result Statistics Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-6 bg-muted/20 p-2 md:p-3 rounded-lg text-center md:text-left">
                   <div>
@@ -857,7 +857,7 @@ export default function Calculators() {
                 </div>
               </Card>
 
-              <Card className="lg:col-span-7 p-8 flex flex-col items-center justify-center bg-primary/5">
+              <Card className="lg:col-span-7 p-8 flex flex-col items-center justify-center bg-primary/5 h-fit">
                 <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest">
                   You are eligible for a loan of
                 </p>
@@ -952,7 +952,7 @@ export default function Calculators() {
                 </div>
               </Card>
 
-              <Card className="lg:col-span-7 p-6 flex flex-col justify-center">
+              <Card className="lg:col-span-7 p-6 flex flex-col justify-center h-fit">
                 <div className="space-y-6">
                   <div>
                     <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2">
