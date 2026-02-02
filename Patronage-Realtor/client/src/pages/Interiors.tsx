@@ -103,7 +103,7 @@ export default function Interiors() {
                       Select {pkg.name}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className={`sm:max-w-[500px] border-2 shadow-2xl ${pkg.color}`}>
+                  <DialogContent className={`sm:max-w-[500px] border-2 shadow-2xl ${pkg.color} origin-center animate-in zoom-in-95 duration-200`}>
                     <DialogHeader className="text-center">
                       <DialogTitle className="text-3xl">Customize {pkg.name} Package</DialogTitle>
                       <DialogDescription>
