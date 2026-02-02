@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -369,7 +370,7 @@ export default function Calculators() {
           {/* --- 1. Smart EMI Planner --- */}
           <TabsContent value="smart-emi">
             <div className="grid lg:grid-cols-12 gap-6">
-              <Card className="lg:col-span-4 p-6 space-y-6 h-fit border-t-4 border-t-primary">
+              <Card className="lg:col-span-5 p-6 space-y-6 h-fit border-t-4 border-t-primary">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Loan Amount (₹)</Label>
@@ -448,7 +449,7 @@ export default function Calculators() {
                 </div>
               </Card>
 
-              <div className="lg:col-span-8 grid md:grid-cols-2 gap-6">
+              <div className="lg:col-span-7 grid md:grid-cols-2 gap-6">
                 {/* Visuals */}
                 <Card className="p-6 flex flex-col justify-center items-center">
                   <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
@@ -572,7 +573,7 @@ export default function Calculators() {
           {/* --- 2. Rent vs Buy --- */}
           <TabsContent value="rent-vs-buy">
             <div className="grid lg:grid-cols-12 gap-6">
-              <Card className="lg:col-span-4 p-6 space-y-6 h-fit">
+              <Card className="lg:col-span-5 p-6 space-y-6 h-fit">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Monthly Rent (₹)</Label>
@@ -622,7 +623,7 @@ export default function Calculators() {
                 </div>
               </Card>
 
-              <Card className="lg:col-span-8 p-6 flex flex-col">
+              <Card className="lg:col-span-7 p-6 flex flex-col">
                 {/* Result Statistics Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-center md:text-left bg-muted/20 p-4 rounded-lg">
                   <div>
@@ -753,7 +754,7 @@ export default function Calculators() {
           {/* --- 3. Eligibility --- */}
           <TabsContent value="eligibility">
             <div className="grid lg:grid-cols-12 gap-6">
-              <Card className="lg:col-span-4 p-6 space-y-6">
+              <Card className="lg:col-span-5 p-6 space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Net Monthly Income (₹)</Label>
@@ -820,7 +821,7 @@ export default function Calculators() {
                 </div>
               </Card>
 
-              <Card className="lg:col-span-8 p-8 flex flex-col items-center justify-center bg-primary/5">
+              <Card className="lg:col-span-7 p-8 flex flex-col items-center justify-center bg-primary/5">
                 <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest">
                   You are eligible for a loan of
                 </p>
@@ -866,7 +867,7 @@ export default function Calculators() {
           {/* --- 4. Ownership Cost --- */}
           <TabsContent value="ownership">
             <div className="grid lg:grid-cols-12 gap-6">
-              <Card className="lg:col-span-4 p-6 space-y-6">
+              <Card className="lg:col-span-5 p-6 space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Base Property Price (₹)</Label>
@@ -897,7 +898,7 @@ export default function Calculators() {
                 </div>
               </Card>
 
-              <Card className="lg:col-span-8 p-6 flex flex-col justify-center">
+              <Card className="lg:col-span-7 p-6 flex flex-col justify-center">
                 <div className="space-y-6">
                   <div>
                     <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2">
