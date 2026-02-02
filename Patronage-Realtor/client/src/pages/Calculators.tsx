@@ -118,15 +118,13 @@ export default function Calculators() {
   // --- Calculation Logic ---
 
   const calculateEligibility = () => {
-    const disposable = Math.max(0, eligIncome - eligEmi);
-    const maxEmi = disposable * 0.5; // 50% FOIR
+    if (eligIncome <= 0 || eligTenure <= 0) return;
+
     const rate = 0.085 / 12; // 8.5% assumption
     const months = eligTenure * 12;
 
-    if (months <= 0) {
-      setEligResults({ loanAmount: 0, monthlyEmi: 0, maxEmi: 0 });
-      return;
-    }
+    const disposableIncome = Math.max(0, eligIncome - eligEmi);
+    const maxEmi = disposableIncome * 0.5; // 50% FOIR
 
     const loanAmount =
       maxEmi *
@@ -165,7 +163,7 @@ export default function Calculators() {
     let totalBuyingOutflow = 0;
     let currentRent = rvbRent;
     let breakEvenYear = -1;
-    const graphData = [];
+    const graphData: { year: number; Rent: number; EMI: number; AssetValue: number }[] = [];
 
     for (let i = 1; i <= smartTenure; i++) {
       totalRentOutflow += currentRent * 12;
