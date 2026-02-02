@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -166,7 +167,7 @@ export default function Calculators() {
     let breakEvenYear = -1;
     const graphData = [];
 
-    for (let i = 1; i <= tenure; i++) {
+    for (let i = 1; i <= smartTenure; i++) {
       totalRentOutflow += currentRent * 12;
       totalBuyingOutflow += rvbEmi * 12;
 
@@ -305,10 +306,7 @@ export default function Calculators() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* HEADER PLACEHOLDER */}
-      <div className="border-b p-4 text-center font-bold">
-        Smart Financial Calculators
-      </div>
+      <Header />
 
       <main className="container mx-auto px-4 py-8 flex-grow">
         <div className="max-w-4xl mx-auto text-center mb-8">
@@ -326,22 +324,21 @@ export default function Calculators() {
           onValueChange={setActiveTab}
         >
           <div className="flex justify-center mb-8">
-            <TabsList className="bg-muted p-1 grid grid-cols-2 md:grid-cols-4 w-full md:w-auto h-auto">
-              <TabsTrigger value="smart-emi" className="py-2.5">
+            <TabsList className="bg-muted p-1 grid grid-cols-2 md:grid-cols-4 w-full md:w-auto h-auto md:h-15">
+              <TabsTrigger value="smart-emi" className="py-2.5 h-full">
                 <Landmark className="h-4 w-4 mr-2" /> Smart EMI
               </TabsTrigger>
-              <TabsTrigger value="rent-vs-buy" className="py-2.5">
+              <TabsTrigger value="rent-vs-buy" className="py-2.5 h-full">
                 <Scale className="h-4 w-4 mr-2" /> Rent vs Buy
               </TabsTrigger>
-              <TabsTrigger value="eligibility" className="py-2.5">
+              <TabsTrigger value="eligibility" className="py-2.5 h-full">
                 <TrendingUp className="h-4 w-4 mr-2" /> Eligibility
               </TabsTrigger>
-              <TabsTrigger value="ownership" className="py-2.5">
+              <TabsTrigger value="ownership" className="py-2.5 h-full">
                 <Coins className="h-4 w-4 mr-2" /> Ownership Cost
               </TabsTrigger>
             </TabsList>
           </div>
-
           {/* --- 1. Smart EMI Planner --- */}
           <TabsContent value="smart-emi">
             <div className="grid lg:grid-cols-12 gap-6">

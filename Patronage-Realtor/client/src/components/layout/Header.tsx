@@ -62,7 +62,7 @@ export function Header() {
                       >
                         <MapPin className="h-4 w-4 mb-2" />
                         <div className="mb-2 text-lg font-medium">
-                          New Projects
+                          Featured Properties
                         </div>
                         <p className="text-sm leading-tight text-muted-foreground">
                           Discover our latest luxury developments.
@@ -75,7 +75,7 @@ export function Header() {
                         className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md hover:bg-secondary/80 transition-colors"
                       >
                         <Search className="h-4 w-4 mb-2" />
-                        <div className="mb-2 text-lg font-medium">Buy</div>
+                        <div className="mb-2 text-lg font-medium">Explore</div>
                         <p className="text-sm leading-tight text-muted-foreground">
                           Find your perfect home in our listings.
                         </p>
