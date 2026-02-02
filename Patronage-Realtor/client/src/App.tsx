@@ -8,6 +8,7 @@ import Properties from "@/pages/Properties";
 import Interiors from "@/pages/Interiors";
 import AboutUs from "@/pages/AboutUs";
 import Calculators from "@/pages/Calculators";
+import InteriorPackageDetails from "@/pages/InteriorPackageDetails";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/properties" component={Properties} />
       <Route path="/interiors" component={Interiors} />
+      <Route path="/interiors/:package" component={InteriorPackageDetails} />
       <Route path="/about-us" component={AboutUs} />
       <Route path="/calculators" component={Calculators} />
       <Route component={NotFound} />

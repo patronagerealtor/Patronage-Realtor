@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "wouter";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ const packages = [
 ];
 
 export default function Interiors() {
+  const [, setLocation] = useLocation();
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -82,7 +84,12 @@ export default function Interiors() {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full">Select {pkg.name}</Button>
+                <Button 
+                  className="w-full"
+                  onClick={() => setLocation(`/interiors/${pkg.name.toLowerCase()}`)}
+                >
+                  Select {pkg.name}
+                </Button>
               </CardFooter>
             </Card>
           ))}
