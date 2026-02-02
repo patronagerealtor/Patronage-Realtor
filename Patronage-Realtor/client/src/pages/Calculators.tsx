@@ -455,9 +455,9 @@ export default function Calculators() {
                 </div>
               </Card>
 
-              <div className="lg:col-span-7 grid md:grid-cols-2 gap-6 h-fit">
+              <div className="lg:col-span-7 grid md:grid-cols-2 gap-6 h-fit content-start">
                 {/* Visuals */}
-                <Card className="p-6 flex flex-col justify-center items-center h-full">
+                <Card className="p-6 flex flex-col justify-center items-center h-fit min-h-full">
                   <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                     Total Cost Breakdown
                   </h3>
@@ -501,7 +501,7 @@ export default function Calculators() {
 
                 {/* Stats */}
                 <Card
-                  className={`p-6 flex flex-col justify-between h-full ${
+                  className={`p-6 flex flex-col justify-between h-fit min-h-full ${
                     smartResults.riskLevel === "Safe"
                       ? "bg-green-50/50 dark:bg-green-900/10"
                       : "bg-red-50/50 dark:bg-red-900/10"
