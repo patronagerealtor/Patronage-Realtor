@@ -41,11 +41,16 @@ const COLORS = {
 export default function Calculators() {
   const [activeTab, setActiveTab] = useState("smart-emi");
 
+  // --- Unified Calculator State ---
+  const [sharedIncome, setSharedIncome] = useState(100000);
+  const [sharedExistingEmi, setSharedExistingEmi] = useState(0);
+  const [sharedInterestRate, setSharedInterestRate] = useState(8.5);
+  const [sharedTenure, setSharedTenure] = useState(20);
+  const [sharedPropertyPrice, setSharedPropertyPrice] = useState(5000000);
+  const [sharedMonthlyRent, setSharedMonthlyRent] = useState(20000);
+  const [sharedLoanAmount, setSharedLoanAmount] = useState(5000000);
+
   // --- 1. Loan Eligibility State ---
-  const [eligIncome, setEligIncome] = useState(100000);
-  const [eligEmi, setEligEmi] = useState(0);
-  const [eligInterestRate, setEligInterestRate] = useState(8.5);
-  const [eligTenure, setEligTenure] = useState(20);
   const [eligResults, setEligResults] = useState({
     loanAmount: 0,
     monthlyEmi: 0,
@@ -53,7 +58,6 @@ export default function Calculators() {
   });
 
   // --- 2. Ownership Cost State ---
-  const [costPrice, setCostPrice] = useState(5000000);
   const [costParking, setCostParking] = useState("no");
   const [costResults, setCostResults] = useState({
     stampDuty: 0,
@@ -64,8 +68,6 @@ export default function Calculators() {
   });
 
   // --- 3. Rent vs Buy State ---
-  const [rvbRent, setRvbRent] = useState(20000);
-  const [rvbPrice, setRvbPrice] = useState(5000000);
   const [rvbEmi, setRvbEmi] = useState(35000);
   const [rvbHorizon, setRvbHorizon] = useState(10);
   const [rvbResults, setRvbResults] = useState({
@@ -84,11 +86,6 @@ export default function Calculators() {
   });
 
   // --- 4. Smart EMI State ---
-  const [smartLoanAmount, setSmartLoanAmount] = useState(5000000);
-  const [smartInterestRate, setSmartInterestRate] = useState(8.5);
-  const [smartTenure, setSmartTenure] = useState(20);
-  const [smartIncome, setSmartIncome] = useState(100000);
-  const [smartExistingEmi, setSmartExistingEmi] = useState(0);
   const [smartPrepayment, setSmartPrepayment] = useState(0);
   const [smartResults, setSmartResults] = useState({
     monthlyEmi: 0,
