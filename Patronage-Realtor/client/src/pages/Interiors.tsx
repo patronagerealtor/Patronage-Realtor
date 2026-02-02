@@ -150,7 +150,7 @@ export default function Interiors() {
           ))}
         </div>
 
-        <div className="mt-20 text-center bg-secondary/30 p-12 rounded-3xl">
+        <div className="mt-25 text-center bg-secondary/30 p-12 rounded-3xl">
           <h2 className="text-2xl font-bold mb-4">Still confused?</h2>
           <p className="mb-8 text-muted-foreground">Our designers have a PhD in matching cushions to your personality. Even if your personality is "I just want it to look like a Pinterest board."</p>
           <Button size="lg" className="rounded-full px-8">Talk to our Designers</Button>

@@ -15,7 +15,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Landmark, Coins, Scale, TrendingUp, ChevronDown } from "lucide-react";
+import { Landmark, Coins, Scale, TrendingUp, ChevronDown, BookOpen } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   PieChart,
   Pie,
@@ -543,6 +549,24 @@ export default function Calculators() {
                 </Card>
               </div>
             </div>
+
+            <Accordion type="single" collapsible className="mt-8">
+              <AccordionItem value="logic" className="border rounded-lg bg-card px-4">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-2 text-primary font-semibold">
+                    <BookOpen className="h-4 w-4" />
+                    Calculation Logic
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground space-y-4 pb-4">
+                  <p>The Smart EMI calculator uses the standard EMI formula: <code>[P x R x (1+R)^N] / [(1+R)^N - 1]</code></p>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li><strong>Risk Level:</strong> Based on FOIR. Below 40% is "Safe", 40-50% is "Moderate", above 50% is "High Risk".</li>
+                    <li><strong>Interest Saved:</strong> Projected by applying prepayment directly to principal each month.</li>
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </TabsContent>
 
           {/* --- 2. Rent vs Buy --- */}
@@ -797,6 +821,26 @@ export default function Calculators() {
                 </div>
               </Card>
             </div>
+
+            <Accordion type="single" collapsible className="mt-8">
+              <AccordionItem value="logic" className="border rounded-lg bg-card px-4">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-2 text-primary font-semibold">
+                    <BookOpen className="h-4 w-4" />
+                    Calculation Logic
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground space-y-4 pb-4">
+                  <p>Loan eligibility is determined by your repayment capacity:</p>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li><strong>Disposable Income:</strong> Your monthly income minus any existing EMIs.</li>
+                    <li><strong>Safe Monthly EMI:</strong> 40% of your disposable income (Recommended limit).</li>
+                    <li><strong>Max EMI:</strong> 50% of your disposable income (Maximum stretch limit).</li>
+                    <li><strong>Eligible Loan:</strong> Calculated by reverse-engineering the EMI formula using the Safe EMI, current Interest Rate, and Tenure.</li>
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </TabsContent>
 
           {/* --- 4. Ownership Cost --- */}
@@ -866,6 +910,25 @@ export default function Calculators() {
                 </div>
               </Card>
             </div>
+
+            <Accordion type="single" collapsible className="mt-8">
+              <AccordionItem value="logic" className="border rounded-lg bg-card px-4">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-2 text-primary font-semibold">
+                    <BookOpen className="h-4 w-4" />
+                    Calculation Logic
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground space-y-4 pb-4">
+                  <p>Total ownership cost includes the base price and mandatory government charges:</p>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li><strong>Stamp Duty:</strong> Calculated at 7% of the property price (state average).</li>
+                    <li><strong>GST:</strong> Calculated at 5% for under-construction properties.</li>
+                    <li><strong>Parking:</strong> A fixed cost of ₹3,00,000 if selected.</li>
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </TabsContent>
         </Tabs>
       </main>

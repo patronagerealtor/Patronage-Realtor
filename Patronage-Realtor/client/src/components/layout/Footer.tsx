@@ -72,7 +72,7 @@ export function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 mt-0.5" />
                 <span>
-                  09, IT-59 office spaces & food court, Phase I Hinjewadi, Pune
+                  09, IT-59 office spaces & food court, Phase 1 Hinjewadi, Pune
                 </span>
               </li>
               <li className="flex items-center gap-3">
