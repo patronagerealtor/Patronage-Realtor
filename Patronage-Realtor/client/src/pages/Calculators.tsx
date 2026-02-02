@@ -728,6 +728,26 @@ export default function Calculators() {
                 </div>
               </Card>
             </div>
+
+            <Accordion type="single" collapsible className="mt-8">
+              <AccordionItem value="logic" className="border rounded-lg bg-card px-4">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-2 text-primary font-semibold">
+                    <BookOpen className="h-4 w-4" />
+                    Calculation Logic
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground space-y-4 pb-4">
+                  <p>We compare the total cost of renting vs buying over your selected horizon:</p>
+                  <ul className="list-disc pl-5 space-y-2">
+                    <li><strong>Rent Cost:</strong> Cumulative rent paid, assuming a 10% annual increase.</li>
+                    <li><strong>Buy Cost:</strong> Cumulative EMI payments made over the period.</li>
+                    <li><strong>Asset Value:</strong> Projected property value assuming 7% annual appreciation.</li>
+                    <li><strong>Break-even:</strong> The year when cumulative rent paid exceeds cumulative EMI paid.</li>
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </TabsContent>
 
           {/* --- 3. Eligibility --- */}
