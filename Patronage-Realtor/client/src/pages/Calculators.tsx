@@ -126,14 +126,17 @@ export default function Calculators() {
     const months = eligTenure * 12;
 
     const disposableIncome = Math.max(0, eligIncome - eligEmi);
-    
+
     // Using same logic as Smart EMI
     const safeMonthlyEmi = Math.max(0, disposableIncome * 0.4);
     const maxEmi = Math.max(0, disposableIncome * 0.5);
 
-    const maxAffordableLoan = safeMonthlyEmi > 0
-      ? safeMonthlyEmi * ((Math.pow(1 + rate, months) - 1) / (rate * Math.pow(1 + rate, months)))
-      : 0;
+    const maxAffordableLoan =
+      safeMonthlyEmi > 0
+        ? safeMonthlyEmi *
+          ((Math.pow(1 + rate, months) - 1) /
+            (rate * Math.pow(1 + rate, months)))
+        : 0;
 
     setEligResults({
       loanAmount: Math.round(maxAffordableLoan),
@@ -168,7 +171,12 @@ export default function Calculators() {
     let totalBuyingOutflow = 0;
     let currentRent = rvbRent;
     let breakEvenYear = -1;
-    const graphData: { year: number; Rent: number; EMI: number; AssetValue: number }[] = [];
+    const graphData: {
+      year: number;
+      Rent: number;
+      EMI: number;
+      AssetValue: number;
+    }[] = [];
 
     for (let i = 1; i <= smartTenure; i++) {
       totalRentOutflow += currentRent * 12;
@@ -732,7 +740,9 @@ export default function Calculators() {
                           type="number"
                           className="pr-12"
                           value={eligTenure}
-                          onChange={(e) => setEligTenure(Number(e.target.value))}
+                          onChange={(e) =>
+                            setEligTenure(Number(e.target.value))
+                          }
                         />
                         <div className="absolute top-0 right-0 h-full">
                           <Select
