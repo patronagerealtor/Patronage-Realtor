@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, Users, Target, CheckCircle2 } from "lucide-react";
 import { useEffect } from "react";
+import { useLocation } from "wouter";
 
 const stats = [
   { label: "Years Experience", value: "15+", icon: Award },
@@ -31,6 +32,7 @@ const team = [
 ];
 
 export default function AboutUs() {
+  const [, setLocation] = useLocation();
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -144,6 +146,7 @@ export default function AboutUs() {
             </Button>
             <Button
               size="lg"
+              onClick={() => setLocation("/properties")}
               variant="outline"
               className="px-12 bg-transparent text-primary-foreground border-primary-foreground hover:bg-primary-foreground hover:text-primary"
             >
