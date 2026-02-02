@@ -254,6 +254,11 @@ export default function Calculators() {
     if (emi > disposableIncome * 0.5) verdict = "Risky";
     else if (emi > safeMonthlyEmi) verdict = "Stretch";
 
+    // Update Rent vs Buy state when Smart EMI calculation runs
+    setRvbPrice(smartLoanAmount);
+    setRvbEmi(Math.round(emi));
+    setSmartTenure(smartTenure);
+
     // Simplified Prepayment Logic
     let revisedMonths = 0;
     let totalInterestWithPrepayment = 0;
