@@ -712,31 +712,44 @@ export default function Calculators() {
                     />
                   </div>
 
-                  {/* HYBRID TENURE INPUT */}
-                  <div className="space-y-2">
-                    <Label>Desired Tenure (Yrs)</Label>
-                    <div className="relative">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Interest (%)</Label>
                       <Input
                         type="number"
-                        className="pr-12"
-                        value={eligTenure}
-                        onChange={(e) => setEligTenure(Number(e.target.value))}
+                        step="0.1"
+                        value={eligInterestRate}
+                        onChange={(e) =>
+                          setEligInterestRate(Number(e.target.value))
+                        }
                       />
-                      <div className="absolute top-0 right-0 h-full">
-                        <Select
-                          onValueChange={(val) => setEligTenure(Number(val))}
-                        >
-                          <SelectTrigger className="h-full w-12 rounded-l-none border-l bg-muted/20 px-2 focus:ring-0 focus:ring-offset-0 flex items-center justify-center">
-                            <ChevronDown className="h-4 w-4 opacity-50" />
-                          </SelectTrigger>
-                          <SelectContent position="popper">
-                            {[15, 20, 25, 30].map((y) => (
-                              <SelectItem key={y} value={y.toString()}>
-                                {y} Years
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                    </div>
+                    {/* HYBRID TENURE INPUT */}
+                    <div className="space-y-2">
+                      <Label>Tenure (Yrs)</Label>
+                      <div className="relative">
+                        <Input
+                          type="number"
+                          className="pr-12"
+                          value={eligTenure}
+                          onChange={(e) => setEligTenure(Number(e.target.value))}
+                        />
+                        <div className="absolute top-0 right-0 h-full">
+                          <Select
+                            onValueChange={(val) => setEligTenure(Number(val))}
+                          >
+                            <SelectTrigger className="h-full w-12 rounded-l-none border-l bg-muted/20 px-2 focus:ring-0 focus:ring-offset-0 flex items-center justify-center">
+                              <ChevronDown className="h-4 w-4 opacity-50" />
+                            </SelectTrigger>
+                            <SelectContent position="popper">
+                              {[15, 20, 25, 30].map((y) => (
+                                <SelectItem key={y} value={y.toString()}>
+                                  {y} Years
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                       </div>
                     </div>
                   </div>
