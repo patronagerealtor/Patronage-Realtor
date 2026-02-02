@@ -1,10 +1,20 @@
-import { useEffect } from "react";
-import { useLocation } from "wouter";
+import { useEffect, useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const packages = [
   {
@@ -38,7 +48,10 @@ const packages = [
 ];
 
 export default function Interiors() {
-  const [, setLocation] = useLocation();
+  const [selectedPackage, setSelectedPackage] = useState<typeof packages[0] | null>(null);
+  const [houseType, setHouseType] = useState("2BHK");
+  const [totalArea, setTotalArea] = useState("");
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -84,12 +97,54 @@ export default function Interiors() {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button 
-                  className="w-full"
-                  onClick={() => setLocation(`/interiors/${pkg.name.toLowerCase()}`)}
-                >
-                  Select {pkg.name}
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="w-full" onClick={() => setSelectedPackage(pkg)}>
+                      Select {pkg.name}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className={`sm:max-w-[500px] border-2 shadow-2xl ${pkg.color}`}>
+                    <DialogHeader className="text-center">
+                      <DialogTitle className="text-3xl">Customize {pkg.name} Package</DialogTitle>
+                      <DialogDescription>
+                        Share your home details for a personalized quote.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-8 py-4">
+                      <div className="space-y-4">
+                        <Label className="text-lg font-semibold">House Type</Label>
+                        <RadioGroup 
+                          value={houseType} 
+                          onValueChange={setHouseType}
+                          className="grid grid-cols-3 gap-4"
+                        >
+                          {["1BHK", "2BHK", "3BHK"].map((type) => (
+                            <div key={type} className="flex items-center space-x-2 border p-4 rounded-xl hover:bg-white/50 transition-colors cursor-pointer bg-white/30">
+                              <RadioGroupItem value={type} id={type} />
+                              <Label htmlFor={type} className="cursor-pointer font-medium">{type}</Label>
+                            </div>
+                          ))}
+                        </RadioGroup>
+                      </div>
+
+                      <div className="space-y-4">
+                        <Label htmlFor="area" className="text-lg font-semibold">Total Area (sq.ft.)</Label>
+                        <Input
+                          id="area"
+                          type="number"
+                          placeholder="e.g. 1200"
+                          value={totalArea}
+                          onChange={(e) => setTotalArea(e.target.value)}
+                          className="text-lg py-6 rounded-xl bg-white/50 border-white/50"
+                        />
+                      </div>
+
+                      <Button className="w-full text-lg py-6 rounded-xl mt-4">
+                        Get Estimated Quote
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </CardFooter>
             </Card>
           ))}
