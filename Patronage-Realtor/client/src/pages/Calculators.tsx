@@ -44,6 +44,7 @@ export default function Calculators() {
   // --- 1. Loan Eligibility State ---
   const [eligIncome, setEligIncome] = useState(100000);
   const [eligEmi, setEligEmi] = useState(0);
+  const [eligInterestRate, setEligInterestRate] = useState(8.5);
   const [eligTenure, setEligTenure] = useState(20);
   const [eligResults, setEligResults] = useState({
     loanAmount: 0,
@@ -118,10 +119,10 @@ export default function Calculators() {
   // --- Calculation Logic ---
 
   const calculateEligibility = () => {
-    if (eligIncome <= 0 || eligTenure <= 0) return;
+    if (eligInterestRate <= 0 || eligIncome <= 0 || eligTenure <= 0) return;
 
     // Use same rate as Smart EMI (8.5% default)
-    const rate = 0.085 / 12;
+    const rate = eligInterestRate / 12 / 100;
     const months = eligTenure * 12;
 
     const disposableIncome = Math.max(0, eligIncome - eligEmi);
@@ -134,10 +135,8 @@ export default function Calculators() {
       ? safeMonthlyEmi * ((Math.pow(1 + rate, months) - 1) / (rate * Math.pow(1 + rate, months)))
       : 0;
 
-    const absoluteMaxLoan = maxEmi * ((Math.pow(1 + rate, months) - 1) / (rate * Math.pow(1 + rate, months)));
-
     setEligResults({
-      loanAmount: Math.round(absoluteMaxLoan),
+      loanAmount: Math.round(maxAffordableLoan),
       monthlyEmi: Math.round(safeMonthlyEmi),
       maxEmi: Math.round(maxEmi),
     });
