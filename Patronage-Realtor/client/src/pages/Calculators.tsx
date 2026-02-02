@@ -254,10 +254,15 @@ export default function Calculators() {
     if (emi > disposableIncome * 0.5) verdict = "Risky";
     else if (emi > safeMonthlyEmi) verdict = "Stretch";
 
-    // Update Rent vs Buy state when Smart EMI calculation runs
+    // Update Shared state when Smart EMI calculation runs
+    setEligIncome(smartIncome);
+    setEligEmi(smartExistingEmi);
+    setEligInterestRate(smartInterestRate);
+    setEligTenure(smartTenure);
+
     setRvbPrice(smartLoanAmount);
     setRvbEmi(Math.round(emi));
-    setSmartTenure(smartTenure);
+    setRvbHorizon(Math.min(smartTenure, 30)); // Sync horizon as well if appropriate
 
     // Simplified Prepayment Logic
     let revisedMonths = 0;
