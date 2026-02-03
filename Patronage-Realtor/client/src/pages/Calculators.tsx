@@ -67,6 +67,7 @@ export default function Calculators() {
 
   // --- 2. Ownership Cost State ---
   const [costPrice, setCostPrice] = useState(5000000);
+  const [costPropertyStatus, setCostPropertyStatus] = useState("under-construction");
   const [costParking, setCostParking] = useState("no");
   const [costResults, setCostResults] = useState({
     stampDuty: 0,
@@ -160,7 +161,7 @@ export default function Calculators() {
 
   const calculateOwnership = () => {
     const stampDuty = costPrice * 0.07;
-    const gst = costPrice * 0.05;
+    const gst = costPropertyStatus === "under-construction" ? costPrice * 0.05 : 0;
     const parking = costParking === "yes" ? 300000 : 0;
 
     const total = Math.round(costPrice + stampDuty + gst + parking);
@@ -325,6 +326,7 @@ export default function Calculators() {
     eligEmi,
     eligTenure,
     costPrice,
+    costPropertyStatus,
     costParking,
     rvbRent,
     rvbPrice,
@@ -931,6 +933,23 @@ export default function Calculators() {
                         handleCurrencyInput(e.target.value, setCostPrice)
                       }
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Property Status</Label>
+                    <RadioGroup
+                      value={costPropertyStatus}
+                      onValueChange={setCostPropertyStatus}
+                      className="flex gap-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="under-construction" id="uc" />
+                        <Label htmlFor="uc">Under Construction</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="ready-to-move" id="rm" />
+                        <Label htmlFor="rm">Ready to Move</Label>
+                      </div>
+                    </RadioGroup>
                   </div>
                   <div className="space-y-2">
                     <Label>Car Parking?</Label>

@@ -1,0 +1,95 @@
+You are working in an existing Next.js + React (TypeScript) project.
+
+File to modify:
+calculator.tsx
+
+Context:
+- The Ownership Cost calculator already exists and works.
+- Currently GST (5%) is applied unconditionally.
+- In real-world Indian property transactions:
+  - GST applies ONLY to under-construction properties
+  - GST = 0 for ready-to-move properties
+
+IMPORTANT CONSTRAINTS:
+❌ DO NOT change styling, colors, spacing, or layout
+❌ DO NOT modify other calculators (Smart EMI, Rent vs Buy, Eligibility)
+❌ DO NOT refactor existing logic beyond what is necessary
+❌ DO NOT remove any existing functionality
+
+------------------------------------------------
+GOAL
+------------------------------------------------
+
+Make GST calculation accurate by adding a Property Status selector
+and applying GST conditionally.
+
+------------------------------------------------
+REQUIRED CHANGES
+------------------------------------------------
+
+1. ADD PROPERTY STATUS STATE
+Add a new state in Ownership Cost section:
+
+- Name: costPropertyStatus
+- Type: string
+- Default value: "under-construction"
+
+Allowed values:
+- "under-construction"
+- "ready-to-move"
+
+------------------------------------------------
+2. ADD PROPERTY STATUS INPUT (UI)
+In the Ownership Cost input card:
+
+- Add a new input section ABOVE the "Car Parking?" option
+- Label text:
+  "Property Status"
+
+- Use RadioGroup (same component already used for parking)
+- Two options:
+  ○ Under Construction (GST applicable)
+  ○ Ready to Move (No GST)
+
+- Match existing spacing and typography
+- No new colors or styles
+- Keep layout consistent with other inputs
+
+------------------------------------------------
+3. UPDATE GST CALCULATION LOGIC
+Modify calculateOwnership():
+
+Current:
+  gst = costPrice * 0.05
+
+Change to:
+  gst =
+    costPropertyStatus === "under-construction"
+      ? costPrice * 0.05
+      : 0
+
+------------------------------------------------
+4. UPDATE COST BREAKDOWN
+Ensure:
+- GST value becomes ₹0 when "Ready to Move" is selected
+- Total Ownership Cost updates correctly
+- Breakdown chart/values reflect updated GST
+
+------------------------------------------------
+5. UPDATE useEffect DEPENDENCIES
+- Add costPropertyStatus to calculateOwnership dependencies
+- Ensure recalculation happens when status changes
+
+------------------------------------------------
+FINAL VALIDATION CHECKLIST
+------------------------------------------------
+
+Before finishing, confirm:
+✅ GST applies only when "Under Construction" is selected
+✅ Ready-to-move properties show zero GST
+✅ No visual changes outside Ownership Cost section
+✅ Parking logic still works
+✅ No console errors
+✅ Total cost updates instantly when toggling status
+
+Proceed carefully and make ONLY the above changes.
