@@ -67,16 +67,12 @@ export default function Calculators() {
 
   // --- 2. Ownership Cost State ---
   const [costPrice, setCostPrice] = useState(5000000);
-  const [costSqFt, setCostSqFt] = useState("");
-  const [costArea, setCostArea] = useState("");
-  const [costGender, setCostGender] = useState("male");
   const [costPropertyStatus, setCostPropertyStatus] = useState("under-construction");
-  const [costRegistration, setCostRegistration] = useState(0);
-  const [costAdvocate, setCostAdvocate] = useState(0);
+  const [costParking, setCostParking] = useState("no");
   const [costResults, setCostResults] = useState({
     stampDuty: 0,
     gst: 0,
-    tds: 0,
+    parking: 0,
     total: 0,
     breakdown: [] as { name: string; value: number }[],
   });
@@ -164,30 +160,22 @@ export default function Calculators() {
   };
 
   const calculateOwnership = () => {
-    const stampDutyRate = costGender === "female" ? 0.06 : 0.07;
-    const stampDuty = costPrice * stampDutyRate;
+    const stampDuty = costPrice * 0.07;
     const gst = costPropertyStatus === "under-construction" ? costPrice * 0.05 : 0;
-    const tds = costPrice * 0.01;
+    const parking = costParking === "yes" ? 300000 : 0;
 
-    const total = Math.round(
-      costPrice + stampDuty + gst + tds + costRegistration + costAdvocate,
-    );
+    const total = Math.round(costPrice + stampDuty + gst + parking);
 
     setCostResults({
       stampDuty: Math.round(stampDuty),
       gst: Math.round(gst),
-      tds: Math.round(tds),
+      parking,
       total,
       breakdown: [
         { name: "Base Price", value: costPrice },
-        {
-          name: `Stamp Duty (${costGender === "female" ? "6%" : "7%"})`,
-          value: Math.round(stampDuty),
-        },
-        { name: "GST (5%)", value: Math.round(gst) },
-        { name: "TDS (1%)", value: Math.round(tds) },
-        { name: "Registration", value: costRegistration },
-        { name: "Advocate", value: costAdvocate },
+        { name: "Stamp Duty", value: Math.round(stampDuty) },
+        { name: "GST", value: Math.round(gst) },
+        { name: "Parking", value: parking },
       ],
     });
   };
@@ -339,9 +327,7 @@ export default function Calculators() {
     eligTenure,
     costPrice,
     costPropertyStatus,
-    costGender,
-    costRegistration,
-    costAdvocate,
+    costParking,
     rvbRent,
     rvbPrice,
     rvbEmi,
@@ -939,35 +925,6 @@ export default function Calculators() {
             <div className="grid lg:grid-cols-12 gap-6">
               <Card className="lg:col-span-5 p-6 space-y-6">
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Cost per Sq.ft (₹)</Label>
-                      <Input
-                        value={costSqFt}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setCostSqFt(val);
-                          if (val && costArea) {
-                            setCostPrice(Number(val) * Number(costArea));
-                          }
-                        }}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Area (Sq.ft)</Label>
-                      <Input
-                        value={costArea}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setCostArea(val);
-                          if (val && costSqFt) {
-                            setCostPrice(Number(val) * Number(costSqFt));
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
-
                   <div className="space-y-2">
                     <Label>Base Property Price (₹)</Label>
                     <Input
@@ -977,25 +934,6 @@ export default function Calculators() {
                       }
                     />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label>Buyer Gender</Label>
-                    <RadioGroup
-                      value={costGender}
-                      onValueChange={setCostGender}
-                      className="flex gap-4"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="male" id="male" />
-                        <Label htmlFor="male">Male</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="female" id="female" />
-                        <Label htmlFor="female">Female</Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
                   <div className="space-y-2">
                     <Label>Property Status</Label>
                     <RadioGroup
@@ -1013,26 +951,22 @@ export default function Calculators() {
                       </div>
                     </RadioGroup>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Registration Cost (₹)</Label>
-                      <Input
-                        value={costRegistration.toLocaleString("en-IN")}
-                        onChange={(e) =>
-                          handleCurrencyInput(e.target.value, setCostRegistration)
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Advocate Cost (₹)</Label>
-                      <Input
-                        value={costAdvocate.toLocaleString("en-IN")}
-                        onChange={(e) =>
-                          handleCurrencyInput(e.target.value, setCostAdvocate)
-                        }
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label>Car Parking?</Label>
+                    <RadioGroup
+                      value={costParking}
+                      onValueChange={setCostParking}
+                      className="flex gap-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="yes" id="py" />
+                        <Label htmlFor="py">Yes (+₹3L)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="no" id="pn" />
+                        <Label htmlFor="pn">No</Label>
+                      </div>
+                    </RadioGroup>
                   </div>
                 </div>
               </Card>
@@ -1049,41 +983,21 @@ export default function Calculators() {
                   </div>
                   <div className="space-y-3 pt-6 border-t">
                     <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                      <span>Base Price</span>
-                      <span className="font-semibold">
-                        {formatCurrency(costPrice)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                      <span>Stamp Duty ({costGender === "female" ? "6%" : "7%"})</span>
+                      <span>Stamp Duty (7%)</span>
                       <span className="font-semibold">
                         {formatCurrency(costResults.stampDuty)}
                       </span>
                     </div>
-                    {costResults.gst > 0 && (
-                      <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                        <span>GST (5%)</span>
-                        <span className="font-semibold">
-                          {formatCurrency(costResults.gst)}
-                        </span>
-                      </div>
-                    )}
                     <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                      <span>TDS (1%)</span>
+                      <span>GST (5%)</span>
                       <span className="font-semibold">
-                        {formatCurrency(costResults.tds)}
+                        {formatCurrency(costResults.gst)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                      <span>Registration</span>
+                      <span>Parking</span>
                       <span className="font-semibold">
-                        {formatCurrency(costRegistration)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                      <span>Advocate Cost</span>
-                      <span className="font-semibold">
-                        {formatCurrency(costAdvocate)}
+                        {formatCurrency(costResults.parking)}
                       </span>
                     </div>
                   </div>
