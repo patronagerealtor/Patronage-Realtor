@@ -1,0 +1,159 @@
+You are working in an existing Next.js + React (TypeScript) project.
+
+File to modify:
+calculator.tsx
+
+Context:
+- The project contains multiple calculators inside Tabs.
+- The Ownership Cost calculator already exists and works.
+- We must enhance ONLY the Ownership Cost calculator.
+- Other calculators (Smart EMI, Rent vs Buy, Eligibility) must remain untouched.
+
+IMPORTANT CONSTRAINTS:
+❌ DO NOT modify logic, UI, layout, or state of other calculators
+❌ DO NOT change global styling, theme, or colors
+❌ DO NOT refactor unrelated code
+✅ Keep UI style consistent and professional
+
+------------------------------------------------
+GOAL
+------------------------------------------------
+
+Make the Ownership Cost calculator more accurate and realistic
+for Indian real-estate transactions, while keeping the UI clean.
+
+------------------------------------------------
+REQUIRED FUNCTIONAL CHANGES
+------------------------------------------------
+
+### 1️⃣ BUYER GENDER → STAMP DUTY LOGIC
+
+Add a new input:
+
+- Label: "Buyer Gender"
+- Input type: RadioGroup
+- Options:
+  ○ Male
+  ○ Female
+- Default: Male
+
+Stamp Duty logic:
+- Male  → 7%
+- Female → 6%
+
+Replace existing stamp duty calculation with:
+stampDuty =
+  gender === "female"
+    ? propertyPrice * 0.06
+    : propertyPrice * 0.07
+
+------------------------------------------------
+### 2️⃣ ADD FIXED TDS (1%)
+
+Add TDS calculation:
+- TDS = 1% of property price
+- Always applicable (fixed)
+
+tds = propertyPrice * 0.01
+
+Display TDS as a separate line item in breakdown.
+
+------------------------------------------------
+### 3️⃣ COST PER SQ.FT + AREA INPUTS (MANUAL)
+
+Add two new manual input fields:
+
+1. Cost per Sq.ft (₹)
+2. Area (Sq.ft)
+
+Rules:
+- Both fields are optional but editable
+- If BOTH are filled:
+  → Auto-calculate Base Property Price:
+     propertyPrice = costPerSqFt * area
+- If user edits Property Price directly:
+  → Do NOT override Cost/Sq.ft or Area
+- Keep logic simple and predictable
+
+------------------------------------------------
+### 4️⃣ REGISTRATION & ADVOCATE COST (USER INPUT)
+
+Add two new currency input fields:
+
+1. Registration Cost (₹)
+2. Advocate Cost (₹)
+
+Rules:
+- Manual user inputs
+- Default value: 0
+- Always added to total ownership cost
+
+------------------------------------------------
+### 5️⃣ REMOVE CAR PARKING COMPLETELY
+
+- Remove Car Parking radio buttons
+- Remove parking state
+- Remove parking calculation
+- Remove parking from breakdown
+- Ensure no unused variables remain
+
+------------------------------------------------
+OWNERSHIP COST FORMULA (FINAL)
+
+Total Ownership Cost =
+Base Property Price
++ Stamp Duty (gender-based)
++ GST (only if under construction — already implemented)
++ TDS (1%)
++ Registration Cost
++ Advocate Cost
+
+------------------------------------------------
+UI REQUIREMENTS
+------------------------------------------------
+
+- Keep existing Card layout
+- Keep same spacing, fonts, colors
+- Add new fields in logical order:
+  1. Cost per Sq.ft
+  2. Area
+  3. Property Price
+  4. Buyer Gender
+  5. Property Status
+  6. Registration Cost
+  7. Advocate Cost
+
+- Breakdown card must show:
+  - Base Price
+  - Stamp Duty (% shown)
+  - GST (if applicable)
+  - TDS (1%)
+  - Registration Cost
+  - Advocate Cost
+  - TOTAL OWNERSHIP COST (highlighted)
+
+------------------------------------------------
+STATE & EFFECTS
+------------------------------------------------
+
+- Add required state variables only for Ownership Cost
+- Update calculateOwnership() accordingly
+- Add new dependencies to useEffect ONLY if related to ownership
+- Ensure recalculation happens instantly on any change
+
+------------------------------------------------
+FINAL VALIDATION CHECKLIST
+------------------------------------------------
+
+Before completing, confirm:
+✅ Stamp duty changes based on gender
+✅ GST applies only to under-construction
+✅ TDS always applied
+✅ Cost/sq.ft × Area works correctly
+✅ Manual price override works
+✅ Parking is completely removed
+✅ Other calculators unchanged
+✅ No console errors
+✅ UI looks consistent and professional
+
+Proceed carefully and implement ONLY the above changes.
