@@ -1,26 +1,28 @@
 import { Button } from "@/components/ui/button";
-import { PlaceholderImage } from "@/components/shared/PlaceholderImage";
 import { ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
+import { BackgroundPaths } from "@/components/ui/background-paths";
 
 export function Hero() {
   const [, setLocation] = useLocation();
+
   return (
     <section className="relative w-full py-12 md:py-20 lg:py-24 overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url("/Hero/hero-background.png")' }}
-      >
-        <div className="absolute inset-0 bg-background/65" />
+      {/* Animated Background Paths */}
+      <div className="absolute inset-0 z-0">
+        <BackgroundPaths />
+        {/* Soft overlay for readability */}
+        <div className="absolute inset-0 bg-background/40" />
       </div>
-      <div className="container relative z-10 mx-auto px-4">
+
+      {/* Hero Content */}
+      <div className="container relative z-20 mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Column - Text Content */}
           <div className="space-y-8 max-w-2xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight text-foreground leading-[1.1]">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight leading-[1.1]">
               Find a place you will call{" "}
-              <span className="text-muted-foreground/70 decoration-4 decoration-border underline-offset-4">
+              <span className="text-muted-foreground/70 underline-offset-4">
                 home
               </span>
             </h1>
@@ -35,24 +37,23 @@ export function Hero() {
                 size="lg"
                 onClick={() => setLocation("/properties")}
                 className="h-14 px-8 text-base shadow-sm
-                transition-all duration-300 ease-out
-                hover:-translate-y-1 hover:shadow-lg
-                active:translate-y-0.5"
-                data-testid="button-explore"
+                  transition-all duration-300 ease-out
+                  hover:-translate-y-1 hover:shadow-lg
+                  active:translate-y-0.5"
               >
                 Explore Properties <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
+
               <Button
                 size="lg"
                 variant="outline"
                 className="h-14 px-8 text-base border-2"
-                data-testid="button-contact"
               >
                 Contact Us
               </Button>
             </div>
 
-            {/* Trust Indicators / Stats (Optional enhancement for wireframe) */}
+            {/* Trust Indicators */}
             <div className="grid grid-cols-3 gap-8 pt-8 border-t border-border mt-8">
               <div>
                 <p className="text-2xl font-bold font-heading">1.2k+</p>
@@ -81,7 +82,10 @@ export function Hero() {
             <img
               src="/Hero/hero-1.png"
               alt="Modern Luxury Villa"
-              className="w-full h-[400px] md:h-[500px] lg:h-[600px] object-cover shadow-xl border-4 border-background rounded-lg transition-transform duration-500 ease-out hover:scale-[1.02] hover:shadow-2xl"
+              className="w-full h-[400px] md:h-[500px] lg:h-[600px]
+                object-cover rounded-lg border-4 border-background
+                shadow-xl transition-transform duration-500 ease-out
+                hover:scale-[1.02] hover:shadow-2xl"
             />
           </div>
         </div>

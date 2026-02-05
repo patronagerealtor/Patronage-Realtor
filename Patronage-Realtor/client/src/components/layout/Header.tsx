@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Menu, X, ChevronDown, User, Search, MapPin } from "lucide-react";
+import { Menu, MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -11,7 +11,6 @@ import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
@@ -19,176 +18,126 @@ import {
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
+  const navLinkClass =
+    "relative px-3 py-2 text-sm font-medium transition-colors hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all hover:after:w-full";
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="container mx-auto px-4 h-16 flex items-center">
         {/* Logo */}
-        <a
-          href="/"
-          className="flex items-center gap-2 font-heading font-bold text-xl tracking-tight hover:opacity-90 transition-opacity"
-          data-testid="logo"
-        >
+        <a href="/" className="flex items-center gap-2">
           <img
             src="/logo/logo-full.png"
             alt="Patronage Realtor"
             className="h-15 w-auto object-contain"
-            data-testid="img-logo"
           />
         </a>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-6">
+        {/* Desktop Navigation (CENTERED) */}
+        <div className="hidden md:flex flex-1 justify-center">
           <NavigationMenu>
-            <NavigationMenuList>
+            <NavigationMenuList className="flex gap-6">
+              {/* Properties */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-transparent font-medium">
                   Properties
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[400px] gap-3 p-4 md:w-[600px] md:grid-cols-2 lg:w-[700px]">
+                  <ul className="grid w-[400px] gap-3 p-4 md:w-[600px] md:grid-cols-2">
                     <li>
                       <a
                         href="/#featured-properties"
-                        onClick={(e) => {
-                          if (window.location.pathname === "/") {
-                            e.preventDefault();
-                            const el = document.getElementById(
-                              "featured-properties",
-                            );
-                            if (el) el.scrollIntoView({ behavior: "smooth" });
-                          }
-                        }}
-                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md hover:bg-secondary/80 transition-colors"
+                        className="flex flex-col rounded-md bg-secondary p-5 hover:bg-secondary/80 transition-colors"
                       >
                         <MapPin className="h-4 w-4 mb-2" />
-                        <div className="mb-2 text-lg font-medium">
+                        <span className="font-medium">
                           Featured Properties
-                        </div>
-                        <p className="text-sm leading-tight text-muted-foreground">
-                          Discover our latest luxury developments.
+                        </span>
+                        <p className="text-sm text-muted-foreground">
+                          Discover premium listings
                         </p>
                       </a>
                     </li>
                     <li>
                       <a
                         href="/properties"
-                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-secondary p-6 no-underline outline-none focus:shadow-md hover:bg-secondary/80 transition-colors"
+                        className="flex flex-col rounded-md bg-secondary p-5 hover:bg-secondary/80 transition-colors"
                       >
                         <Search className="h-4 w-4 mb-2" />
-                        <div className="mb-2 text-lg font-medium">Explore</div>
-                        <p className="text-sm leading-tight text-muted-foreground">
-                          Find your perfect home in our listings.
+                        <span className="font-medium">Explore</span>
+                        <p className="text-sm text-muted-foreground">
+                          Browse all properties
                         </p>
                       </a>
                     </li>
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
+
+              {/* Other links */}
               <NavigationMenuItem>
-                <a
-                  href="/interiors"
-                  className="bg-transparent font-medium group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline"
-                >
+                <a href="/webinars" className={navLinkClass}>
+                  Webinar
+                </a>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <a href="/calculators" className={navLinkClass}>
+                  Calculators
+                </a>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <a href="/interiors" className={navLinkClass}>
                   Interiors
                 </a>
               </NavigationMenuItem>
+
               <NavigationMenuItem>
-                <a
-                  href="/about-us"
-                  className="bg-transparent font-medium group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline"
-                >
+                <a href="/about-us" className={navLinkClass}>
                   About Us
-                </a>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <a
-                  href="/calculators"
-                  className="bg-transparent font-medium group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline"
-                >
-                  Calculators
                 </a>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
         </div>
 
-        {/* Desktop Actions */}
-        <div className="hidden md:flex items-center gap-4">
-          <Button variant="outline" className="gap-2">
+        {/* Right Action */}
+        <div className="hidden md:flex items-center">
+          <Button className="transition-all hover:scale-105 hover:shadow-md">
             Contact Us
-          </Button>
-          <Button className="shadow-sm" data-testid="button-book-call">
-            Book a Call
           </Button>
         </div>
 
         {/* Mobile Menu */}
-        <div className="md:hidden">
+        <div className="md:hidden ml-auto">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
                 <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-              <SheetTitle className="font-heading font-bold text-xl mb-6">
+            <SheetContent side="right" className="w-[300px]">
+              <SheetTitle className="mb-6 text-xl font-heading">
                 Menu
               </SheetTitle>
               <nav className="flex flex-col gap-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wider mb-2">
-                    Featured Properties
-                  </h4>
-                  <a
-                    href="/properties"
-                    className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50"
-                  >
-                    Explore
-                  </a>
-                  <a
-                    href="/#featured-properties"
-                    onClick={() => {
-                      setIsOpen(false);
-                      if (window.location.pathname === "/") {
-                        const el = document.getElementById(
-                          "featured-properties",
-                        );
-                        if (el) el.scrollIntoView({ behavior: "smooth" });
-                      }
-                    }}
-                    className="block py-2 text-lg font-medium hover:text-primary/70 border-b border-border/50"
-                  >
-                    Featured
-                  </a>
-                </div>
-
-                <div className="space-y-2 mt-4">
-                  <a
-                    href="/interiors"
-                    className="block py-2 text-lg font-medium hover:text-primary/70"
-                  >
-                    Interiors
-                  </a>
-                  <a
-                    href="/about-us"
-                    className="block py-2 text-lg font-medium hover:text-primary/70"
-                  >
-                    About Us
-                  </a>
-                  <a
-                    href="#"
-                    className="block py-2 text-lg font-medium hover:text-primary/70"
-                  >
-                    Contact Us
-                  </a>
-                </div>
-
-                <div className="mt-8">
-                  <Button className="w-full mb-3" size="lg">
-                    Book a Call
-                  </Button>
-                </div>
+                <a href="/properties" className="text-lg font-medium">
+                  Properties
+                </a>
+                <a href="/webinars" className="text-lg font-medium">
+                  Webinar
+                </a>
+                <a href="/calculators" className="text-lg font-medium">
+                  Calculators
+                </a>
+                <a href="/interiors" className="text-lg font-medium">
+                  Interiors
+                </a>
+                <a href="/about-us" className="text-lg font-medium">
+                  About Us
+                </a>
+                <Button className="mt-6 w-full">Contact Us</Button>
               </nav>
             </SheetContent>
           </Sheet>
