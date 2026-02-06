@@ -26,12 +26,45 @@ export function Hero() {
             transition={{ duration: 0.8 }}
             className="max-w-4xl"
           >
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold tracking-tight leading-[1.1]">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold tracking-tight leading-[1.15]">
               Find a place you will call{" "}
-              <span className="text-primary underline-offset-8 decoration-primary/30 decoration-2 underline">
-                home
-              </span>
+
+              <button
+                className="group relative inline-flex items-center
+                           px-4 py-1 rounded-full
+                           transition-transform duration-500 hover:scale-105"
+              >
+                {/* TEXT */}
+                <span
+                  className="relative z-10 text-primary
+                             transition-all duration-500
+                             group-hover:tracking-wider"
+                  style={{
+                    textShadow: "0 0 0px #133E45",
+                  }}
+                >
+                  home
+                </span>
+
+                {/* TEXT GLOW (TEXT-SHADOW BASED) */}
+                <span
+                  className="absolute inset-0 flex items-center justify-center
+                             opacity-0 transition-opacity duration-500
+                             group-hover:opacity-100 pointer-events-none"
+                  style={{
+                    color: "#133E45",
+                    textShadow:
+                      "0 0 8px #133E45, 0 0 16px #133E45, 0 0 32px #133E45",
+                  }}
+                >
+                  home
+                </span>
+              </button>
             </h1>
+
+
+
+
           </motion.div>
 
           {/* Partitioned Content */}
