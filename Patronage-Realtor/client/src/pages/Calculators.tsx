@@ -119,8 +119,14 @@ export default function Calculators() {
 
   // Helper to handle currency inputs safely
   const handleCurrencyInput = (val: string, setter: (v: number) => void) => {
-    const numberVal = Number(val.replace(/,/g, ""));
-    if (!isNaN(numberVal)) setter(numberVal);
+    // Remove all non-numeric characters except for the decimal point
+    const cleanVal = val.replace(/[^0-9.]/g, "");
+    const numberVal = parseFloat(cleanVal);
+    if (!isNaN(numberVal)) {
+      setter(numberVal);
+    } else if (cleanVal === "") {
+      setter(0);
+    }
   };
 
   const formatCurrency = (val: number) =>
@@ -128,7 +134,7 @@ export default function Calculators() {
       style: "currency",
       currency: "INR",
       maximumFractionDigits: 0,
-    }).format(val);
+    }).format(val || 0);
 
   // --- Calculation Logic ---
 
@@ -383,7 +389,8 @@ export default function Calculators() {
                   <div className="space-y-2">
                     <Label>Loan Amount (₹)</Label>
                     <Input
-                      value={smartLoanAmount.toLocaleString("en-IN")}
+                      type="text"
+                      value={smartLoanAmount === 0 ? "" : smartLoanAmount.toLocaleString("en-IN")}
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setSmartLoanAmount)
                       }
@@ -393,12 +400,14 @@ export default function Calculators() {
                     <div className="space-y-2">
                       <Label>Interest (%)</Label>
                       <Input
-                        type="number"
-                        step="0.1"
-                        value={smartInterestRate}
-                        onChange={(e) =>
-                          setSmartInterestRate(Number(e.target.value))
-                        }
+                        type="text"
+                        value={smartInterestRate === 0 ? "" : smartInterestRate}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                            setSmartInterestRate(val === "" ? 0 : Number(val));
+                          }
+                        }}
                       />
                     </div>
                     {/* HYBRID TENURE INPUT */}
@@ -406,12 +415,15 @@ export default function Calculators() {
                       <Label>Tenure (Yrs)</Label>
                       <div className="relative">
                         <Input
-                          type="number"
+                          type="text"
                           className="pr-12"
-                          value={smartTenure}
-                          onChange={(e) =>
-                            setSmartTenure(Number(e.target.value))
-                          }
+                          value={smartTenure === 0 ? "" : smartTenure}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === "" || /^\d*$/.test(val)) {
+                              setSmartTenure(val === "" ? 0 : Number(val));
+                            }
+                          }}
                         />
                         <div className="absolute top-0 right-0 h-full">
                           <Select
@@ -436,7 +448,8 @@ export default function Calculators() {
                   <div className="space-y-2">
                     <Label>Net Monthly Income (₹)</Label>
                     <Input
-                      value={smartIncome.toLocaleString("en-IN")}
+                      type="text"
+                      value={smartIncome === 0 ? "" : smartIncome.toLocaleString("en-IN")}
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setSmartIncome)
                       }
@@ -445,7 +458,8 @@ export default function Calculators() {
                   <div className="space-y-2">
                     <Label>Monthly Prepayment (₹)</Label>
                     <Input
-                      value={smartPrepayment.toLocaleString("en-IN")}
+                      type="text"
+                      value={smartPrepayment === 0 ? "" : smartPrepayment.toLocaleString("en-IN")}
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setSmartPrepayment)
                       }
@@ -598,7 +612,8 @@ export default function Calculators() {
                   <div className="space-y-2">
                     <Label>Monthly Rent (₹)</Label>
                     <Input
-                      value={rvbRent.toLocaleString("en-IN")}
+                      type="text"
+                      value={rvbRent === 0 ? "" : rvbRent.toLocaleString("en-IN")}
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setRvbRent)
                       }
@@ -607,7 +622,8 @@ export default function Calculators() {
                   <div className="space-y-2">
                     <Label>Property Price (₹)</Label>
                     <Input
-                      value={rvbPrice.toLocaleString("en-IN")}
+                      type="text"
+                      value={rvbPrice === 0 ? "" : rvbPrice.toLocaleString("en-IN")}
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setRvbPrice)
                       }
@@ -616,7 +632,8 @@ export default function Calculators() {
                   <div className="space-y-2">
                     <Label>Expected EMI (₹)</Label>
                     <Input
-                      value={rvbEmi.toLocaleString("en-IN")}
+                      type="text"
+                      value={rvbEmi === 0 ? "" : rvbEmi.toLocaleString("en-IN")}
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setRvbEmi)
                       }
@@ -797,7 +814,8 @@ export default function Calculators() {
                   <div className="space-y-2">
                     <Label>Net Monthly Income (₹)</Label>
                     <Input
-                      value={eligIncome.toLocaleString("en-IN")}
+                      type="text"
+                      value={eligIncome === 0 ? "" : eligIncome.toLocaleString("en-IN")}
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setEligIncome)
                       }
@@ -806,7 +824,8 @@ export default function Calculators() {
                   <div className="space-y-2">
                     <Label>Current EMIs (₹)</Label>
                     <Input
-                      value={eligEmi.toLocaleString("en-IN")}
+                      type="text"
+                      value={eligEmi === 0 ? "" : eligEmi.toLocaleString("en-IN")}
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setEligEmi)
                       }
@@ -817,12 +836,14 @@ export default function Calculators() {
                     <div className="space-y-2">
                       <Label>Interest (%)</Label>
                       <Input
-                        type="number"
-                        step="0.1"
-                        value={eligInterestRate}
-                        onChange={(e) =>
-                          setEligInterestRate(Number(e.target.value))
-                        }
+                        type="text"
+                        value={eligInterestRate === 0 ? "" : eligInterestRate}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                            setEligInterestRate(val === "" ? 0 : Number(val));
+                          }
+                        }}
                       />
                     </div>
                     {/* HYBRID TENURE INPUT */}
@@ -830,12 +851,15 @@ export default function Calculators() {
                       <Label>Tenure (Yrs)</Label>
                       <div className="relative">
                         <Input
-                          type="number"
+                          type="text"
                           className="pr-12"
-                          value={eligTenure}
-                          onChange={(e) =>
-                            setEligTenure(Number(e.target.value))
-                          }
+                          value={eligTenure === 0 ? "" : eligTenure}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === "" || /^\d*$/.test(val)) {
+                              setEligTenure(val === "" ? 0 : Number(val));
+                            }
+                          }}
                         />
                         <div className="absolute top-0 right-0 h-full">
                           <Select
@@ -928,7 +952,8 @@ export default function Calculators() {
                   <div className="space-y-2">
                     <Label>Base Property Price (₹)</Label>
                     <Input
-                      value={costPrice.toLocaleString("en-IN")}
+                      type="text"
+                      value={costPrice === 0 ? "" : costPrice.toLocaleString("en-IN")}
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setCostPrice)
                       }
