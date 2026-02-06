@@ -1,92 +1,90 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Calculator } from "lucide-react";
 import { useLocation } from "wouter";
 import { BackgroundPaths } from "@/components/ui/background-paths";
+import { motion } from "framer-motion";
 
 export function Hero() {
   const [, setLocation] = useLocation();
 
   return (
-    <section className="relative w-full py-12 md:py-20 lg:py-24 overflow-hidden">
+    <section className="relative w-full py-20 md:py-32 lg:py-40 overflow-hidden flex items-center justify-center min-h-[70vh]">
       {/* Animated Background Paths */}
       <div className="absolute inset-0 z-0">
         <BackgroundPaths />
         {/* Soft overlay for readability */}
-        <div className="absolute inset-0 bg-background/40" />
+        <div className="absolute inset-0 bg-background/20" />
       </div>
 
       {/* Hero Content */}
       <div className="container relative z-20 mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left Column - Text Content */}
-          <div className="space-y-8 max-w-2xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight leading-[1.1]">
+        <div className="flex flex-col items-center text-center space-y-16">
+          {/* Main Heading */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="max-w-4xl"
+          >
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold tracking-tight leading-[1.1]">
               Find a place you will call{" "}
-              <span className="text-muted-foreground/70 underline-offset-4">
+              <span className="text-primary underline-offset-8 decoration-primary/30 decoration-2 underline">
                 home
               </span>
             </h1>
+          </motion.div>
 
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-lg">
-              Discover a curated selection of premium properties, luxury
-              apartments, and modern homes designed for your lifestyle.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+          {/* Partitioned Content */}
+          <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-8 md:gap-12">
+            
+            {/* Left Side - Properties */}
+            <motion.div 
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="flex flex-col items-center md:items-end space-y-4"
+            >
+              <p className="text-lg text-muted-foreground font-medium italic">
+                Discover your perfect sanctuary today.
+              </p>
               <Button
                 size="lg"
                 onClick={() => setLocation("/properties")}
-                className="h-14 px-8 text-base shadow-sm
+                className="h-16 px-10 text-lg rounded-full shadow-xl
                   transition-all duration-300 ease-out
-                  hover:-translate-y-1 hover:shadow-lg
-                  active:translate-y-0.5"
+                  hover:-translate-y-1.5 hover:shadow-2xl hover:scale-105
+                  active:translate-y-0.5 bg-primary text-primary-foreground"
               >
-                Explore Properties <ArrowRight className="ml-2 h-4 w-4" />
+                Explore Properties <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
+            </motion.div>
 
+            {/* Middle Partition */}
+            <div className="hidden md:block w-px h-32 bg-gradient-to-b from-transparent via-border to-transparent" />
+            <div className="md:hidden w-32 h-px mx-auto bg-gradient-to-r from-transparent via-border to-transparent" />
+
+            {/* Right Side - Calculator */}
+            <motion.div 
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="flex flex-col items-center md:items-start space-y-4"
+            >
+              <p className="text-xl md:text-2xl font-heading font-semibold text-foreground">
+                Calculate your dream
+              </p>
               <Button
                 size="lg"
                 variant="outline"
-                className="h-14 px-8 text-base border-2"
+                onClick={() => setLocation("/calculators")}
+                className="h-16 px-10 text-lg rounded-full border-2 border-primary/20
+                  transition-all duration-300 ease-out
+                  hover:-translate-y-1.5 hover:shadow-2xl hover:scale-105 hover:bg-primary/5
+                  active:translate-y-0.5"
               >
-                Contact Us
+                <Calculator className="mr-2 h-5 w-5" /> Calculate Now
               </Button>
-            </div>
-
-            {/* Trust Indicators */}
-            <div className="grid grid-cols-3 gap-8 pt-8 border-t border-border mt-8">
-              <div>
-                <p className="text-2xl font-bold font-heading">1.2k+</p>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Properties
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold font-heading">300+</p>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Agents
-                </p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold font-heading">15k+</p>
-                <p className="text-xs text-muted-foreground uppercase tracking-wide">
-                  Happy Clients
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Hero Image */}
-          <div className="relative">
-            <div className="absolute -inset-4 bg-secondary/30 rounded-2xl transform rotate-3 -z-10" />
-            <img
-              src="/Hero/hero-1.png"
-              alt="Modern Luxury Villa"
-              className="w-full h-[400px] md:h-[500px] lg:h-[600px]
-                object-cover rounded-lg border-4 border-background
-                shadow-xl transition-transform duration-500 ease-out
-                hover:scale-[1.02] hover:shadow-2xl"
-            />
+            </motion.div>
           </div>
         </div>
       </div>
