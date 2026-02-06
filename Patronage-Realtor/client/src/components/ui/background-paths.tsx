@@ -16,12 +16,13 @@ function FloatingPaths({ position }: { position: number }) {
   }));
 
   return (
-        <svg
-          className="w-full h-full"
-          viewBox="0 0 1200 800"
-          preserveAspectRatio="xMidYMid slice"
-          fill="none"
-        >
+    <div className="absolute inset-0 overflow-hidden">
+      <svg
+        className="w-full h-full"
+        viewBox="0 0 1200 800"
+        preserveAspectRatio="xMidYMid slice"
+        fill="none"
+      >
 
         {paths.map((path) => (
           <motion.path
