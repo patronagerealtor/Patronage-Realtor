@@ -72,7 +72,6 @@ export default function Calculators() {
   const [costGender, setCostGender] = useState<"male" | "female">("male");
   const [costPerSqft, setCostPerSqft] = useState(0);
   const [costArea, setCostArea] = useState(1000);
-  const [costParking, setCostParking] = useState("no");
   const [registrationCost, setRegistrationCost] = useState(0);
   const [advocateCost, setAdvocateCost] = useState(0);
   const [costResults, setCostResults] = useState({
@@ -82,7 +81,6 @@ export default function Calculators() {
     maintenance: 0,
     registration: 0,
     advocate: 0,
-    parking: 0,
     total: 0,
   });
 
@@ -175,25 +173,29 @@ export default function Calculators() {
   };
 
   const calculateOwnership = () => {
+    // Base value for statutory charges
+    const basePrice = costPrice;
+
+    // Derived value ONLY for maintenance
+    const maintenance =
+      costPerSqft > 0 && costArea > 0 ? costPerSqft * costArea : 0;
+
     const stampDutyRate = costGender === "female" ? 0.06 : 0.07;
-    const stampDuty = costPrice * stampDutyRate;
+    const stampDuty = basePrice * stampDutyRate;
 
     const gst =
-      costPropertyStatus === "under-construction" ? costPrice * 0.05 : 0;
+      costPropertyStatus === "under-construction" ? basePrice * 0.05 : 0;
 
-    const tds = costPrice * 0.01;
-    const maintenance = costArea * 3;
-    const parking = costParking === "yes" ? 300000 : 0;
+    const tds = basePrice * 0.01;
 
     const total =
-      costPrice +
+      basePrice +
       stampDuty +
       gst +
       tds +
       maintenance +
       registrationCost +
-      advocateCost +
-      parking;
+      advocateCost;
 
     setCostResults({
       stampDuty: Math.round(stampDuty),
@@ -202,7 +204,6 @@ export default function Calculators() {
       maintenance: Math.round(maintenance),
       registration: registrationCost,
       advocate: advocateCost,
-      parking: parking,
       total: Math.round(total),
     });
   };
@@ -354,7 +355,11 @@ export default function Calculators() {
     eligTenure,
     costPrice,
     costPropertyStatus,
-    costParking,
+    costPerSqft,
+    costArea,
+    registrationCost,
+    advocateCost,
+    costGender,
     rvbRent,
     rvbPrice,
     rvbEmi,
@@ -1053,7 +1058,7 @@ export default function Calculators() {
                       <Label>Cost per sq.ft (₹)</Label>
                       <Input
                         type="text"
-                        value={costPerSqft || ""}
+                        value={costPerSqft === 0 ? "" : costPerSqft}
                         onChange={(e) =>
                           handleCurrencyInput(e.target.value, setCostPerSqft)
                         }
@@ -1063,7 +1068,7 @@ export default function Calculators() {
                       <Label>Area (sq.ft)</Label>
                       <Input
                         type="text"
-                        value={costArea || ""}
+                        value={costArea === 0 ? "" : costArea}
                         onChange={(e) =>
                           handleCurrencyInput(e.target.value, setCostArea)
                         }
@@ -1076,7 +1081,7 @@ export default function Calculators() {
                     <Label>Registration Cost (₹)</Label>
                     <Input
                       type="text"
-                      value={registrationCost || ""}
+                      value={registrationCost === 0 ? "" : registrationCost}
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setRegistrationCost)
                       }
@@ -1088,7 +1093,7 @@ export default function Calculators() {
                     <Label>Advocate Cost (₹)</Label>
                     <Input
                       type="text"
-                      value={advocateCost || ""}
+                      value={advocateCost === 0 ? "" : advocateCost}
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setAdvocateCost)
                       }
@@ -1118,7 +1123,14 @@ export default function Calculators() {
                     </div>
 
                     <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                      <span>GST (5%)</span>
+                      <span>
+                        GST (
+                        {costPropertyStatus === "under-construction"
+                          ? "5%"
+                          : "0%"}
+                        )
+                      </span>
+
                       <span className="font-semibold">
                         {formatCurrency(costResults.gst)}
                       </span>
