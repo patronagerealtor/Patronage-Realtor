@@ -70,6 +70,7 @@ export default function Calculators() {
   const [costPropertyStatus, setCostPropertyStatus] =
     useState("under-construction");
   const [costGender, setCostGender] = useState<"male" | "female">("male");
+  const [costPerSqft, setCostPerSqft] = useState(0);
   const [costArea, setCostArea] = useState(1000);
   const [costParking, setCostParking] = useState("no");
   const [registrationCost, setRegistrationCost] = useState(0);
