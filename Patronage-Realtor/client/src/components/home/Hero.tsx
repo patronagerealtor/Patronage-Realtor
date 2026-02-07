@@ -36,32 +36,17 @@ export function Hero() {
               >
                 {/* TEXT */}
                 <span
-                  className="relative z-10 text-primary
+                  className="relative z-10 text-gray-500
                              transition-all duration-500
                              group-hover:tracking-wider"
-                  style={{
-                    textShadow: "0 0 0px #133E45",
-                  }}
                 >
-                  home
+                  Home
                 </span>
 
-                {/* TEXT GLOW (TEXT-SHADOW BASED) */}
-                <span
-                  className="absolute inset-0 flex items-center justify-center
-                             opacity-0 transition-opacity duration-500
-                             group-hover:opacity-100 pointer-events-none"
-                  style={{
-                    color: "#133E45",
-                    textShadow:
-                      "0 0 8px #133E45, 0 0 16px #133E45, 0 0 32px #133E45",
-                  }}
-                >
-                  home
-                </span>
+                {/* HOVER TEXT (NO SHADOW, JUST MOTION) */}
+                
               </button>
             </h1>
-
 
 
 
