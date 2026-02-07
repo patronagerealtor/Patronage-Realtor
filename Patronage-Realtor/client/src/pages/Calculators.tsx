@@ -67,14 +67,22 @@ export default function Calculators() {
 
   // --- 2. Ownership Cost State ---
   const [costPrice, setCostPrice] = useState(5000000);
-  const [costPropertyStatus, setCostPropertyStatus] = useState("under-construction");
+  const [costPropertyStatus, setCostPropertyStatus] =
+    useState("under-construction");
+  const [costGender, setCostGender] = useState<"male" | "female">("male");
+  const [costArea, setCostArea] = useState(1000);
   const [costParking, setCostParking] = useState("no");
+  const [registrationCost, setRegistrationCost] = useState(0);
+  const [advocateCost, setAdvocateCost] = useState(0);
   const [costResults, setCostResults] = useState({
     stampDuty: 0,
     gst: 0,
+    tds: 0,
+    maintenance: 0,
+    registration: 0,
+    advocate: 0,
     parking: 0,
     total: 0,
-    breakdown: [] as { name: string; value: number }[],
   });
 
   // --- 3. Rent vs Buy State ---
@@ -166,23 +174,35 @@ export default function Calculators() {
   };
 
   const calculateOwnership = () => {
-    const stampDuty = costPrice * 0.07;
-    const gst = costPropertyStatus === "under-construction" ? costPrice * 0.05 : 0;
+    const stampDutyRate = costGender === "female" ? 0.06 : 0.07;
+    const stampDuty = costPrice * stampDutyRate;
+
+    const gst =
+      costPropertyStatus === "under-construction" ? costPrice * 0.05 : 0;
+
+    const tds = costPrice * 0.01;
+    const maintenance = costArea * 3;
     const parking = costParking === "yes" ? 300000 : 0;
 
-    const total = Math.round(costPrice + stampDuty + gst + parking);
+    const total =
+      costPrice +
+      stampDuty +
+      gst +
+      tds +
+      maintenance +
+      registrationCost +
+      advocateCost +
+      parking;
 
     setCostResults({
       stampDuty: Math.round(stampDuty),
       gst: Math.round(gst),
-      parking,
-      total,
-      breakdown: [
-        { name: "Base Price", value: costPrice },
-        { name: "Stamp Duty", value: Math.round(stampDuty) },
-        { name: "GST", value: Math.round(gst) },
-        { name: "Parking", value: parking },
-      ],
+      tds: Math.round(tds),
+      maintenance: Math.round(maintenance),
+      registration: registrationCost,
+      advocate: advocateCost,
+      parking: parking,
+      total: Math.round(total),
     });
   };
 
@@ -390,7 +410,11 @@ export default function Calculators() {
                     <Label>Loan Amount (₹)</Label>
                     <Input
                       type="text"
-                      value={smartLoanAmount === 0 ? "" : smartLoanAmount.toLocaleString("en-IN")}
+                      value={
+                        smartLoanAmount === 0
+                          ? ""
+                          : smartLoanAmount.toLocaleString("en-IN")
+                      }
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setSmartLoanAmount)
                       }
@@ -449,7 +473,11 @@ export default function Calculators() {
                     <Label>Net Monthly Income (₹)</Label>
                     <Input
                       type="text"
-                      value={smartIncome === 0 ? "" : smartIncome.toLocaleString("en-IN")}
+                      value={
+                        smartIncome === 0
+                          ? ""
+                          : smartIncome.toLocaleString("en-IN")
+                      }
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setSmartIncome)
                       }
@@ -459,7 +487,11 @@ export default function Calculators() {
                     <Label>Monthly Prepayment (₹)</Label>
                     <Input
                       type="text"
-                      value={smartPrepayment === 0 ? "" : smartPrepayment.toLocaleString("en-IN")}
+                      value={
+                        smartPrepayment === 0
+                          ? ""
+                          : smartPrepayment.toLocaleString("en-IN")
+                      }
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setSmartPrepayment)
                       }
@@ -613,7 +645,9 @@ export default function Calculators() {
                     <Label>Monthly Rent (₹)</Label>
                     <Input
                       type="text"
-                      value={rvbRent === 0 ? "" : rvbRent.toLocaleString("en-IN")}
+                      value={
+                        rvbRent === 0 ? "" : rvbRent.toLocaleString("en-IN")
+                      }
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setRvbRent)
                       }
@@ -623,7 +657,9 @@ export default function Calculators() {
                     <Label>Property Price (₹)</Label>
                     <Input
                       type="text"
-                      value={rvbPrice === 0 ? "" : rvbPrice.toLocaleString("en-IN")}
+                      value={
+                        rvbPrice === 0 ? "" : rvbPrice.toLocaleString("en-IN")
+                      }
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setRvbPrice)
                       }
@@ -815,7 +851,11 @@ export default function Calculators() {
                     <Label>Net Monthly Income (₹)</Label>
                     <Input
                       type="text"
-                      value={eligIncome === 0 ? "" : eligIncome.toLocaleString("en-IN")}
+                      value={
+                        eligIncome === 0
+                          ? ""
+                          : eligIncome.toLocaleString("en-IN")
+                      }
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setEligIncome)
                       }
@@ -825,7 +865,9 @@ export default function Calculators() {
                     <Label>Current EMIs (₹)</Label>
                     <Input
                       type="text"
-                      value={eligEmi === 0 ? "" : eligEmi.toLocaleString("en-IN")}
+                      value={
+                        eligEmi === 0 ? "" : eligEmi.toLocaleString("en-IN")
+                      }
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setEligEmi)
                       }
@@ -947,18 +989,45 @@ export default function Calculators() {
           {/* --- 4. Ownership Cost --- */}
           <TabsContent value="ownership">
             <div className="grid lg:grid-cols-12 gap-6">
+              {/* INPUTS */}
               <Card className="lg:col-span-5 p-6 space-y-6">
                 <div className="space-y-4">
+                  {/* Base Price */}
                   <div className="space-y-2">
                     <Label>Base Property Price (₹)</Label>
                     <Input
                       type="text"
-                      value={costPrice === 0 ? "" : costPrice.toLocaleString("en-IN")}
+                      value={
+                        costPrice === 0 ? "" : costPrice.toLocaleString("en-IN")
+                      }
                       onChange={(e) =>
                         handleCurrencyInput(e.target.value, setCostPrice)
                       }
                     />
                   </div>
+
+                  {/* Buyer Gender */}
+                  <div className="space-y-2">
+                    <Label>Buyer Gender</Label>
+                    <RadioGroup
+                      value={costGender}
+                      onValueChange={(v) =>
+                        setCostGender(v as "male" | "female")
+                      }
+                      className="flex gap-4"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="male" id="male" />
+                        <Label htmlFor="male">Male (7%)</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="female" id="female" />
+                        <Label htmlFor="female">Female (6%)</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {/* Property Status */}
                   <div className="space-y-2">
                     <Label>Property Status</Label>
                     <RadioGroup
@@ -976,26 +1045,58 @@ export default function Calculators() {
                       </div>
                     </RadioGroup>
                   </div>
+
+                  {/* Cost per sqft + Area */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Cost per sq.ft (₹)</Label>
+                      <Input
+                        type="text"
+                        value={costPerSqft || ""}
+                        onChange={(e) =>
+                          handleCurrencyInput(e.target.value, setCostPerSqft)
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Area (sq.ft)</Label>
+                      <Input
+                        type="text"
+                        value={costArea || ""}
+                        onChange={(e) =>
+                          handleCurrencyInput(e.target.value, setCostArea)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* Registration */}
                   <div className="space-y-2">
-                    <Label>Car Parking?</Label>
-                    <RadioGroup
-                      value={costParking}
-                      onValueChange={setCostParking}
-                      className="flex gap-4"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="yes" id="py" />
-                        <Label htmlFor="py">Yes (+₹3L)</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="no" id="pn" />
-                        <Label htmlFor="pn">No</Label>
-                      </div>
-                    </RadioGroup>
+                    <Label>Registration Cost (₹)</Label>
+                    <Input
+                      type="text"
+                      value={registrationCost || ""}
+                      onChange={(e) =>
+                        handleCurrencyInput(e.target.value, setRegistrationCost)
+                      }
+                    />
+                  </div>
+
+                  {/* Advocate */}
+                  <div className="space-y-2">
+                    <Label>Advocate Cost (₹)</Label>
+                    <Input
+                      type="text"
+                      value={advocateCost || ""}
+                      onChange={(e) =>
+                        handleCurrencyInput(e.target.value, setAdvocateCost)
+                      }
+                    />
                   </div>
                 </div>
               </Card>
 
+              {/* RESULTS */}
               <Card className="lg:col-span-7 p-6 flex flex-col justify-center h-fit">
                 <div className="space-y-6">
                   <div>
@@ -1006,23 +1107,47 @@ export default function Calculators() {
                       {formatCurrency(costResults.total)}
                     </p>
                   </div>
+
                   <div className="space-y-3 pt-6 border-t">
                     <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                      <span>Stamp Duty (7%)</span>
+                      <span>Stamp Duty</span>
                       <span className="font-semibold">
                         {formatCurrency(costResults.stampDuty)}
                       </span>
                     </div>
+
                     <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
                       <span>GST (5%)</span>
                       <span className="font-semibold">
                         {formatCurrency(costResults.gst)}
                       </span>
                     </div>
+
                     <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                      <span>Parking</span>
+                      <span>TDS (1%)</span>
                       <span className="font-semibold">
-                        {formatCurrency(costResults.parking)}
+                        {formatCurrency(costResults.tds)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
+                      <span>Maintenance</span>
+                      <span className="font-semibold">
+                        {formatCurrency(costResults.maintenance)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
+                      <span>Registration</span>
+                      <span className="font-semibold">
+                        {formatCurrency(costResults.registration)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
+                      <span>Advocate</span>
+                      <span className="font-semibold">
+                        {formatCurrency(costResults.advocate)}
                       </span>
                     </div>
                   </div>
@@ -1030,6 +1155,7 @@ export default function Calculators() {
               </Card>
             </div>
 
+            {/* LOGIC ACCORDION */}
             <Accordion type="single" collapsible className="mt-8">
               <AccordionItem
                 value="logic"
@@ -1042,22 +1168,24 @@ export default function Calculators() {
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground space-y-4 pb-4">
-                  <p>
-                    Total ownership cost includes the base price and mandatory
-                    government charges:
-                  </p>
                   <ul className="list-disc pl-5 space-y-2">
                     <li>
-                      <strong>Stamp Duty:</strong> Calculated at 7% of the
-                      property price (state average).
+                      <strong>Stamp Duty:</strong> 7% for male buyers, 6% for
+                      female buyers.
                     </li>
                     <li>
-                      <strong>GST:</strong> Calculated at 5% for
-                      under-construction properties.
+                      <strong>GST:</strong> 5% for under-construction
+                      properties.
                     </li>
                     <li>
-                      <strong>Parking:</strong> A fixed cost of ₹3,00,000 if
-                      selected.
+                      <strong>TDS:</strong> Mandatory 1% of property value.
+                    </li>
+                    <li>
+                      <strong>Maintenance:</strong> ₹3 × Area (sq.ft).
+                    </li>
+                    <li>
+                      <strong>Registration & Advocate:</strong> User-defined
+                      charges.
                     </li>
                   </ul>
                 </AccordionContent>

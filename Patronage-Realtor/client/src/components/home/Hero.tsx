@@ -18,7 +18,7 @@ export function Hero() {
 
       {/* Hero Content */}
       <div className="container relative z-20 mx-auto px-4">
-        <div className="flex flex-col items-center text-center space-y-16">
+        <div className="flex flex-col items-center text-center space-y-3">
           {/* Main Heading */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -26,35 +26,26 @@ export function Hero() {
             transition={{ duration: 0.8 }}
             className="max-w-4xl"
           >
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-heading font-bold tracking-tight leading-[1.15]">
+            <h1 className="text-5xl md:text-7xl lg:text-7xl font-heading font-bold tracking-tight leading-[1.15]">
               Find a place you will call{" "}
-
-              <button
-                className="group relative inline-flex items-center
-                           px-4 py-1 rounded-full
-                           transition-transform duration-500 hover:scale-105"
-              >
-                {/* TEXT */}
-                <span
-                  className="relative z-10 text-gray-500
-                             transition-all duration-500
-                             group-hover:tracking-wider"
-                >
+              <button className="group relative inline-flex items-center px-4 py-1 rounded-full transition-transform duration-500 hover:scale-105">
+                <span className="relative z-10 text-gray-500 transition-all duration-500 group-hover:tracking-wider">
                   Home
                 </span>
-
-                {/* HOVER TEXT (NO SHADOW, JUST MOTION) */}
-                
               </button>
             </h1>
 
-
-
+            {/* Divider */}
+            <div className="mt-6 flex justify-center">
+              <div className="h-px w-40 md:w-56 lg:w-1000
+                              bg-gradient-to-r from-transparent via-border to-transparent" />
+            </div>
           </motion.div>
+
 
           {/* Partitioned Content */}
           <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-8 md:gap-12">
-            
+
             {/* Left Side - Properties */}
             <motion.div 
               initial={{ opacity: 0, x: -30 }}
@@ -62,9 +53,10 @@ export function Hero() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="flex flex-col items-center md:items-end space-y-4"
             >
-              <p className="text-lg text-muted-foreground font-medium italic">
-                Discover your perfect sanctuary today.
+              <p className="text-2xl md:text-3xm font-heading font-medium tracking-wide text-foreground/90">
+                let's Elevate your living
               </p>
+
               <Button
                 size="lg"
                 onClick={() => setLocation("/properties")}
@@ -88,9 +80,10 @@ export function Hero() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="flex flex-col items-center md:items-start space-y-4"
             >
-              <p className="text-xl md:text-2xl font-heading font-semibold text-foreground">
+              <p className="text-2xl md:text-3xm font-heading font-medium tracking-wide text-foreground/90">
                 Calculate your dream
               </p>
+
               <Button
                 size="lg"
                 variant="outline"
@@ -104,6 +97,7 @@ export function Hero() {
               </Button>
             </motion.div>
           </div>
+
         </div>
       </div>
     </section>
