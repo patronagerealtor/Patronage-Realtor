@@ -71,7 +71,7 @@ export default function Calculators() {
     useState("under-construction");
   const [costGender, setCostGender] = useState<"male" | "female">("male");
   const [costPerSqft, setCostPerSqft] = useState(0);
-  const [costArea, setCostArea] = useState(1000);
+  const [costArea, setCostArea] = useState(0);
   const [registrationCost, setRegistrationCost] = useState(0);
   const [advocateCost, setAdvocateCost] = useState(0);
   const [costResults, setCostResults] = useState({
@@ -176,9 +176,9 @@ export default function Calculators() {
     // Base value for statutory charges
     const basePrice = costPrice;
 
-    // Derived value ONLY for maintenance
+    // Maintenance: (cost per sq.ft × area) × 24 months (2 years)
     const maintenance =
-      costPerSqft > 0 && costArea > 0 ? costPerSqft * costArea : 0;
+      costPerSqft > 0 && costArea > 0 ? (costPerSqft * costArea) * 24 : 0;
 
     const stampDutyRate = costGender === "female" ? 0.06 : 0.07;
     const stampDuty = basePrice * stampDutyRate;
@@ -344,15 +344,28 @@ export default function Calculators() {
     });
   };
 
+  // Run when Smart EMI inputs change — syncs to Rent vs Buy
+  useEffect(() => {
+    calculateSmartEmi();
+  }, [
+    smartLoanAmount,
+    smartInterestRate,
+    smartTenure,
+    smartIncome,
+    smartExistingEmi,
+    smartPrepayment,
+  ]);
+
+  // Run when Rent vs Buy / Eligibility / Ownership inputs change — do NOT overwrite RVB
   useEffect(() => {
     calculateRentVsBuy();
     calculateEligibility();
     calculateOwnership();
-    calculateSmartEmi();
   }, [
     eligIncome,
     eligEmi,
     eligTenure,
+    eligInterestRate,
     costPrice,
     costPropertyStatus,
     costPerSqft,
@@ -364,12 +377,6 @@ export default function Calculators() {
     rvbPrice,
     rvbEmi,
     rvbHorizon,
-    smartLoanAmount,
-    smartInterestRate,
-    smartTenure,
-    smartIncome,
-    smartExistingEmi,
-    smartPrepayment,
   ]);
 
   return (
@@ -392,17 +399,29 @@ export default function Calculators() {
           onValueChange={setActiveTab}
         >
           <div className="flex justify-center mb-8">
-            <TabsList className="bg-muted p-1 grid grid-cols-2 md:grid-cols-4 w-full md:w-auto h-auto md:h-15">
-              <TabsTrigger value="smart-emi" className="py-2.5 h-full">
+            <TabsList className="bg-muted p-1 grid grid-cols-2 md:grid-cols-4 w-full md:w-auto h-auto md:h-15 overflow-visible">
+              <TabsTrigger
+                value="smart-emi"
+                className="py-2.5 h-full transition-all duration-200 hover:shadow-md hover:scale-105 data-[state=inactive]:hover:bg-primary/15 data-[state=inactive]:hover:text-primary data-[state=active]:hover:shadow-lg data-[state=active]:hover:ring-2 data-[state=active]:hover:ring-primary/30"
+              >
                 <Landmark className="h-4 w-4 mr-2" /> Smart EMI
               </TabsTrigger>
-              <TabsTrigger value="rent-vs-buy" className="py-2.5 h-full">
+              <TabsTrigger
+                value="rent-vs-buy"
+                className="py-2.5 h-full transition-all duration-200 hover:shadow-md hover:scale-105 data-[state=inactive]:hover:bg-primary/15 data-[state=inactive]:hover:text-primary data-[state=active]:hover:shadow-lg data-[state=active]:hover:ring-2 data-[state=active]:hover:ring-primary/30"
+              >
                 <Scale className="h-4 w-4 mr-2" /> Rent vs Buy
               </TabsTrigger>
-              <TabsTrigger value="eligibility" className="py-2.5 h-full">
+              <TabsTrigger
+                value="eligibility"
+                className="py-2.5 h-full transition-all duration-200 hover:shadow-md hover:scale-105 data-[state=inactive]:hover:bg-primary/15 data-[state=inactive]:hover:text-primary data-[state=active]:hover:shadow-lg data-[state=active]:hover:ring-2 data-[state=active]:hover:ring-primary/30"
+              >
                 <TrendingUp className="h-4 w-4 mr-2" /> Eligibility
               </TabsTrigger>
-              <TabsTrigger value="ownership" className="py-2.5 h-full">
+              <TabsTrigger
+                value="ownership"
+                className="py-2.5 h-full transition-all duration-200 hover:shadow-md hover:scale-105 data-[state=inactive]:hover:bg-primary/15 data-[state=inactive]:hover:text-primary data-[state=active]:hover:shadow-lg data-[state=active]:hover:ring-2 data-[state=active]:hover:ring-primary/30"
+              >
                 <Coins className="h-4 w-4 mr-2" /> Ownership Cost
               </TabsTrigger>
             </TabsList>
@@ -611,35 +630,121 @@ export default function Calculators() {
               </div>
             </div>
 
-            <Accordion type="single" collapsible className="mt-8">
-              <AccordionItem
-                value="logic"
-                className="border rounded-lg bg-card px-4"
-              >
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center gap-2 text-primary font-semibold">
-                    <BookOpen className="h-4 w-4" />
-                    Calculation Logic
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground space-y-4 pb-4">
+            <Card className="mt-8 border rounded-lg bg-card p-6 md:p-8">
+              <div className="flex items-center gap-2 text-primary font-semibold mb-6">
+                <BookOpen className="h-5 w-5 shrink-0" />
+                <h3 className="text-lg">How Smart EMI Calculator Works</h3>
+              </div>
+              <div className="space-y-6 text-muted-foreground text-sm md:text-base leading-relaxed">
+                <div>
+                  <h4 className="font-bold text-foreground mb-2">What it calculates</h4>
                   <p>
-                    The Smart EMI calculator uses the standard EMI formula:{" "}
-                    <code>[P x R x (1+R)^N] / [(1+R)^N - 1]</code>
+                    Enter your loan amount, interest rate, and tenure. The calculator shows your monthly EMI, total interest over the loan period, and how much you will pay in total. It also checks if your EMI fits comfortably within your income (using a 40% safe limit) and tells you the risk level—Safe, Moderate, or High.
                   </p>
-                  <ul className="list-disc pl-5 space-y-2">
-                    <li>
-                      <strong>Risk Level:</strong> Based on FOIR. Below 40% is
-                      "Safe", 40-50% is "Moderate", above 50% is "High Risk".
-                    </li>
-                    <li>
-                      <strong>Interest Saved:</strong> Projected by applying
-                      prepayment directly to principal each month.
-                    </li>
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground mb-2">Why it matters</h4>
+                  <p>
+                    Buying a home is a long-term commitment. The Smart EMI calculator helps you see if you can afford the loan without stress, plan your budget, and understand the impact of paying a little extra each month. Knowing your safe EMI limit helps you avoid overstretching and stay financially secure.
+                  </p>
+                </div>
+              </div>
+
+              {/* FAQs */}
+              <div className="mt-10 pt-8 border-t border-border">
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-primary shrink-0" />
+                  Frequently Asked Questions
+                </h3>
+                <Accordion type="single" collapsible className="space-y-2">
+                  <AccordionItem
+                    value="faq-1"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-bold text-foreground pr-4">
+                        What is the &quot;Safe EMI&quot; limit?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p>
+                        A safe EMI is the amount you can pay without financial stress.
+                        Financial experts recommend that your total EMI should not exceed 40% of your monthly income.
+                        The calculator checks your EMI against this limit to keep you financially secure.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="faq-2"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-bold text-foreground pr-4">
+                        What do the risk levels mean?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p className="mb-2">
+                        The calculator assigns a risk level based on your EMI:
+                      </p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li><strong>Safe</strong> – EMI is comfortably within limits</li>
+                        <li><strong>Moderate</strong> – EMI is manageable but leaves less room for savings</li>
+                        <li><strong>High Risk</strong> – EMI is too high and may cause financial stress</li>
+                      </ul>
+                      <p className="mt-2">
+                        This helps you decide if you should reduce your loan amount or increase tenure.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="faq-3"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-bold text-foreground pr-4">
+                        What happens if I make extra monthly payments (prepayment)?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p className="mb-2">If you add a monthly prepayment:</p>
+                      <ul className="list-disc pl-5 space-y-1 mb-2">
+                        <li>The extra amount goes directly toward reducing your loan principal</li>
+                        <li>Your total interest reduces</li>
+                        <li>Your loan tenure becomes shorter</li>
+                      </ul>
+                      <p className="mb-2">The calculator shows:</p>
+                      <ul className="list-disc pl-5 space-y-1 mb-2">
+                        <li>How much interest you can save</li>
+                        <li>How many years you can cut from your loan</li>
+                      </ul>
+                      <p>Even small prepayments can save lakhs of rupees over time.</p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="faq-4"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-bold text-foreground pr-4">
+                        Why should I use this calculator before buying a home?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p className="mb-2">
+                        A home loan is a long-term commitment, often for 20–30 years. This calculator helps you:
+                      </p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>Avoid over-stretching your finances</li>
+                        <li>Plan your budget confidently</li>
+                        <li>Understand the true cost of your loan</li>
+                        <li>Make informed decisions before speaking to banks or builders</li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
+            </Card>
           </TabsContent>
 
           {/* --- 2. Rent vs Buy --- */}
@@ -809,43 +914,117 @@ export default function Calculators() {
               </Card>
             </div>
 
-            <Accordion type="single" collapsible className="mt-8">
-              <AccordionItem
-                value="logic"
-                className="border rounded-lg bg-card px-4"
-              >
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center gap-2 text-primary font-semibold">
-                    <BookOpen className="h-4 w-4" />
-                    Calculation Logic
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground space-y-4 pb-4">
+            <Card className="mt-8 border rounded-lg bg-card p-6 md:p-8">
+              <div className="flex items-center gap-2 text-primary font-semibold mb-6">
+                <BookOpen className="h-5 w-5 shrink-0" />
+                <h3 className="text-lg">How Rent vs Buy Calculator Works</h3>
+              </div>
+              <div className="space-y-6 text-muted-foreground text-sm md:text-base leading-relaxed">
+                <div>
+                  <h4 className="font-medium text-foreground mb-2">What it calculates</h4>
                   <p>
-                    We compare the total cost of renting vs buying over your
-                    selected horizon:
+                    Enter your monthly rent, property price, expected EMI, and how many years you plan to stay (analysis horizon). The calculator compares the total cost of renting versus buying over that period. It assumes rent increases by 10% every year and property value grows at 7% annually. You get total rent paid, total EMI paid, the break-even year (when buying becomes cheaper than renting), and the projected property value at the end.
                   </p>
-                  <ul className="list-disc pl-5 space-y-2">
-                    <li>
-                      <strong>Rent Cost:</strong> Cumulative rent paid, assuming
-                      a 10% annual increase.
-                    </li>
-                    <li>
-                      <strong>Buy Cost:</strong> Cumulative EMI payments made
-                      over the period.
-                    </li>
-                    <li>
-                      <strong>Asset Value:</strong> Projected property value
-                      assuming 7% annual appreciation.
-                    </li>
-                    <li>
-                      <strong>Break-even:</strong> The year when cumulative rent
-                      paid exceeds cumulative EMI paid.
-                    </li>
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground mb-2">Key metrics explained</h4>
+                  <p>
+                    <strong>Total Rent</strong> – What you would pay in rent over the horizon. <strong>Total EMI</strong> – What you would pay toward the home loan. <strong>Asset Value</strong> – What the property could be worth in the future. <strong>Break-even</strong> – The year when cumulative rent paid exceeds cumulative EMI paid, meaning buying starts to make more sense.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground mb-2">Why it matters</h4>
+                  <p>
+                    Deciding between renting and buying is one of the biggest financial choices you will make. This calculator gives you a clear, numbers-based view so you can see which option fits your situation better. Whether you plan to stay for 5 years or 20, it helps you make an informed decision and feel confident about your choice.
+                  </p>
+                </div>
+              </div>
+              {/* FAQs */}
+<div className="mt-10 pt-8 border-t border-border">
+  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+    <BookOpen className="h-5 w-5 text-primary shrink-0" />
+    Frequently Asked Questions
+  </h3>
+
+  <Accordion type="single" collapsible className="space-y-2">
+    <AccordionItem
+      value="rvb-faq-1"
+      className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+    >
+      <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+        <span className="text-left font-bold text-foreground pr-4">
+          How does the calculator compare renting and buying?
+        </span>
+      </AccordionTrigger>
+      <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+        <p>
+          The calculator compares both options over the same time period. For renting,
+          it calculates the total rent you would pay assuming rent increases every year.
+          For buying, it calculates the total EMI paid and estimates the future value of
+          the property. This side-by-side comparison helps you see which option costs less
+          over your planned stay.
+        </p>
+      </AccordionContent>
+    </AccordionItem>
+
+    <AccordionItem
+      value="rvb-faq-2"
+      className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+    >
+      <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+        <span className="text-left font-bold text-foreground pr-4">
+          What does Asset Value mean?
+        </span>
+      </AccordionTrigger>
+      <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+        <p>
+          Asset Value is the estimated value of the property at the end of your selected
+          time period. The calculator assumes the property value increases every year.
+          This shows the long-term value you may build by owning a home.
+        </p>
+      </AccordionContent>
+    </AccordionItem>
+
+    <AccordionItem
+      value="rvb-faq-3"
+      className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+    >
+      <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+        <span className="text-left font-bold text-foreground pr-4">
+          Does this calculator mean buying is always better?
+        </span>
+      </AccordionTrigger>
+      <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+        <p>
+          No. The result depends on how long you plan to stay in the property and your
+          financial situation. For shorter stays, renting may make more sense. For longer
+          stays, buying may become more beneficial. The calculator helps you decide based
+          on numbers, not assumptions.
+        </p>
+      </AccordionContent>
+    </AccordionItem>
+
+    <AccordionItem
+      value="rvb-faq-4"
+      className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+    >
+      <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+        <span className="text-left font-bold text-foreground pr-4">
+          Why does the calculator assume rent and property value increases?
+        </span>
+      </AccordionTrigger>
+      <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+        <p>
+          Rent generally increases over time due to inflation and demand. Property values
+          also tend to grow in the long term. These assumptions help create a realistic
+          comparison, though actual future values may vary depending on market conditions.
+        </p>
+      </AccordionContent>
+    </AccordionItem>
+  </Accordion>
+</div>
+
+            </Card>
           </TabsContent>
 
           {/* --- 3. Eligibility --- */}
@@ -931,7 +1110,7 @@ export default function Calculators() {
                 </div>
               </Card>
 
-              <Card className="lg:col-span-7 p-8 flex flex-col items-center justify-center bg-primary/5 h-fit">
+              <Card className="lg:col-span-7 p-8 flex flex-col items-center justify-center bg-primary/5 min-h-full">
                 <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest">
                   You are eligible for a loan of
                 </p>
@@ -998,6 +1177,39 @@ export default function Calculators() {
               {/* INPUTS */}
               <Card className="lg:col-span-5 p-6 space-y-6">
                 <div className="space-y-4">
+                  {/* Buyer Gender - First */}
+                  <div className="space-y-2">
+                    <Label>Buyer Gender</Label>
+                    <div className="flex gap-3" role="radiogroup" aria-label="Buyer gender">
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked={costGender === "male"}
+                        onClick={() => setCostGender("male")}
+                        className={`flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors duration-200 ${
+                          costGender === "male"
+                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                            : "bg-muted/30 border-border text-muted-foreground hover:bg-muted/50 hover:border-primary/30"
+                        }`}
+                      >
+                        Male (7%)
+                      </button>
+                      <button
+                        type="button"
+                        role="radio"
+                        aria-checked={costGender === "female"}
+                        onClick={() => setCostGender("female")}
+                        className={`flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors duration-200 ${
+                          costGender === "female"
+                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                            : "bg-muted/30 border-border text-muted-foreground hover:bg-muted/50 hover:border-primary/30"
+                        }`}
+                      >
+                        Female (6%)
+                      </button>
+                    </div>
+                  </div>
+
                   {/* Base Price */}
                   <div className="space-y-2">
                     <Label>Base Property Price (₹)</Label>
@@ -1010,27 +1222,6 @@ export default function Calculators() {
                         handleCurrencyInput(e.target.value, setCostPrice)
                       }
                     />
-                  </div>
-
-                  {/* Buyer Gender */}
-                  <div className="space-y-2">
-                    <Label>Buyer Gender</Label>
-                    <RadioGroup
-                      value={costGender}
-                      onValueChange={(v) =>
-                        setCostGender(v as "male" | "female")
-                      }
-                      className="flex gap-4"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="male" id="male" />
-                        <Label htmlFor="male">Male (7%)</Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="female" id="female" />
-                        <Label htmlFor="female">Female (6%)</Label>
-                      </div>
-                    </RadioGroup>
                   </div>
 
                   {/* Property Status */}
@@ -1144,7 +1335,7 @@ export default function Calculators() {
                     </div>
 
                     <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                      <span>Maintenance</span>
+                      <span>Maintenance (2 Years)</span>
                       <span className="font-semibold">
                         {formatCurrency(costResults.maintenance)}
                       </span>
@@ -1194,7 +1385,7 @@ export default function Calculators() {
                       <strong>TDS:</strong> Mandatory 1% of property value.
                     </li>
                     <li>
-                      <strong>Maintenance:</strong> ₹3 × Area (sq.ft).
+                      <strong>Maintenance (2 Years):</strong> (Cost per sq.ft × Area) × 24 months.
                     </li>
                     <li>
                       <strong>Registration & Advocate:</strong> User-defined

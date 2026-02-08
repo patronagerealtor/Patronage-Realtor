@@ -41,8 +41,8 @@ export function WhyChooseUs() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {FEATURES.map((feature, idx) => (
-          <div key={idx} className="bg-card border border-border p-6 md:p-8 rounded-lg text-center hover:border-primary/50 transition-colors duration-300">
-            <div className="w-14 h-14 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6 text-primary">
+          <div key={idx} className="group bg-card border border-border p-6 md:p-8 rounded-lg text-center hover:border-primary/50 hover:bg-muted/30 transition-colors duration-300">
+            <div className="w-14 h-14 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
               <feature.icon className="h-7 w-7" />
             </div>
             <h3 className="text-lg font-bold mb-2 font-heading">{feature.title}</h3>
