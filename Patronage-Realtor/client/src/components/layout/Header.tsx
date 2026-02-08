@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Menu, MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link, useLocation } from "wouter"; // ✅ Import Link
 import {
   Sheet,
   SheetContent,
@@ -17,6 +18,7 @@ import {
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [location] = useLocation(); // Optional: to style active state
 
   const navLinkClass =
     "relative px-3 py-2 text-sm font-medium transition-colors hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all hover:after:w-full";
@@ -25,15 +27,17 @@ export function Header() {
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2">
-          <img
-            src="/logo/logo-full.png"
-            alt="Patronage Realtor"
-            className="h-15 w-auto object-contain"
-          />
-        </a>
+        <Link href="/">
+          <a className="flex items-center gap-2 cursor-pointer">
+            <img
+              src="/logo/logo-full.png"
+              alt="Patronage Realtor"
+              className="h-15 w-auto object-contain"
+            />
+          </a>
+        </Link>
 
-        {/* Desktop Navigation (CENTERED) */}
+        {/* Desktop Navigation */}
         <div className="hidden md:flex flex-1 justify-center">
           <NavigationMenu>
             <NavigationMenuList className="flex gap-6">
@@ -45,58 +49,56 @@ export function Header() {
                 <NavigationMenuContent>
                   <ul className="grid w-[400px] gap-3 p-4 md:w-[600px] md:grid-cols-2">
                     <li>
-                      <a
-                        href="/#featured-properties"
-                        className="flex flex-col rounded-md bg-secondary p-5 hover:bg-secondary/80 transition-colors"
-                      >
-                        <MapPin className="h-4 w-4 mb-2" />
-                        <span className="font-medium">
-                          Featured Properties
-                        </span>
-                        <p className="text-sm text-muted-foreground">
-                          Discover premium listings
-                        </p>
-                      </a>
+                      <Link href="/#featured-properties">
+                        <a className="flex flex-col rounded-md bg-secondary p-5 hover:bg-secondary/80 transition-colors">
+                          <MapPin className="h-4 w-4 mb-2" />
+                          <span className="font-medium">
+                            Featured Properties
+                          </span>
+                          <p className="text-sm text-muted-foreground">
+                            Discover premium listings
+                          </p>
+                        </a>
+                      </Link>
                     </li>
                     <li>
-                      <a
-                        href="/properties"
-                        className="flex flex-col rounded-md bg-secondary p-5 hover:bg-secondary/80 transition-colors"
-                      >
-                        <Search className="h-4 w-4 mb-2" />
-                        <span className="font-medium">Explore</span>
-                        <p className="text-sm text-muted-foreground">
-                          Browse all properties
-                        </p>
-                      </a>
+                      <Link href="/properties">
+                        <a className="flex flex-col rounded-md bg-secondary p-5 hover:bg-secondary/80 transition-colors">
+                          <Search className="h-4 w-4 mb-2" />
+                          <span className="font-medium">Explore</span>
+                          <p className="text-sm text-muted-foreground">
+                            Browse all properties
+                          </p>
+                        </a>
+                      </Link>
                     </li>
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* Other links */}
+              {/* ✅ FIXED: Path is now '/webinars' (plural) to match mobile and Route */}
               <NavigationMenuItem>
-                <a href="/webinars" className={navLinkClass}>
-                  Webinar
-                </a>
+                <Link href="/webinars">
+                  <a className={navLinkClass}>Webinars</a>
+                </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <a href="/calculators" className={navLinkClass}>
-                  Calculators
-                </a>
+                <Link href="/calculators">
+                  <a className={navLinkClass}>Calculators</a>
+                </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <a href="/interiors" className={navLinkClass}>
-                  Interiors
-                </a>
+                <Link href="/interiors">
+                  <a className={navLinkClass}>Interiors</a>
+                </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <a href="/about-us" className={navLinkClass}>
-                  About Us
-                </a>
+                <Link href="/about-us">
+                  <a className={navLinkClass}>About Us</a>
+                </Link>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
@@ -122,21 +124,22 @@ export function Header() {
                 Menu
               </SheetTitle>
               <nav className="flex flex-col gap-4">
-                <a href="/properties" className="text-lg font-medium">
-                  Properties
-                </a>
-                <a href="/webinars" className="text-lg font-medium">
-                  Webinar
-                </a>
-                <a href="/calculators" className="text-lg font-medium">
-                  Calculators
-                </a>
-                <a href="/interiors" className="text-lg font-medium">
-                  Interiors
-                </a>
-                <a href="/about-us" className="text-lg font-medium">
-                  About Us
-                </a>
+                <Link href="/properties" onClick={() => setIsOpen(false)}>
+                  <a className="text-lg font-medium">Properties</a>
+                </Link>
+                {/* ✅ FIXED: Path matches desktop */}
+                <Link href="/webinars" onClick={() => setIsOpen(false)}>
+                  <a className="text-lg font-medium">Webinars</a>
+                </Link>
+                <Link href="/calculators" onClick={() => setIsOpen(false)}>
+                  <a className="text-lg font-medium">Calculators</a>
+                </Link>
+                <Link href="/interiors" onClick={() => setIsOpen(false)}>
+                  <a className="text-lg font-medium">Interiors</a>
+                </Link>
+                <Link href="/about-us" onClick={() => setIsOpen(false)}>
+                  <a className="text-lg font-medium">About Us</a>
+                </Link>
                 <Button className="mt-6 w-full">Contact Us</Button>
               </nav>
             </SheetContent>
