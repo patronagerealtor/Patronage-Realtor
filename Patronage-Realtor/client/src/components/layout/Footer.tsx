@@ -24,8 +24,27 @@ export function Footer() {
                 className="h-30 w-auto object-contain"
               />
             </div>
-            <p className="text-muted-foreground text-sm max-w-xs">
-              Dream it ! Own it ! Style it !
+            <p className="text-muted-foreground text-sm max-w-xs flex flex-wrap gap-1">
+              <a
+                href="/properties"
+                className="hover:text-foreground transition-colors font-medium"
+              >
+                Dream it !
+              </a>
+              <span> </span>
+              <a
+                href="/properties"
+                className="hover:text-foreground transition-colors font-medium"
+              >
+                Own it !
+              </a>
+              <span> </span>
+              <a
+                href=""/* Chatbot */
+                className="hover:text-foreground transition-colors font-medium"
+              >
+                Style it !
+              </a>
             </p>
           </div>
 
@@ -34,7 +53,10 @@ export function Footer() {
             <h4 className="font-heading font-semibold text-lg">Quick Links</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="/" className="hover:text-foreground transition-colors">
+                <a
+                  href="/interiors"
+                  className="hover:text-foreground transition-colors"
+                >
                   Properties
                 </a>
               </li>
