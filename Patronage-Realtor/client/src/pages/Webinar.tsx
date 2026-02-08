@@ -5,7 +5,7 @@ import { motion, Variants } from "framer-motion";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
-// 1. Static Data
+/* -------------------- Types -------------------- */
 type Webinar = {
   id: string;
   title: string;
@@ -18,6 +18,7 @@ type Webinar = {
   image: string;
 };
 
+/* -------------------- Data -------------------- */
 const WEBINAR: Webinar[] = [
   {
     id: "1",
@@ -60,7 +61,7 @@ const WEBINAR: Webinar[] = [
   },
 ];
 
-// 2. Animation Variants
+/* -------------------- Animations -------------------- */
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -78,7 +79,7 @@ const itemVariants: Variants = {
   },
 };
 
-// 3. Sub-component
+/* -------------------- Card -------------------- */
 function WebinarCard({ webinar }: { webinar: Webinar }) {
   const isLive = webinar.category === "Live Now";
 
@@ -87,30 +88,32 @@ function WebinarCard({ webinar }: { webinar: Webinar }) {
       variants={itemVariants}
       className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all hover:shadow-xl"
     >
-      {/* Image Section */}
+      {/* Image */}
       <div className="relative h-48 w-full overflow-hidden">
-        <div className="absolute inset-0 bg-black/20 z-10 transition-colors group-hover:bg-black/10" />
+        <div className="absolute inset-0 bg-black/20 z-10 group-hover:bg-black/10 transition-colors" />
+
         <img
           src={webinar.image}
           alt={webinar.title}
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
+
         <div className="absolute top-4 left-4 z-20">
           <Badge
-            className={`${
+            className={
               isLive
                 ? "bg-red-500 hover:bg-red-600 animate-pulse"
                 : webinar.category === "Upcoming"
                   ? "bg-primary hover:bg-primary/90"
                   : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-            }`}
+            }
           >
             {webinar.category}
           </Badge>
         </div>
       </div>
 
-      {/* Content Section */}
+      {/* Content */}
       <div className="flex flex-1 flex-col p-6">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
           <Calendar className="h-4 w-4" />
@@ -120,7 +123,7 @@ function WebinarCard({ webinar }: { webinar: Webinar }) {
           <span>{webinar.time}</span>
         </div>
 
-        <h3 className="text-xl font-heading font-semibold leading-tight mb-2 group-hover:text-primary transition-colors">
+        <h3 className="text-xl font-heading font-semibold mb-2 group-hover:text-primary transition-colors">
           {webinar.title}
         </h3>
 
@@ -128,27 +131,18 @@ function WebinarCard({ webinar }: { webinar: Webinar }) {
           {webinar.description}
         </p>
 
-        {/* Footer / Speaker Info */}
         <div className="mt-auto pt-6 border-t border-border flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
               <User className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-medium leading-none">
-                {webinar.speaker}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {webinar.role}
-              </p>
+              <p className="text-sm font-medium">{webinar.speaker}</p>
+              <p className="text-xs text-muted-foreground">{webinar.role}</p>
             </div>
           </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full group-hover:bg-primary/10 group-hover:text-primary"
-          >
+          <Button variant="ghost" size="icon" className="rounded-full">
             {webinar.category === "On-Demand" ? (
               <PlayCircle className="h-5 w-5" />
             ) : (
@@ -161,16 +155,39 @@ function WebinarCard({ webinar }: { webinar: Webinar }) {
   );
 }
 
+/* -------------------- Page -------------------- */
 export function Webinar() {
   return (
-    // Wrapper div handles layout to keep Footer at the bottom
     <div className="flex min-h-screen flex-col">
       <Header />
 
       <main className="flex-1">
-        <section className="relative w-full py-20 bg-background overflow-hidden">
-          <div className="container mx-auto px-4">
-            {/* Header Section */}
+        <section className="relative w-full py-20 overflow-hidden">
+          {/* 🎥 Background Video */}
+          <div className="absolute inset-0 z-0">
+            <video
+              className="h-full w-full object-cover"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster="/Hero/webinar-bg.jpg"
+            >
+              <source src="/Hero/webinar-bg.mp4" type="video/mp4" />
+              <img
+                src="/Hero/webinar-bg.jpg"
+                alt="Webinar background"
+                className="h-full w-full object-cover"
+              />
+            </video>
+
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px]" />
+          </div>
+
+          {/* Content */}
+          <div className="container relative z-10 mx-auto px-4">
+            {/* Header */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -179,7 +196,7 @@ export function Webinar() {
               className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16"
             >
               <div className="max-w-2xl">
-                <h2 className="text-4xl md:text-5xl font-heading font-bold tracking-tight mb-4">
+                <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4">
                   Expert Insights & <br />
                   <span className="text-primary">Masterclasses</span>
                 </h2>
@@ -188,12 +205,13 @@ export function Webinar() {
                   ownership, and sustainable living.
                 </p>
               </div>
+
               <Button size="lg" className="hidden md:flex rounded-full">
                 View All Events
               </Button>
             </motion.div>
 
-            {/* Grid Section */}
+            {/* Grid */}
             <motion.div
               variants={containerVariants}
               initial="hidden"
@@ -206,7 +224,7 @@ export function Webinar() {
               ))}
             </motion.div>
 
-            {/* Mobile View All Button */}
+            {/* Mobile CTA */}
             <div className="mt-12 flex md:hidden justify-center">
               <Button size="lg" className="w-full rounded-full">
                 View All Events
