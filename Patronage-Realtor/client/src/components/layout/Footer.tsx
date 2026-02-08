@@ -19,7 +19,7 @@ export function Footer() {
           <div className="space-y-4">
             <div className="flex items-center gap-2 font-heading font-bold text-xl tracking-tight">
               <img
-                src="/logo/logo-full.png"
+                src="/logo/favicon.png"
                 alt="Patronage Realtor"
                 className="h-30 w-auto object-contain"
               />
@@ -40,7 +40,7 @@ export function Footer() {
               </a>
               <span> </span>
               <a
-                href=""/* Chatbot */
+                href="/interiors"
                 className="hover:text-foreground transition-colors font-medium"
               >
                 Style it !

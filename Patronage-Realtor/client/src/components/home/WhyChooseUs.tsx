@@ -25,7 +25,13 @@ const FEATURES = [
 
 export function WhyChooseUs() {
   return (
-    <section className="container mx-auto px-4 py-16 md:py-24">
+    <section className="relative py-16 md:py-24">
+      {/* Background with transparency overlay */}
+      <div
+        className="absolute inset-0 bg-muted/50 bg-[linear-gradient(to_bottom,hsl(var(--muted)/0.6),hsl(var(--background)/0.85))]"
+        aria-hidden
+      />
+      <div className="container relative z-10 mx-auto px-4">
       <div className="text-center max-w-2xl mx-auto mb-16">
         <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4">Why Choose Us</h2>
         <p className="text-muted-foreground">
@@ -43,6 +49,7 @@ export function WhyChooseUs() {
             <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
           </div>
         ))}
+      </div>
       </div>
     </section>
   );
