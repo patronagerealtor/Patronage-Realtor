@@ -72,6 +72,7 @@ export default function Calculators() {
   const [costGender, setCostGender] = useState<"male" | "female">("male");
   const [costPerSqft, setCostPerSqft] = useState(0);
   const [costArea, setCostArea] = useState(0);
+  const [costMaintenanceYears, setCostMaintenanceYears] = useState(2);
   const [registrationCost, setRegistrationCost] = useState(0);
   const [advocateCost, setAdvocateCost] = useState(0);
   const [costResults, setCostResults] = useState({
@@ -176,9 +177,11 @@ export default function Calculators() {
     // Base value for statutory charges
     const basePrice = costPrice;
 
-    // Maintenance: (cost per sq.ft × area) × 24 months (2 years)
+    // Maintenance: (cost per sq.ft × area) × (years × 12 months)
     const maintenance =
-      costPerSqft > 0 && costArea > 0 ? (costPerSqft * costArea) * 24 : 0;
+      costPerSqft > 0 && costArea > 0
+        ? (costPerSqft * costArea) * costMaintenanceYears * 12
+        : 0;
 
     const stampDutyRate = costGender === "female" ? 0.06 : 0.07;
     const stampDuty = basePrice * stampDutyRate;
@@ -370,6 +373,7 @@ export default function Calculators() {
     costPropertyStatus,
     costPerSqft,
     costArea,
+    costMaintenanceYears,
     registrationCost,
     advocateCost,
     costGender,
@@ -1267,6 +1271,31 @@ export default function Calculators() {
                     </div>
                   </div>
 
+                  {/* Number of years (maintenance) */}
+                  <div className="space-y-2">
+                    <Label>Number of years (maintenance)</Label>
+                    <Select
+                      value={costMaintenanceYears.toString()}
+                      onValueChange={(val) =>
+                        setCostMaintenanceYears(Number(val))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[1, 2, 3, 4, 5].map((y) => (
+                          <SelectItem key={y} value={y.toString()}>
+                            {y} {y === 1 ? "Year" : "Years"}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Total maintenance = (Cost per sq.ft × Area) × 12 × years
+                    </p>
+                  </div>
+
                   {/* Registration */}
                   <div className="space-y-2">
                     <Label>Registration Cost (₹)</Label>
@@ -1307,7 +1336,11 @@ export default function Calculators() {
 
                   <div className="space-y-3 pt-6 border-t">
                     <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                      <span>Stamp Duty</span>
+                      <span>
+                        Stamp Duty (
+                        {costGender === "female" ? "6%" : "7%"}
+                        )
+                      </span>
                       <span className="font-semibold">
                         {formatCurrency(costResults.stampDuty)}
                       </span>
@@ -1335,7 +1368,10 @@ export default function Calculators() {
                     </div>
 
                     <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                      <span>Maintenance (2 Years)</span>
+                      <span>
+                        Maintenance ({costMaintenanceYears}{" "}
+                        {costMaintenanceYears === 1 ? "Year" : "Years"})
+                      </span>
                       <span className="font-semibold">
                         {formatCurrency(costResults.maintenance)}
                       </span>
@@ -1385,7 +1421,8 @@ export default function Calculators() {
                       <strong>TDS:</strong> Mandatory 1% of property value.
                     </li>
                     <li>
-                      <strong>Maintenance (2 Years):</strong> (Cost per sq.ft × Area) × 24 months.
+                      <strong>Maintenance:</strong> (Cost per sq.ft × Area) ×
+                      12 × selected years (1–5).
                     </li>
                     <li>
                       <strong>Registration & Advocate:</strong> User-defined
