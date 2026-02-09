@@ -27,14 +27,12 @@ export function Header() {
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center">
         {/* Logo */}
-        <Link href="/">
-          <a className="flex items-center gap-2 cursor-pointer">
-            <img
-              src="/logo/logo-full.png"
-              alt="Patronage Realtor"
-              className="h-15 w-auto object-contain"
-            />
-          </a>
+        <Link href="/" className="flex items-center gap-2 cursor-pointer">
+          <img
+            src="/logo/logo-full.png"
+            alt="Patronage Realtor"
+            className="h-15 w-auto object-contain"
+          />
         </Link>
 
         {/* Desktop Navigation */}
@@ -49,27 +47,29 @@ export function Header() {
                 <NavigationMenuContent>
                   <ul className="grid w-[400px] gap-3 p-4 md:w-[600px] md:grid-cols-2">
                     <li>
-                      <Link href="/#featured-properties">
-                        <a className="flex flex-col rounded-md bg-secondary p-5 hover:bg-secondary/80 transition-colors">
-                          <MapPin className="h-4 w-4 mb-2" />
-                          <span className="font-medium">
-                            Featured Properties
-                          </span>
-                          <p className="text-sm text-muted-foreground">
-                            Discover premium listings
-                          </p>
-                        </a>
+                      <Link
+                        href="/#featured-properties"
+                        className="flex flex-col rounded-md bg-secondary p-5 hover:bg-secondary/80 transition-colors"
+                      >
+                        <MapPin className="h-4 w-4 mb-2" />
+                        <span className="font-medium">
+                          Featured Properties
+                        </span>
+                        <p className="text-sm text-muted-foreground">
+                          Discover premium listings
+                        </p>
                       </Link>
                     </li>
                     <li>
-                      <Link href="/properties">
-                        <a className="flex flex-col rounded-md bg-secondary p-5 hover:bg-secondary/80 transition-colors">
-                          <Search className="h-4 w-4 mb-2" />
-                          <span className="font-medium">Explore</span>
-                          <p className="text-sm text-muted-foreground">
-                            Browse all properties
-                          </p>
-                        </a>
+                      <Link
+                        href="/properties"
+                        className="flex flex-col rounded-md bg-secondary p-5 hover:bg-secondary/80 transition-colors"
+                      >
+                        <Search className="h-4 w-4 mb-2" />
+                        <span className="font-medium">Explore</span>
+                        <p className="text-sm text-muted-foreground">
+                          Browse all properties
+                        </p>
                       </Link>
                     </li>
                   </ul>
@@ -78,26 +78,26 @@ export function Header() {
 
               {/* ✅ FIXED: Path is now '/webinars' (plural) to match mobile and Route */}
               <NavigationMenuItem>
-                <Link href="/webinars">
-                  <a className={navLinkClass}>Webinars</a>
+                <Link href="/webinars" className={navLinkClass}>
+                  Webinars
                 </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link href="/calculators">
-                  <a className={navLinkClass}>Calculators</a>
+                <Link href="/calculators" className={navLinkClass}>
+                  Calculators
                 </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link href="/interiors">
-                  <a className={navLinkClass}>Interiors</a>
+                <Link href="/interiors" className={navLinkClass}>
+                  Interiors
                 </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link href="/about-us">
-                  <a className={navLinkClass}>About Us</a>
+                <Link href="/about-us" className={navLinkClass}>
+                  About Us
                 </Link>
               </NavigationMenuItem>
             </NavigationMenuList>
@@ -124,21 +124,40 @@ export function Header() {
                 Menu
               </SheetTitle>
               <nav className="flex flex-col gap-4">
-                <Link href="/properties" onClick={() => setIsOpen(false)}>
-                  <a className="text-lg font-medium">Properties</a>
+                <Link
+                  href="/properties"
+                  onClick={() => setIsOpen(false)}
+                  className="text-lg font-medium"
+                >
+                  Properties
                 </Link>
-                {/* ✅ FIXED: Path matches desktop */}
-                <Link href="/webinars" onClick={() => setIsOpen(false)}>
-                  <a className="text-lg font-medium">Webinars</a>
+                <Link
+                  href="/webinars"
+                  onClick={() => setIsOpen(false)}
+                  className="text-lg font-medium"
+                >
+                  Webinars
                 </Link>
-                <Link href="/calculators" onClick={() => setIsOpen(false)}>
-                  <a className="text-lg font-medium">Calculators</a>
+                <Link
+                  href="/calculators"
+                  onClick={() => setIsOpen(false)}
+                  className="text-lg font-medium"
+                >
+                  Calculators
                 </Link>
-                <Link href="/interiors" onClick={() => setIsOpen(false)}>
-                  <a className="text-lg font-medium">Interiors</a>
+                <Link
+                  href="/interiors"
+                  onClick={() => setIsOpen(false)}
+                  className="text-lg font-medium"
+                >
+                  Interiors
                 </Link>
-                <Link href="/about-us" onClick={() => setIsOpen(false)}>
-                  <a className="text-lg font-medium">About Us</a>
+                <Link
+                  href="/about-us"
+                  onClick={() => setIsOpen(false)}
+                  className="text-lg font-medium"
+                >
+                  About Us
                 </Link>
                 <Button className="mt-6 w-full">Contact Us</Button>
               </nav>
