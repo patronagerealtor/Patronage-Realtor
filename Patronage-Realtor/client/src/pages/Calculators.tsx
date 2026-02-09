@@ -1136,43 +1136,129 @@ export default function Calculators() {
               </Card>
             </div>
 
-            <Accordion type="single" collapsible className="mt-8">
-              <AccordionItem
-                value="logic"
-                className="border rounded-lg bg-card px-4"
-              >
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center gap-2 text-primary font-semibold">
-                    <BookOpen className="h-4 w-4" />
-                    Calculation Logic
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground space-y-4 pb-4">
+            <Card className="mt-8 border rounded-lg bg-card p-6 md:p-8">
+              <div className="flex items-center gap-2 text-primary font-semibold mb-6">
+                <BookOpen className="h-5 w-5 shrink-0" />
+                <h3 className="text-lg">How Eligibility Calculator Works</h3>
+              </div>
+              <div className="space-y-6 text-muted-foreground text-sm md:text-base leading-relaxed">
+                <div>
+                  <h4 className="font-medium text-foreground mb-2">What it calculates</h4>
                   <p>
-                    Loan eligibility is determined by your repayment capacity:
+                    Enter your net monthly income, any current EMIs you pay, the interest rate you expect, and the loan tenure. The calculator works out how much loan you can afford. It uses your disposable income (income minus existing EMIs), applies a safe limit of 40% for recommended EMI and 50% for maximum EMI, then reverse-engineers the EMI formula to tell you the eligible loan amount and the max recommended EMI you can take on.
                   </p>
-                  <ul className="list-disc pl-5 space-y-2">
-                    <li>
-                      <strong>Disposable Income:</strong> Your monthly income
-                      minus any existing EMIs.
-                    </li>
-                    <li>
-                      <strong>Safe Monthly EMI:</strong> 40% of your disposable
-                      income (Recommended limit).
-                    </li>
-                    <li>
-                      <strong>Max EMI:</strong> 50% of your disposable income
-                      (Maximum stretch limit).
-                    </li>
-                    <li>
-                      <strong>Eligible Loan:</strong> Calculated by
-                      reverse-engineering the EMI formula using the Safe EMI,
-                      current Interest Rate, and Tenure.
-                    </li>
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground mb-2">Key terms</h4>
+                  <p>
+                    <strong>Disposable income</strong> – Your monthly income after deducting existing EMIs. <strong>Safe Monthly EMI</strong> – 40% of disposable income (recommended limit). <strong>Max EMI</strong> – 50% of disposable income (upper limit). <strong>Eligible loan</strong> – The loan amount you can service at the safe EMI for the given rate and tenure.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground mb-2">Why it matters</h4>
+                  <p>
+                    Knowing your eligibility before you shop helps you set a realistic budget and talk to banks with confidence. The calculator keeps you within safe limits so you don’t overcommit and can plan your finances better.
+                  </p>
+                </div>
+              </div>
+
+              {/* FAQs */}
+              <div className="mt-10 pt-8 border-t border-border">
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-primary shrink-0" />
+                  Frequently Asked Questions
+                </h3>
+                <Accordion type="single" collapsible className="space-y-2">
+                  <AccordionItem
+                    value="elig-faq-1"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-medium text-foreground pr-4">
+                        How does the calculator decide my eligibility?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p className="mb-2">
+                        The calculator first calculates your disposable income by subtracting your existing EMIs from your monthly income. From this disposable income:
+                      </p>
+                      <ul className="list-disc pl-5 space-y-1 mb-2">
+                        <li>Forty percent is considered a safe monthly EMI limit</li>
+                        <li>Fifty percent is considered the maximum EMI limit</li>
+                      </ul>
+                      <p>
+                        Using the safe EMI limit, the calculator reverse-calculates the loan amount you can comfortably service for the chosen interest rate and tenure.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="elig-faq-2"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-medium text-foreground pr-4">
+                        What is disposable income?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p>
+                        Disposable income is the amount of money you have left each month after paying your existing EMIs. This is the income available for taking on a new home loan safely.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="elig-faq-3"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-medium text-foreground pr-4">
+                        What is the Max EMI?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p>
+                        The Max EMI is fifty percent of your disposable income. This represents the upper limit of what banks may allow, but it is considered a stretch and may reduce your financial flexibility.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="elig-faq-4"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-medium text-foreground pr-4">
+                        Why should I check eligibility before buying a home?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p className="mb-2">Checking eligibility early helps you:</p>
+                      <ul className="list-disc pl-5 space-y-1 mb-2">
+                        <li>Set a realistic property budget</li>
+                        <li>Avoid loan rejections later</li>
+                        <li>Negotiate confidently with banks</li>
+                        <li>Prevent financial overcommitment</li>
+                      </ul>
+                      <p>It ensures you choose a home that fits your long-term financial comfort.</p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="elig-faq-5"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-medium text-foreground pr-4">
+                        Is this calculator the same as what banks use?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p>
+                        The calculator follows the same core principles used by banks, such as income-based EMI limits and standard loan formulas. Actual bank approvals may vary slightly based on credit score, employment type, and other factors, but this calculator provides a reliable estimate.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
+            </Card>
           </TabsContent>
 
           {/* --- 4. Ownership Cost --- */}
@@ -1323,7 +1409,7 @@ export default function Calculators() {
               </Card>
 
               {/* RESULTS */}
-              <Card className="lg:col-span-7 p-6 flex flex-col justify-center h-fit">
+              <Card className="lg:col-span-7 p-6 flex flex-col justify-center min-h-full">
                 <div className="space-y-6">
                   <div>
                     <p className="text-sm text-muted-foreground uppercase tracking-widest mb-2">
@@ -1395,43 +1481,142 @@ export default function Calculators() {
               </Card>
             </div>
 
-            {/* LOGIC ACCORDION */}
-            <Accordion type="single" collapsible className="mt-8">
-              <AccordionItem
-                value="logic"
-                className="border rounded-lg bg-card px-4"
-              >
-                <AccordionTrigger className="hover:no-underline">
-                  <div className="flex items-center gap-2 text-primary font-semibold">
-                    <BookOpen className="h-4 w-4" />
-                    Calculation Logic
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground space-y-4 pb-4">
-                  <ul className="list-disc pl-5 space-y-2">
-                    <li>
-                      <strong>Stamp Duty:</strong> 7% for male buyers, 6% for
-                      female buyers.
-                    </li>
-                    <li>
-                      <strong>GST:</strong> 5% for under-construction
-                      properties.
-                    </li>
-                    <li>
-                      <strong>TDS:</strong> Mandatory 1% of property value.
-                    </li>
-                    <li>
-                      <strong>Maintenance:</strong> (Cost per sq.ft × Area) ×
-                      12 × selected years (1–5).
-                    </li>
-                    <li>
-                      <strong>Registration & Advocate:</strong> User-defined
-                      charges.
-                    </li>
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+            <Card className="mt-8 border rounded-lg bg-card p-6 md:p-8">
+              <div className="flex items-center gap-2 text-primary font-semibold mb-6">
+                <BookOpen className="h-5 w-5 shrink-0" />
+                <h3 className="text-lg">How Ownership Cost Calculator Works</h3>
+              </div>
+              <div className="space-y-6 text-muted-foreground text-sm md:text-base leading-relaxed">
+                <div>
+                  <h4 className="font-medium text-foreground mb-2">What it calculates</h4>
+                  <p>
+                    Enter the base property price, your gender (for stamp duty rate), property status (under construction or ready to move), cost per sq.ft, area, number of years for maintenance, and any registration or advocate charges. The calculator adds stamp duty, GST (if under construction), TDS, maintenance over the chosen years, plus your optional charges to give you the total cost of ownership.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground mb-2">Key components</h4>
+                  <p>
+                    <strong>Stamp duty</strong> – 7% for male buyers, 6% for female buyers, on the base price. <strong>GST</strong> – 5% for under-construction properties, 0% for ready-to-move. <strong>TDS</strong> – 1% of property value. <strong>Maintenance</strong> – (Cost per sq.ft × Area) × 12 × selected years. <strong>Registration & advocate</strong> – You enter these amounts if applicable.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-medium text-foreground mb-2">Why it matters</h4>
+                  <p>
+                    Buying a property involves more than the listed price. This calculator shows you the full amount you will need—including taxes and other charges—so you can budget accurately and avoid surprises at the time of purchase.
+                  </p>
+                </div>
+              </div>
+
+              {/* FAQs */}
+              <div className="mt-10 pt-8 border-t border-border">
+                <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-primary shrink-0" />
+                  Frequently Asked Questions
+                </h3>
+                <Accordion type="single" collapsible className="space-y-2">
+                  <AccordionItem
+                    value="own-faq-1"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-medium text-foreground pr-4">
+                        How is stamp duty calculated?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p className="mb-2">Stamp duty is calculated based on the buyer&apos;s gender:</p>
+                      <ul className="list-disc pl-5 space-y-1 mb-2">
+                        <li>For male buyers, stamp duty is calculated at seven percent of the base property price</li>
+                        <li>For female buyers, stamp duty is calculated at six percent of the base property price</li>
+                      </ul>
+                      <p>This reflects the benefit offered to female buyers in many states.</p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="own-faq-2"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-medium text-foreground pr-4">
+                        What is TDS and how is it calculated?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p>
+                        TDS stands for Tax Deducted at Source. It is calculated as one percent of the base property price and is applicable as per current tax rules when purchasing property above the specified value.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="own-faq-3"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-medium text-foreground pr-4">
+                        How is maintenance cost calculated?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p className="mb-2">Maintenance cost is calculated using the following method:</p>
+                      <ul className="list-disc pl-5 space-y-1 mb-2">
+                        <li>First, the monthly maintenance is calculated by multiplying the cost per square foot with the total area</li>
+                        <li>Then, this monthly amount is multiplied by twelve and by the number of years selected</li>
+                      </ul>
+                      <p>This gives the total maintenance amount collected in advance.</p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="own-faq-4"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-medium text-foreground pr-4">
+                        What are registration and advocate charges?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p>
+                        Registration and advocate charges are additional costs involved in the legal transfer of the property. These amounts can vary, so the calculator allows you to enter them manually if applicable.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="own-faq-5"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-medium text-foreground pr-4">
+                        Why should I use the Ownership Cost Calculator?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p className="mb-2">Many buyers focus only on the property price and underestimate additional costs. This calculator helps you:</p>
+                      <ul className="list-disc pl-5 space-y-1 mb-2">
+                        <li>Plan your finances accurately</li>
+                        <li>Avoid last minute surprises</li>
+                        <li>Understand the true cost of ownership</li>
+                        <li>Make informed decisions before finalizing a property</li>
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem
+                    value="own-faq-6"
+                    className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
+                  >
+                    <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                      <span className="text-left font-medium text-foreground pr-4">
+                        Is this calculator accurate for real life purchases?
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                      <p>
+                        The calculator follows commonly used real world rules and government charges. Actual amounts may vary slightly depending on state laws, builder policies, and individual agreements, but the calculator provides a reliable and practical estimate.
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </div>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>
