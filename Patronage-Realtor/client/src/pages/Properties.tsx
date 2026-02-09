@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { PropertySearch } from "@/components/home/PropertySearch";
@@ -10,73 +11,21 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/shared/PlaceholderImage";
-import { MapPin, Bed, Bath, Square } from "lucide-react";
-import { useEffect } from "react";
-
-const ALL_PROPERTIES = [
-  {
-    id: 1,
-    title: "Modern Villa",
-    location: "Beverly Hills, CA",
-    price: "$2,500,000",
-    beds: 4,
-    baths: 3,
-    sqft: "3,200",
-    status: "For Sale",
-  },
-  {
-    id: 2,
-    title: "Downtown Loft",
-    location: "New York, NY",
-    price: "$1,200,000",
-    beds: 2,
-    baths: 2,
-    sqft: "1,400",
-    status: "For Rent",
-  },
-  {
-    id: 3,
-    title: "Seaside Condo",
-    location: "Miami, FL",
-    price: "$850,000",
-    beds: 3,
-    baths: 2,
-    sqft: "1,800",
-    status: "For Sale",
-  },
-  {
-    id: 4,
-    title: "Mountain Retreat",
-    location: "Aspen, CO",
-    price: "$3,100,000",
-    beds: 5,
-    baths: 4,
-    sqft: "4,500",
-    status: "For Sale",
-  },
-  {
-    id: 5,
-    title: "Lakeside Cottage",
-    location: "Lake Tahoe, CA",
-    price: "$950,000",
-    beds: 3,
-    baths: 2,
-    sqft: "2,100",
-    status: "For Sale",
-  },
-  {
-    id: 6,
-    title: "City Penthouse",
-    location: "Chicago, IL",
-    price: "$1,800,000",
-    beds: 3,
-    baths: 3,
-    sqft: "2,800",
-    status: "For Rent",
-  },
-];
+import { PropertyDetailDialog } from "@/components/shared/PropertyDetailDialog";
+import { MapPin, Bed, Bath, Square, Building2, Home } from "lucide-react";
+import { useProperties } from "@/hooks/use-properties";
+import type { PropertyRow } from "@/lib/supabase";
 
 export default function Properties() {
+  const { properties } = useProperties();
+  const [detailProperty, setDetailProperty] = useState<PropertyRow | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
+
+  const openDetail = (property: PropertyRow) => {
+    setDetailProperty(property);
+    setDetailOpen(true);
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -107,7 +56,7 @@ export default function Properties() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {ALL_PROPERTIES.map((property) => (
+          {properties.map((property) => (
             <Card
               key={property.id}
               className="overflow-hidden group border-border shadow-sm hover:shadow-md transition-shadow"
@@ -117,11 +66,19 @@ export default function Properties() {
                   {property.status}
                 </Badge>
                 <div className="overflow-hidden h-64">
-                  <PlaceholderImage
-                    height="h-full"
-                    text="Property Image"
-                    className="rounded-none group-hover:scale-105 transition-transform duration-500"
-                  />
+                  {property.image_url ? (
+                    <img
+                      src={property.image_url}
+                      alt={property.title}
+                      className="w-full h-full object-cover rounded-none group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <PlaceholderImage
+                      height="h-full"
+                      text="Property Image"
+                      className="rounded-none group-hover:scale-105 transition-transform duration-500"
+                    />
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="p-6">
@@ -133,11 +90,26 @@ export default function Properties() {
                     {property.price}
                   </span>
                 </div>
-
-                <div className="flex items-center text-muted-foreground text-sm mb-4">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  {property.location}
-                </div>
+                {property.developer ? (
+                  <div className="flex items-center text-muted-foreground text-sm mb-1">
+                    <Building2 className="h-4 w-4 mr-1 shrink-0" />
+                    <span>{property.developer}</span>
+                  </div>
+                ) : null}
+                {property.location ? (
+                  <div className="flex items-center text-muted-foreground text-sm mb-1">
+                    <MapPin className="h-4 w-4 mr-1 shrink-0" />
+                    <span>{property.location}</span>
+                  </div>
+                ) : null}
+                {property.property_type ? (
+                  <div className="flex items-center text-muted-foreground text-sm mb-4">
+                    <Home className="h-4 w-4 mr-1 shrink-0" />
+                    <span>{property.property_type}</span>
+                  </div>
+                ) : (
+                  <div className="mb-4" />
+                )}
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground pt-4 border-t border-border">
                   <span className="flex items-center gap-1">
@@ -147,12 +119,16 @@ export default function Properties() {
                     <Bath className="h-4 w-4" /> {property.baths} Baths
                   </span>
                   <span className="flex items-center gap-1">
-                    <Square className="h-4 w-4" /> {property.sqft} sqft
+                    <Square className="h-4 w-4" /> {property.sqft} sq.ft
                   </span>
                 </div>
               </CardContent>
               <CardFooter className="p-6 pt-0">
-                <Button className="w-full" variant="outline">
+                <Button
+                  className="w-full"
+                  variant="outline"
+                  onClick={() => openDetail(property)}
+                >
                   View Details
                 </Button>
               </CardFooter>
@@ -160,6 +136,16 @@ export default function Properties() {
           ))}
         </div>
       </main>
+
+      <PropertyDetailDialog
+        property={detailProperty}
+        open={detailOpen}
+        onOpenChange={(open) => {
+          setDetailOpen(open);
+          if (!open) setDetailProperty(null);
+        }}
+        similarProperties={properties.filter((p) => p.id !== detailProperty?.id).slice(0, 4)}
+      />
 
       <Footer />
     </div>
