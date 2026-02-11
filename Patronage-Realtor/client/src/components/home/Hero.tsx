@@ -23,7 +23,7 @@ type TagItemProps = {
   message: string;
 };
 
-function TagItem({ text, link, message }: TagItemProps): JSX.Element {
+function TagItem({ text, link, message }: TagItemProps) {
   return (
     <motion.div
       variants={tagItemVariants}
@@ -39,7 +39,7 @@ function TagItem({ text, link, message }: TagItemProps): JSX.Element {
         {text}
       </a>
 
-      {/* Tooltip: Hidden on mobile (touch devices), visible on hover for desktop */}
+      {/* Tooltip */}
       <div className="pointer-events-none absolute left-1/2 bottom-full mb-3 w-64 -translate-x-1/2 rounded-xl bg-background border border-border p-4 text-sm text-muted-foreground shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 hidden md:block">
         {message}
       </div>
@@ -47,13 +47,15 @@ function TagItem({ text, link, message }: TagItemProps): JSX.Element {
   );
 }
 
-export function Hero(): JSX.Element {
+export function Hero() {
   const [, setLocation] = useLocation();
   const [titleNumber, setTitleNumber] = useState<number>(0);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      setTitleNumber((prev) => (prev === TITLES.length - 1 ? 0 : prev + 1));
+      setTitleNumber((prev) =>
+        prev === TITLES.length - 1 ? 0 : prev + 1,
+      );
     }, 2000);
 
     return () => clearTimeout(timeoutId);
@@ -77,16 +79,21 @@ export function Hero(): JSX.Element {
           >
             <h1 className="text-5xl md:text-7xl lg:text-7xl font-heading font-bold tracking-tight leading-[1.15]">
               Find a place you will call{" "}
-              <span className="group relative inline-flex items-center px-1 py-1">
-                <span className="inline-block min-w-[9ch] text-center">
+              <span className="relative inline-flex items-center px-1">
+                <span className="inline-block min-w-[9ch] text-center perspective-[800px]">
                   <AnimatePresence mode="wait">
                     <motion.span
                       key={titleNumber}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.45, ease: "easeOut" }}
-                      className="relative z-10 text-muted-foreground inline-block"
+                      initial={{ opacity: 0, y: 10, rotateX: -90 }}
+                      animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                      exit={{ opacity: 0, y: -10, rotateX: 90 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      className="
+                        inline-block
+                        text-transparent bg-clip-text
+                        bg-gradient-to-br from-primary via-primary/80 to-primary/60
+                        font-bold
+                      "
                     >
                       {TITLES[titleNumber]}
                     </motion.span>
@@ -142,16 +149,15 @@ export function Hero(): JSX.Element {
             </motion.div>
           </div>
 
-          {/* Tagline Section - Optimized for Mobile */}
+          {/* Tagline Section */}
           <motion.div
             initial="hidden"
             animate="visible"
             transition={{ delay: 0.3 }}
             variants={{
               hidden: {},
-              visible: { transition: { staggerChildren: 0.2 } }, // Stagger hyperlinks
+              visible: { transition: { staggerChildren: 0.2 } },
             }}
-            // CHANGED: Flex-col on mobile, flex-row on md. Adjusted gaps.
             className="mt-12 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-center"
           >
             <TagItem
@@ -159,7 +165,6 @@ export function Hero(): JSX.Element {
               link="/properties"
               message="Visualize your perfect home with confidence and clarity."
             />
-            {/* Separator hidden on mobile */}
             <span className="hidden md:inline text-muted-foreground">·</span>
 
             <TagItem
@@ -167,7 +172,6 @@ export function Hero(): JSX.Element {
               link="/ownership"
               message="Make informed decisions and turn your dream into reality."
             />
-            {/* Separator hidden on mobile */}
             <span className="hidden md:inline text-muted-foreground">·</span>
 
             <TagItem
