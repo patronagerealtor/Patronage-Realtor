@@ -87,7 +87,7 @@ export const Scene = () => {
 
   return (
     <div className="w-full h-full z-0 pointer-events-none">
-      <Canvas camera={{ position: cameraPosition, fov: 40 }} gl={{ antialias: true, alpha: true }}>
+      <Canvas camera={{ position: cameraPosition as [number, number, number], fov: 40 }} gl={{ antialias: true, alpha: true }}>
         <ambientLight intensity={15} />
         <directionalLight position={[10, 10, 5]} intensity={15} />
         <AnimatedBoxes />
