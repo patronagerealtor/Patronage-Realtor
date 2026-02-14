@@ -23,7 +23,7 @@ type TagItemProps = {
   message: string;
 };
 
-function TagItem({ text, link, message }: TagItemProps): JSX.Element {
+function TagItem({ text, link, message }: TagItemProps) {
   return (
     <motion.div
       variants={tagItemVariants}
@@ -47,7 +47,7 @@ function TagItem({ text, link, message }: TagItemProps): JSX.Element {
   );
 }
 
-export function Hero(): JSX.Element {
+export function Hero() {
   const [, setLocation] = useLocation();
   const [titleNumber, setTitleNumber] = useState<number>(0);
 
