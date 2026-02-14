@@ -292,7 +292,10 @@ export default function DataEntry() {
               </Button>
               <Button
                 variant="outline"
-                onClick={() => previewId && setPreviewId(previewId)}
+                onClick={() => {
+                  const id = editingId ?? previewId;
+                  if (id) setPreviewId(id);
+                }}
                 disabled={!previewId && !editingId}
               >
                 Preview
