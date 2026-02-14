@@ -3,14 +3,12 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { PlaceholderImage } from "@/components/shared/PlaceholderImage";
 import { MapPin, Bed, Bath, Square, ArrowRight } from "lucide-react";
-
-const FEATURED_PROPERTIES = [
-  { id: 1, title: "Modern Villa", location: "Beverly Hills, CA", price: "$2,500,000", beds: 4, baths: 3, sqft: "3,200", status: "For Sale" },
-  { id: 2, title: "Downtown Loft", location: "New York, NY", price: "$1,200,000", beds: 2, baths: 2, sqft: "1,400", status: "For Rent" },
-  { id: 3, title: "Seaside Condo", location: "Miami, FL", price: "$850,000", beds: 3, baths: 2, sqft: "1,800", status: "For Sale" },
-];
+import { useProperties } from "@/hooks/useProperties";
 
 export function FeaturedProperties() {
+  const { properties } = useProperties();
+  const featured = properties.slice(0, 3);
+
   return (
     <section id="featured-properties" className="container mx-auto px-4 py-16 md:py-24">
       <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
@@ -25,7 +23,7 @@ export function FeaturedProperties() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {FEATURED_PROPERTIES.slice(0, 3).map((property) => (
+        {featured.map((property) => (
           <Card key={property.id} className="overflow-hidden group border-border shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="p-0 relative">
               <Badge className="absolute top-4 left-4 z-10 bg-background/90 text-foreground backdrop-blur-sm shadow-sm">{property.status}</Badge>

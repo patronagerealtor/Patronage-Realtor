@@ -10,76 +10,20 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PlaceholderImage } from "@/components/shared/PlaceholderImage";
+import { PropertyDetailDialog } from "@/components/shared/PropertyDetailDialog";
+import { useProperties } from "@/hooks/useProperties";
 import { MapPin, Bed, Bath, Square } from "lucide-react";
-import { useEffect } from "react";
-
-const ALL_PROPERTIES = [
-  {
-    id: 1,
-    title: "Modern Villa",
-    location: "Beverly Hills, CA",
-    price: "$2,500,000",
-    beds: 4,
-    baths: 3,
-    sqft: "3,200",
-    status: "For Sale",
-  },
-  {
-    id: 2,
-    title: "Downtown Loft",
-    location: "New York, NY",
-    price: "$1,200,000",
-    beds: 2,
-    baths: 2,
-    sqft: "1,400",
-    status: "For Rent",
-  },
-  {
-    id: 3,
-    title: "Seaside Condo",
-    location: "Miami, FL",
-    price: "$850,000",
-    beds: 3,
-    baths: 2,
-    sqft: "1,800",
-    status: "For Sale",
-  },
-  {
-    id: 4,
-    title: "Mountain Retreat",
-    location: "Aspen, CO",
-    price: "$3,100,000",
-    beds: 5,
-    baths: 4,
-    sqft: "4,500",
-    status: "For Sale",
-  },
-  {
-    id: 5,
-    title: "Lakeside Cottage",
-    location: "Lake Tahoe, CA",
-    price: "$950,000",
-    beds: 3,
-    baths: 2,
-    sqft: "2,100",
-    status: "For Sale",
-  },
-  {
-    id: 6,
-    title: "City Penthouse",
-    location: "Chicago, IL",
-    price: "$1,800,000",
-    beds: 3,
-    baths: 3,
-    sqft: "2,800",
-    status: "For Rent",
-  },
-];
+import { useEffect, useState } from "react";
 
 export default function Properties() {
+  const { properties, byId } = useProperties();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const selectedProperty = selectedId ? byId.get(selectedId) : undefined;
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
@@ -107,7 +51,7 @@ export default function Properties() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {ALL_PROPERTIES.map((property) => (
+          {properties.map((property) => (
             <Card
               key={property.id}
               className="overflow-hidden group border-border shadow-sm hover:shadow-md transition-shadow"
@@ -152,7 +96,11 @@ export default function Properties() {
                 </div>
               </CardContent>
               <CardFooter className="p-6 pt-0">
-                <Button className="w-full" variant="outline">
+                <Button
+                  className="w-full"
+                  variant="outline"
+                  onClick={() => setSelectedId(property.id)}
+                >
                   View Details
                 </Button>
               </CardFooter>
@@ -162,6 +110,15 @@ export default function Properties() {
       </main>
 
       <Footer />
+
+      <PropertyDetailDialog
+        open={!!selectedId}
+        onOpenChange={(o) => !o && setSelectedId(null)}
+        property={selectedProperty}
+        onEdit={(id) => {
+          window.location.href = `/data-entry?edit=${encodeURIComponent(id)}`;
+        }}
+      />
     </div>
   );
 }
