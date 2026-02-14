@@ -64,7 +64,8 @@ export function PropertyDetailDialog({
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const [floorPlanTab, setFloorPlanTab] = useState(0);
   const [mapToggle, setMapToggle] = useState<"map" | "satellite">("map");
-  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  // Use HTMLElement here because ref callbacks on section elements can be generic HTMLElements.
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const data = property
