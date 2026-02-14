@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Scene } from "@/components/ui/hero-section";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -453,16 +454,11 @@ export default function Interiors() {
       {/* Hero Section */}
       <section
         id="hero"
-        className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
-        style={{
-          backgroundImage:
-            "url(https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1920&h=1080&fit=crop)",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundAttachment: "fixed",
-        }}
+        className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-gradient-to-br from-[#000] to-[#1A2428] text-white"
       >
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0">
+          <Scene />
+        </div>
         <div
           className="relative z-10 container mx-auto px-4 text-center"
           style={{
