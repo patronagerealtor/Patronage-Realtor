@@ -93,6 +93,8 @@ export function WhyChooseUs() {
             <motion.div
               key={idx}
               variants={cardVariants}
+              whileHover={{ y: -8, scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
               className="
                 group relative bg-card border border-border
                 p-6 md:p-8 rounded-lg text-center

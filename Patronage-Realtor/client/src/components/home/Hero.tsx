@@ -2,11 +2,17 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Calculator } from "lucide-react";
 import { useLocation } from "wouter";
 import { BackgroundPaths } from "@/components/ui/background-paths";
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
+import {
+  motion,
+  AnimatePresence,
+  Variants,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 
 // Static data outside component
-const TITLES = ["Home", "Sanctuary", "Space", "Haven", "Dream"];
+const TITLES = ["Home", "Sanctuary", "Space", "Heaven", "Dream"];
 
 const tagItemVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
@@ -39,7 +45,6 @@ function TagItem({ text, link, message }: TagItemProps) {
         {text}
       </a>
 
-      {/* Tooltip */}
       <div className="pointer-events-none absolute left-1/2 bottom-full mb-3 w-64 -translate-x-1/2 rounded-xl bg-background border border-border p-4 text-sm text-muted-foreground shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-50 hidden md:block">
         {message}
       </div>
@@ -50,6 +55,17 @@ function TagItem({ text, link, message }: TagItemProps) {
 export function Hero() {
   const [, setLocation] = useLocation();
   const [titleNumber, setTitleNumber] = useState<number>(0);
+
+  // ✅ Scroll Fade + Scale Effect
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -62,7 +78,11 @@ export function Hero() {
   }, [titleNumber]);
 
   return (
-    <section className="relative w-full py-20 md:py-32 lg:py-40 overflow-hidden flex items-center justify-center min-h-[70vh]">
+    <motion.section
+      ref={sectionRef}
+      style={{ opacity, scale }} // ✅ Scroll effect applied
+      className="relative w-full py-20 md:py-32 lg:py-40 overflow-hidden flex items-center justify-center min-h-[70vh]"
+    >
       <div className="absolute inset-0 z-0">
         <BackgroundPaths />
         <div className="absolute inset-0 bg-background/20" />
@@ -70,7 +90,7 @@ export function Hero() {
 
       <div className="container relative z-20 mx-auto px-4">
         <div className="flex flex-col items-center text-center space-y-2">
-          {/* Heading */}
+          {/* Heading Entry Animation */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -182,6 +202,6 @@ export function Hero() {
           </motion.div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
