@@ -87,8 +87,8 @@ export default function Calculators() {
   // --- 3. Rent vs Buy State ---
   const [rvbRent, setRvbRent] = useState(20000);
   const [rvbPrice, setRvbPrice] = useState(5000000);
-  const [rvbEmi, setRvbEmi] = useState(35000);
-  const [rvbHorizon, setRvbHorizon] = useState(10);
+  const [rvbEmi, setRvbEmi] = useState(43391);
+  const [rvbHorizon, setRvbHorizon] = useState(20);
   const [rvbResults, setRvbResults] = useState({
     totalRent: 0,
     totalEmi: 0,
@@ -220,7 +220,7 @@ export default function Calculators() {
       AssetValue: number;
     }[] = [];
 
-    for (let i = 1; i <= smartTenure; i++) {
+    for (let i = 1; i <= rvbHorizon; i++) {
       totalRentOutflow += currentRent * 12;
       totalBuyingOutflow += rvbEmi * 12;
 
@@ -296,15 +296,17 @@ export default function Calculators() {
     if (emi > disposableIncome * 0.5) verdict = "Risky";
     else if (emi > safeMonthlyEmi) verdict = "Stretch";
 
-    // Update Shared state when Smart EMI calculation runs
-    setEligIncome(smartIncome);
-    setEligEmi(smartExistingEmi);
-    setEligInterestRate(smartInterestRate);
-    setEligTenure(smartTenure);
+    // Update Shared state only while working in Smart EMI tab
+    // (prevents overriding user-entered values in other calculators)
+    if (activeTab === "smart-emi") {
+      setEligIncome(smartIncome);
+      setEligEmi(smartExistingEmi);
+      setEligInterestRate(smartInterestRate);
+      setEligTenure(smartTenure);
 
-    setRvbPrice(smartLoanAmount);
-    setRvbEmi(Math.round(emi));
-    setRvbHorizon(Math.min(smartTenure, 30)); // Sync horizon as well if appropriate
+      setRvbPrice(smartLoanAmount);
+      setRvbEmi(Math.round(emi));
+    }
 
     // Simplified Prepayment Logic
     let revisedMonths = 0;
