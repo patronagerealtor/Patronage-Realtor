@@ -13,7 +13,7 @@ import { PlaceholderImage } from "@/components/shared/PlaceholderImage";
 import type { Property } from "@/lib/propertyStore";
 import { Bath, Bed, MapPin, Square } from "lucide-react";
 
-type Props = {
+export type PropertyDetailDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   property?: Property;
@@ -25,7 +25,7 @@ export function PropertyDetailDialog({
   onOpenChange,
   property,
   onEdit,
-}: Props) {
+}: PropertyDetailDialogProps) {
   if (!property) return null;
 
   const imageUrl = property.images?.[0];
