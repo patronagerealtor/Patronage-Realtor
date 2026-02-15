@@ -62,4 +62,3 @@ The frontend follows a modular component-based architecture:
 - Nodemailer (email services)
 - Passport with passport-local (authentication)
 
-

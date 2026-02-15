@@ -1,0 +1,15 @@
+{
+  "name": "@patronage/server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "dev:server": "cross-env NODE_ENV=development tsx src/index.ts",
+    "build": "tsx ../../scripts/build.ts",
+    "start": "node dist/index.cjs",
+    "check": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
