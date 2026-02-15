@@ -1,6 +1,16 @@
 # Importing property details from Supabase
 
-Property listings on the **Home** (Featured Properties) and **Properties** pages are loaded from your Supabase database when configured. The app **maps your schema** to the UI as follows:
+Property listings on the **Home** (Featured Properties) and **Properties** pages are loaded from your Supabase database when configured.
+
+## DataEntry: Add, Edit, Delete properties
+
+The **Admin Data Entry** page (`/data-entry`) supports full CRUD when linked to Supabase. It uses a dedicated table `property_listings`:
+
+1. Run the SQL migration: open `docs/supabase-property-listings.sql` and execute it in Supabase Dashboard → SQL Editor.
+2. Ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set in `.env`.
+3. Visit `/data-entry` to add, edit, or delete properties. Data is stored in Supabase.
+
+If Supabase is not configured, DataEntry falls back to localStorage. The app **maps your schema** to the UI as follows:
 
 | Your column            | Shown in app as     |
 |------------------------|---------------------|
