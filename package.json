@@ -1,16 +1,25 @@
 {
-  "name": "workspace",
+  "name": "patronage-realtor",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "license": "MIT",
+  "description": "Patronage Realtor - Monorepo",
+  "workspaces": [
+    "packages/client",
+    "packages/server",
+    "packages/shared"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "npm --workspace=packages/server run dev",
+    "dev:client": "npm --workspace=packages/client run dev",
+    "dev:server": "npm --workspace=packages/server run dev:server",
+    "build": "npm --workspace=packages/server run build",
+    "build:client": "npm --workspace=packages/client run build",
+    "start": "npm --workspace=packages/server run start",
+    "check": "npm run check --workspaces"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "@radix-ui/react-slider": "^1.3.6",
-    "lottie-react": "^2.4.1"
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "npm-run-all": "^4.1.5"
   }
 }
