@@ -132,8 +132,6 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
     };
   });
 }
-<<<<<<< HEAD:Patronage-Realtor/client/src/lib/supabase.ts
-=======
 
 // ---------------------------------------------------------------------------
 // DataEntry: property_listings table (CRUD for add, edit, delete)
@@ -183,39 +181,43 @@ export async function fetchPropertyListings(): Promise<PropertyListingRow[]> {
   }));
 }
 
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export async function insertPropertyListing(
   row: Omit<PropertyListingRow, "id">,
   id?: string
 ): Promise<string | null> {
   if (!supabase) return null;
+  const isUuid = id && UUID_REGEX.test(id);
   const newId =
-    id ??
-    (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    isUuid ? id : typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
       ? crypto.randomUUID()
-      : `prop_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+      : null;
+  const payload = {
+    ...(newId ? { id: newId } : {}),
+    title: row.title,
+    location: row.location,
+    price: row.price,
+    beds: row.beds,
+    baths: row.baths,
+    sqft: row.sqft,
+    status: row.status,
+    description: row.description || null,
+    images: row.images ?? [],
+    amenities: row.amenities ?? [],
+    highlights: row.highlights ?? [],
+  };
   const { data, error } = await supabase
     .from(PROPERTY_LISTINGS_TABLE)
-    .insert({
-      id: newId,
-      title: row.title,
-      location: row.location,
-      price: row.price,
-      beds: row.beds,
-      baths: row.baths,
-      sqft: row.sqft,
-      status: row.status,
-      description: row.description || null,
-      images: row.images ?? [],
-      amenities: row.amenities ?? [],
-      highlights: row.highlights ?? [],
-    })
+    .insert(payload)
     .select("id")
     .single();
   if (error) {
     console.error("[Supabase] insert property_listings error:", error);
     return null;
   }
-  return data?.id ? String(data.id) : newId;
+  return data?.id ? String(data.id) : newId ?? null;
 }
 
 export async function updatePropertyListing(
@@ -258,4 +260,3 @@ export async function deletePropertyListing(id: string): Promise<boolean> {
   }
   return true;
 }
->>>>>>> cursor/project-run-configuration-d59a:packages/client/src/lib/supabase.ts

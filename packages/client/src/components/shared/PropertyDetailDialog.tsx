@@ -14,15 +14,10 @@ import {
   ArrowLeft,
   ChevronDown,
   LayoutGrid,
-<<<<<<< HEAD:Patronage-Realtor/client/src/components/shared/PropertyDetailDialog.tsx
-} from "lucide-react";
-import type { PropertyRow } from "@/lib/supabase";
-=======
   Pencil,
 } from "lucide-react";
-import type { PropertyRow } from "../../lib/supabase";
-import type { Property } from "../../lib/propertyStore";
->>>>>>> cursor/project-run-configuration-d59a:packages/client/src/components/shared/PropertyDetailDialog.tsx
+import type { PropertyRow } from "@/lib/supabase";
+import type { Property } from "@/lib/propertyStore";
 
 const TABS = [
   "Overview",
@@ -55,16 +50,10 @@ const FLOOR_PLANS = [
 ];
 
 type PropertyDetailDialogProps = {
-<<<<<<< HEAD:Patronage-Realtor/client/src/components/shared/PropertyDetailDialog.tsx
-  property: PropertyRow | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-=======
   property: PropertyRow | Property | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEdit?: (id: string) => void;
->>>>>>> cursor/project-run-configuration-d59a:packages/client/src/components/shared/PropertyDetailDialog.tsx
   similarProperties?: PropertyRow[];
 };
 
@@ -72,20 +61,14 @@ export function PropertyDetailDialog({
   property,
   open,
   onOpenChange,
-<<<<<<< HEAD:Patronage-Realtor/client/src/components/shared/PropertyDetailDialog.tsx
-=======
   onEdit,
->>>>>>> cursor/project-run-configuration-d59a:packages/client/src/components/shared/PropertyDetailDialog.tsx
   similarProperties = [],
 }: PropertyDetailDialogProps) {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("Overview");
   const [aboutExpanded, setAboutExpanded] = useState(false);
   const [floorPlanTab, setFloorPlanTab] = useState(0);
   const [mapToggle, setMapToggle] = useState<"map" | "satellite">("map");
-<<<<<<< HEAD:Patronage-Realtor/client/src/components/shared/PropertyDetailDialog.tsx
-  // Use HTMLElement here because ref callbacks on section elements can be generic HTMLElements.
-=======
->>>>>>> cursor/project-run-configuration-d59a:packages/client/src/components/shared/PropertyDetailDialog.tsx
+
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -170,8 +153,6 @@ export function PropertyDetailDialog({
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-<<<<<<< HEAD:Patronage-Realtor/client/src/components/shared/PropertyDetailDialog.tsx
-=======
         {onEdit && property && (
           <button
             type="button"
@@ -182,7 +163,6 @@ export function PropertyDetailDialog({
             Edit
           </button>
         )}
->>>>>>> cursor/project-run-configuration-d59a:packages/client/src/components/shared/PropertyDetailDialog.tsx
         <nav className="flex min-w-0 flex-1 gap-1 overflow-x-auto py-1">
           {TABS.map((tab) => (
             <button

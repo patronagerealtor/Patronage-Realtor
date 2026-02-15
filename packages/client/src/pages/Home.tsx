@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-<<<<<<< HEAD:Patronage-Realtor/client/src/pages/Home.tsx
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/home/Hero";
@@ -11,19 +10,6 @@ import { Interiors } from "@/components/home/Interiors";
 import { AboutPreview } from "@/components/home/AboutPreview";
 import { ContactCTA } from "@/components/home/ContactCTA";
 import { Chatbot } from "@/components/shared/Chatbot";
-=======
-import { Header } from "../components/layout/Header";
-import { Footer } from "../components/layout/Footer";
-import { Hero } from "../components/home/Hero";
-import { Reels } from "../components/home/Reels";
-import { WhyChooseUs } from "../components/home/WhyChooseUs";
-import { FeaturedProperties } from "../components/home/FeaturedProperties";
-import { PropertySearch } from "../components/home/PropertySearch";
-import { Interiors } from "../components/home/Interiors";
-import { AboutPreview } from "../components/home/AboutPreview";
-import { ContactCTA } from "../components/home/ContactCTA";
-import { Chatbot } from "../components/shared/Chatbot";
->>>>>>> cursor/project-run-configuration-d59a:packages/client/src/pages/Home.tsx
 
 export default function Home() {
   useEffect(() => {

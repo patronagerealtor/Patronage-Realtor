@@ -3,11 +3,7 @@ import {
   fetchPropertiesFromSupabase,
   checkSupabaseConnection,
   type PropertyRow,
-<<<<<<< HEAD:Patronage-Realtor/client/src/hooks/use-properties.ts
 } from "@/lib/supabase";
-=======
-} from "../lib/supabase";
->>>>>>> cursor/project-run-configuration-d59a:packages/client/src/hooks/use-properties.ts
 import { useEffect } from "react";
 
 const FALLBACK_PROPERTIES: PropertyRow[] = [

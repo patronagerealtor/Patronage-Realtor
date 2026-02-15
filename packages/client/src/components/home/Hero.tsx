@@ -1,11 +1,7 @@
 import { Button } from "../ui/button";
 import { ArrowRight, Calculator } from "lucide-react";
 import { useLocation } from "wouter";
-<<<<<<< HEAD:Patronage-Realtor/client/src/components/home/Hero.tsx
 import { BackgroundPaths } from "@/components/ui/background-paths";
-=======
-import { BackgroundPaths } from "../ui/background-paths";
->>>>>>> cursor/project-run-configuration-d59a:packages/client/src/components/home/Hero.tsx
 import { useEffect, useState, useRef } from "react";
 import {
   motion,
