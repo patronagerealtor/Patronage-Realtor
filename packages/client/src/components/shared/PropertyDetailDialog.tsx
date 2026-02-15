@@ -14,8 +14,10 @@ import {
   ArrowLeft,
   ChevronDown,
   LayoutGrid,
+  Pencil,
 } from "lucide-react";
 import type { PropertyRow } from "../../lib/supabase";
+import type { Property } from "../../lib/propertyStore";
 
 const TABS = [
   "Overview",
@@ -48,9 +50,10 @@ const FLOOR_PLANS = [
 ];
 
 type PropertyDetailDialogProps = {
-  property: PropertyRow | null;
+  property: PropertyRow | Property | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onEdit?: (id: string) => void;
   similarProperties?: PropertyRow[];
 };
 
@@ -58,6 +61,7 @@ export function PropertyDetailDialog({
   property,
   open,
   onOpenChange,
+  onEdit,
   similarProperties = [],
 }: PropertyDetailDialogProps) {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("Overview");
@@ -148,6 +152,16 @@ export function PropertyDetailDialog({
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
+        {onEdit && property && (
+          <button
+            type="button"
+            onClick={() => onEdit(String(property.id))}
+            className="flex h-9 shrink-0 items-center gap-2 rounded-md border border-border px-3 text-sm font-medium text-foreground hover:bg-accent"
+          >
+            <Pencil className="h-4 w-4" />
+            Edit
+          </button>
+        )}
         <nav className="flex min-w-0 flex-1 gap-1 overflow-x-auto py-1">
           {TABS.map((tab) => (
             <button

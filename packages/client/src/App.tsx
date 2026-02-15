@@ -10,6 +10,7 @@ import Interiors from "./pages/Interiors";
 import AboutUs from "./pages/AboutUs";
 import Calculators from "./pages/Calculators";
 import NotFound from "./pages/not-found";
+import DataEntry from "./pages/DataEntry";
 
 // ✅ FIX 1: Use curly braces { } for named import
 import { Webinar } from "./pages/Webinar";
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/interiors" component={Interiors} />
       <Route path="/about-us" component={AboutUs} />
       <Route path="/calculators" component={Calculators} />
+      <Route path="/data-entry" component={DataEntry} />
       <Route component={NotFound} />
     </Switch>
   );

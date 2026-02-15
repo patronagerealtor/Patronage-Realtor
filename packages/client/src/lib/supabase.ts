@@ -132,3 +132,127 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
     };
   });
 }
+
+// ---------------------------------------------------------------------------
+// DataEntry: property_listings table (CRUD for add, edit, delete)
+// Run the SQL in docs/supabase-property-listings.sql to create the table.
+// ---------------------------------------------------------------------------
+
+export type PropertyListingRow = {
+  id: string;
+  title: string;
+  location: string;
+  price: string;
+  beds: number;
+  baths: number;
+  sqft: string;
+  status: string;
+  description: string | null;
+  images: string[];
+  amenities: string[];
+  highlights: string[];
+};
+
+const PROPERTY_LISTINGS_TABLE = "property_listings";
+
+export async function fetchPropertyListings(): Promise<PropertyListingRow[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from(PROPERTY_LISTINGS_TABLE)
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("[Supabase] fetch property_listings error:", error);
+    return [];
+  }
+  return (data ?? []).map((row) => ({
+    id: String(row.id),
+    title: row.title ?? "",
+    location: row.location ?? "",
+    price: row.price ?? "",
+    beds: Number(row.beds ?? 0),
+    baths: Number(row.baths ?? 0),
+    sqft: String(row.sqft ?? ""),
+    status: row.status ?? "For Sale",
+    description: row.description ?? null,
+    images: Array.isArray(row.images) ? row.images : [],
+    amenities: Array.isArray(row.amenities) ? row.amenities : [],
+    highlights: Array.isArray(row.highlights) ? row.highlights : [],
+  }));
+}
+
+export async function insertPropertyListing(
+  row: Omit<PropertyListingRow, "id">,
+  id?: string
+): Promise<string | null> {
+  if (!supabase) return null;
+  const newId =
+    id ??
+    (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `prop_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+  const { data, error } = await supabase
+    .from(PROPERTY_LISTINGS_TABLE)
+    .insert({
+      id: newId,
+      title: row.title,
+      location: row.location,
+      price: row.price,
+      beds: row.beds,
+      baths: row.baths,
+      sqft: row.sqft,
+      status: row.status,
+      description: row.description || null,
+      images: row.images ?? [],
+      amenities: row.amenities ?? [],
+      highlights: row.highlights ?? [],
+    })
+    .select("id")
+    .single();
+  if (error) {
+    console.error("[Supabase] insert property_listings error:", error);
+    return null;
+  }
+  return data?.id ? String(data.id) : newId;
+}
+
+export async function updatePropertyListing(
+  id: string,
+  row: Partial<Omit<PropertyListingRow, "id">>
+): Promise<boolean> {
+  if (!supabase) return false;
+  const payload: Record<string, unknown> = {};
+  if (row.title !== undefined) payload.title = row.title;
+  if (row.location !== undefined) payload.location = row.location;
+  if (row.price !== undefined) payload.price = row.price;
+  if (row.beds !== undefined) payload.beds = row.beds;
+  if (row.baths !== undefined) payload.baths = row.baths;
+  if (row.sqft !== undefined) payload.sqft = row.sqft;
+  if (row.status !== undefined) payload.status = row.status;
+  if (row.description !== undefined) payload.description = row.description ?? null;
+  if (row.images !== undefined) payload.images = row.images;
+  if (row.amenities !== undefined) payload.amenities = row.amenities;
+  if (row.highlights !== undefined) payload.highlights = row.highlights;
+  const { error } = await supabase
+    .from(PROPERTY_LISTINGS_TABLE)
+    .update(payload)
+    .eq("id", id);
+  if (error) {
+    console.error("[Supabase] update property_listings error:", error);
+    return false;
+  }
+  return true;
+}
+
+export async function deletePropertyListing(id: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase
+    .from(PROPERTY_LISTINGS_TABLE)
+    .delete()
+    .eq("id", id);
+  if (error) {
+    console.error("[Supabase] delete property_listings error:", error);
+    return false;
+  }
+  return true;
+}

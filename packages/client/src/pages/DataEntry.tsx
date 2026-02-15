@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "../components/ui/table";
 import { PropertyDetailDialog } from "../components/shared/PropertyDetailDialog";
-import { useProperties } from "../hooks/useProperties";
+import { useDataEntryPropertiesOrLocal } from "../hooks/useDataEntryProperties";
 import type { Property, PropertyStatus } from "../lib/propertyStore";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
@@ -50,7 +50,7 @@ function parseCsv(val: string) {
 
 export default function DataEntry() {
   const { properties, byId, upsertProperty, deleteProperty, resetToDefaults } =
-    useProperties();
+    useDataEntryPropertiesOrLocal();
   const [location, setLocation] = useLocation();
 
   const searchParams = useMemo(() => {
@@ -75,7 +75,7 @@ export default function DataEntry() {
   const [amenitiesText, setAmenitiesText] = useState("");
   const [highlightsText, setHighlightsText] = useState("");
 
-  const selectedForPreview = previewId ? byId.get(previewId) : undefined;
+  const selectedForPreview = previewId ? byId.get(previewId) ?? null : null;
 
   const fillFormFromProperty = (p: Property) => {
     setEditingId(p.id);
@@ -151,7 +151,8 @@ export default function DataEntry() {
           </h1>
           <p className="text-muted-foreground mt-2">
             Add or edit properties used by the Property Details popup. Data is
-            stored in your browser (localStorage).
+            stored in Supabase when configured, otherwise in your browser
+            (localStorage).
           </p>
         </div>
 
@@ -381,7 +382,7 @@ export default function DataEntry() {
         open={!!previewId}
         onOpenChange={(o) => !o && setPreviewId(null)}
         property={selectedForPreview}
-        onEdit={(id) => {
+        onEdit={(id: string) => {
           const p = byId.get(id);
           if (p) fillFormFromProperty(p);
           setPreviewId(null);
