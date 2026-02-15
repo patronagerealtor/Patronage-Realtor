@@ -1,6 +1,7 @@
 /**
- * Run from project root: npx tsx script/check-supabase.ts
- * Requires .env with VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+ * Run from project root: npx tsx scripts/check-supabase.ts
+ * Uses the same .env as the client: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.
+ * Verifies both tables used by the app: properties (Home/Properties) and property_listings (DataEntry).
  */
 import path from "path";
 import { fileURLToPath } from "url";
@@ -22,14 +23,16 @@ async function main() {
   console.log("Checking Supabase connectivity...\n");
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.error("Missing env. In project root (Patronage-Realtor), create .env with:");
+    console.error("Missing env. In project root, create .env with:");
     console.error("  VITE_SUPABASE_URL=https://your-project.supabase.co");
     console.error("  VITE_SUPABASE_ANON_KEY=your-anon-key");
     console.error("\nGet these from Supabase Dashboard → Project Settings → API.");
+    console.error("Same env is used by the client (DataEntry and Properties pages).");
     process.exit(1);
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  let ok = true;
 
   try {
     const { count, error } = await supabase
@@ -37,18 +40,38 @@ async function main() {
       .select("*", { count: "exact", head: true });
 
     if (error) {
-      console.error("Supabase error:", error.message);
-      console.error("Code:", error.code);
-      process.exit(1);
+      console.error("[properties] Supabase error:", error.message, "Code:", error.code);
+      ok = false;
+    } else {
+      console.log("[properties] Table reachable. Row count:", count ?? 0);
     }
-
-    console.log("Connected to Supabase.");
-    console.log("Properties table is reachable. Row count:", count ?? 0);
-    process.exit(0);
   } catch (e) {
-    console.error("Connection failed:", e instanceof Error ? e.message : e);
-    process.exit(1);
+    console.error("[properties] Connection failed:", e instanceof Error ? e.message : e);
+    ok = false;
   }
+
+  try {
+    const { count, error } = await supabase
+      .from("property_listings")
+      .select("*", { count: "exact", head: true });
+
+    if (error) {
+      console.error("[property_listings] Supabase error:", error.message, "Code:", error.code);
+      console.error("  → DataEntry page needs this table. Run docs/supabase-property-listings.sql in Supabase SQL Editor.");
+      ok = false;
+    } else {
+      console.log("[property_listings] Table reachable (DataEntry). Row count:", count ?? 0);
+    }
+  } catch (e) {
+    console.error("[property_listings] Connection failed:", e instanceof Error ? e.message : e);
+    ok = false;
+  }
+
+  if (ok) {
+    console.log("\nSupabase is ready. DataEntry will persist to property_listings when the client runs with this .env.");
+    process.exit(0);
+  }
+  process.exit(1);
 }
 
 main();

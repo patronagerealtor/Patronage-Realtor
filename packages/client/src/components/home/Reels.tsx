@@ -7,11 +7,7 @@ import {
   useState,
 } from "react";
 import { motion } from "framer-motion";
-<<<<<<< HEAD:Patronage-Realtor/client/src/components/home/Reels.tsx
 import { Button } from "@/components/ui/button";
-=======
-import { Button } from "../ui/button";
->>>>>>> cursor/project-run-configuration-d59a:packages/client/src/components/home/Reels.tsx
 import { MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 
 const REELS = [

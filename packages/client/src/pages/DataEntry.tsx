@@ -49,8 +49,19 @@ function parseCsv(val: string) {
 }
 
 export default function DataEntry() {
-  const { properties, byId, upsertProperty, deleteProperty, resetToDefaults } =
-    useDataEntryPropertiesOrLocal();
+  const dataEntry = useDataEntryPropertiesOrLocal();
+  const {
+    properties,
+    byId,
+    upsertProperty,
+    deleteProperty,
+    resetToDefaults,
+    dataSource,
+    isLoading,
+    error,
+    mutationError,
+  } = dataEntry;
+  const isMutating = "isMutating" in dataEntry ? dataEntry.isMutating : false;
   const [location, setLocation] = useLocation();
 
   const searchParams = useMemo(() => {
@@ -117,27 +128,30 @@ export default function DataEntry() {
     fillFormFromProperty(p);
   }, [editId, byId]);
 
-  const onSave = () => {
+  const onSave = async () => {
     if (!title.trim()) return;
-    const nextId = upsertProperty({
-      id: editingId ?? undefined,
-      title: title.trim(),
-      status,
-      price: price.trim(),
-      location: locationText.trim(),
-      beds: Math.max(0, Number(beds) || 0),
-      baths: Math.max(0, Number(baths) || 0),
-      sqft: sqft.trim(),
-      description: description.trim() || undefined,
-      images: parseLines(imagesText),
-      amenities: parseCsv(amenitiesText),
-      highlights: parseCsv(highlightsText),
-    });
-
-    setPreviewId(nextId);
-    setLocation(`/data-entry?edit=${encodeURIComponent(nextId)}`, {
-      replace: true,
-    });
+    try {
+      const nextId = await upsertProperty({
+        id: editingId ?? undefined,
+        title: title.trim(),
+        status,
+        price: price.trim(),
+        location: locationText.trim(),
+        beds: Math.max(0, Number(beds) || 0),
+        baths: Math.max(0, Number(baths) || 0),
+        sqft: sqft.trim(),
+        description: description.trim() || undefined,
+        images: parseLines(imagesText),
+        amenities: parseCsv(amenitiesText),
+        highlights: parseCsv(highlightsText),
+      });
+      setPreviewId(nextId);
+      setLocation(`/data-entry?edit=${encodeURIComponent(nextId)}`, {
+        replace: true,
+      });
+    } catch {
+      // Error is shown via saveError / mutationError from hook
+    }
   };
 
   return (
@@ -154,6 +168,35 @@ export default function DataEntry() {
             stored in Supabase when configured, otherwise in your browser
             (localStorage).
           </p>
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
+            <span
+              className={
+                dataSource === "supabase"
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-muted-foreground"
+              }
+            >
+              {dataSource === "supabase"
+                ? "Connected to Supabase (property_listings)"
+                : "Using localStorage (set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in root .env for Supabase)"}
+            </span>
+            {isLoading && (
+              <span className="text-muted-foreground">Loading…</span>
+            )}
+            {isMutating && (
+              <span className="text-muted-foreground">Saving…</span>
+            )}
+            {error && (
+              <span className="text-destructive">
+                Load error: {error instanceof Error ? error.message : String(error)}
+              </span>
+            )}
+            {mutationError != null && (
+              <span className="text-destructive">
+                Save error: {mutationError instanceof Error ? mutationError.message : String(mutationError)}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-6">

@@ -68,7 +68,7 @@ function usePropertiesLocal() {
   }, []);
 
   const upsertProperty = useCallback(
-    (partial: Omit<Property, "id"> & { id?: string }) => {
+    (partial: Omit<Property, "id"> & { id?: string }): Promise<string> => {
       const id = partial.id ?? createPropertyId();
       const next: Property[] = (() => {
         const existingIdx = properties.findIndex((p) => p.id === id);
@@ -79,7 +79,7 @@ function usePropertiesLocal() {
         return copy;
       })();
       setProperties(next);
-      return id;
+      return Promise.resolve(id);
     },
     [properties, setProperties],
   );
@@ -110,6 +110,8 @@ function usePropertiesLocal() {
     dataSource: "local" as const,
     isLoading: false,
     error: null,
+    mutationError: null,
+    isMutating: false,
   };
 }
 
@@ -163,9 +165,13 @@ export function useDataEntryProperties() {
   }, [properties]);
 
   const upsertProperty = useCallback(
-    (partial: Omit<Property, "id"> & { id?: string }) => {
+    async (partial: Omit<Property, "id"> & { id?: string }): Promise<string> => {
       if (!useSupabase) return partial.id ?? "";
-      const id = partial.id ?? (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : createPropertyId());
+      const id =
+        partial.id ??
+        (typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : createPropertyId());
       const row = {
         title: partial.title,
         location: partial.location,
@@ -179,12 +185,17 @@ export function useDataEntryProperties() {
         amenities: partial.amenities ?? [],
         highlights: partial.highlights ?? [],
       };
-      if (partial.id && properties.some((p) => p.id === partial.id)) {
-        updateMutation.mutate({ id, row });
-      } else {
-        insertMutation.mutate({ row, id });
+      try {
+        if (partial.id && properties.some((p) => p.id === partial.id)) {
+          await updateMutation.mutateAsync({ id, row });
+        } else {
+          const insertedId = await insertMutation.mutateAsync({ row, id });
+          return insertedId ?? id;
+        }
+        return id;
+      } catch (e) {
+        throw e;
       }
-      return id;
     },
     [useSupabase, properties, insertMutation, updateMutation],
   );
@@ -220,6 +231,9 @@ export function useDataEntryProperties() {
     queryClient.invalidateQueries({ queryKey: ["property_listings"] });
   }, [useSupabase, queryClient]);
 
+  const mutationError =
+    insertMutation.error ?? updateMutation.error ?? deleteMutation.error;
+
   return {
     properties,
     byId,
@@ -229,6 +243,7 @@ export function useDataEntryProperties() {
     dataSource: "supabase" as const,
     isLoading: query.isLoading,
     error: query.error,
+    mutationError: mutationError ?? null,
     isMutating:
       insertMutation.isPending ||
       updateMutation.isPending ||
