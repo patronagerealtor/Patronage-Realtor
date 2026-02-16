@@ -466,13 +466,7 @@ export default function Interiors() {
             opacity: Math.max(0, 1 - scrollY / 500),
           }}
         >
-          <Badge
-            className="mb-4 text-sm px-4 py-2"
-            variant="secondary"
-          >
-            <Sparkles className="w-4 h-4 mr-2" />
-            Transform Your Space
-          </Badge>
+          
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 font-heading">
             Design Your Dream
             <br />
