@@ -13,6 +13,8 @@ import { GallerySection } from "./sections/GallerySection";
 import { MapSection } from "./sections/MapSection";
 import { SimilarSection, type SimilarPropertyItem } from "./sections/SimilarSection";
 import { ContactCard } from "./sections/ContactCard";
+import { supabase } from "@/lib/supabase";
+
 
 const TABS = [
   "Overview",
@@ -45,6 +47,41 @@ export function PropertyDetailDialog({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const data = toPropertyDetailData(property);
+
+  useEffect(() => {
+    const testConnection = async () => {
+    const { data, error } = await supabase.from("test").select("*");
+
+    console.log("Supabase test → data:", data);
+    console.log("Supabase test → error:", error);
+  };
+  
+    testConnection();
+  }, []);
+
+  useEffect(() => {
+    const testInsert = async () => {
+      const { data, error } = await supabase.from("properties").insert([
+        {
+          title: "Test Property",
+          location: "Balewadi, Pune",
+          price_display: "₹1 Cr",
+          beds: 3,
+          baths: 2,
+          sqft: "1200",
+          property_type: "Apartment",
+          construction_status: "Under Construction",
+          amenities: ["Gym", "Swimming Pool"]
+        }
+      ]).select();
+  
+      console.log("Insert result:", { data, error });
+    };
+  
+    testInsert();
+  }, []);
+  
+
   const similarList: SimilarPropertyItem[] = similarProperties.map((p) => ({
     id: p.id,
     title: p.title,
