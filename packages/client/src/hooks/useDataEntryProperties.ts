@@ -1,11 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  supabase,
-  fetchPropertyListings,
-  insertPropertyListing,
-  updatePropertyListing,
-  deletePropertyListing,
-} from "../lib/supabase";
+import { supabase, fetchPropertiesFromSupabase } from "../lib/supabase";
+import type { PropertyRow } from "../lib/supabase";
 import {
   createPropertyId,
   DEFAULT_PROPERTIES,
@@ -13,23 +8,14 @@ import {
   saveProperties,
   type Property,
 } from "../lib/propertyStore";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
+import { useEffect, useState } from "react";
 
-/** Property shape used by DataEntry - matches Property from propertyStore */
-function toProperty(row: {
-  id: string;
-  title: string;
-  location: string;
-  price: string;
-  beds: number;
-  baths: number;
-  sqft: string;
-  status: string;
-  description?: string | null;
-  images?: string[];
-  amenities?: string[];
-  highlights?: string[];
-}): Property {
+const PROPERTIES_TABLE = "properties";
+const PROPERTY_IMAGES_TABLE = "property_images";
+
+/** Map PropertyRow (from Supabase) to Property (used by DataEntry/UI) */
+function toProperty(row: PropertyRow): Property {
   return {
     id: String(row.id),
     title: row.title,
@@ -40,10 +26,42 @@ function toProperty(row: {
     sqft: String(row.sqft ?? ""),
     status: (row.status as Property["status"]) ?? "For Sale",
     description: row.description ?? undefined,
-    images: row.images,
-    amenities: row.amenities,
-    highlights: row.highlights,
+    images: row.images ?? [],
+    amenities: row.amenities ?? [],
+    highlights: [],
+    developer: row.developer,
+    property_type: row.property_type,
+    city: undefined,
+    possession_date: row.possession_date ?? undefined,
+    latitude: row.latitude,
+    longitude: row.longitude,
+    price_value: row.price_value,
+    slug: undefined,
   };
+}
+
+/** Sync property_images table: replace all rows for property_id with given image URLs */
+async function syncPropertyImages(
+  propertyId: string,
+  imageUrls: string[]
+): Promise<void> {
+  if (!supabase) return;
+  const { error: delError } = await supabase
+    .from(PROPERTY_IMAGES_TABLE)
+    .delete()
+    .eq("property_id", propertyId);
+  if (delError) console.error("[Supabase] delete property_images error:", delError);
+  if (imageUrls.length === 0) return;
+  const { error: insertError } = await supabase
+    .from(PROPERTY_IMAGES_TABLE)
+    .insert(
+      imageUrls.map((image_url, index) => ({
+        property_id: propertyId,
+        image_url,
+        sort_order: index,
+      }))
+    );
+  if (insertError) console.error("[Supabase] insert property_images error:", insertError);
 }
 
 /** localStorage-backed fallback (same API as useProperties) */
@@ -115,43 +133,15 @@ function usePropertiesLocal() {
   };
 }
 
-/** Supabase-backed DataEntry properties */
+/** Supabase-backed DataEntry properties (properties + property_images only) */
 export function useDataEntryProperties() {
   const queryClient = useQueryClient();
   const useSupabase = !!supabase;
 
   const query = useQuery({
-    queryKey: ["property_listings"],
-    queryFn: fetchPropertyListings,
+    queryKey: ["properties"],
+    queryFn: fetchPropertiesFromSupabase,
     enabled: useSupabase,
-  });
-
-  const insertMutation = useMutation({
-    mutationFn: ({
-      row,
-      id,
-    }: {
-      row: Omit<import("../lib/supabase").PropertyListingRow, "id">;
-      id: string;
-    }) => insertPropertyListing(row, id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["property_listings"] });
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, row }: { id: string; row: Parameters<typeof updatePropertyListing>[1] }) =>
-      updatePropertyListing(id, row),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["property_listings"] });
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deletePropertyListing,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["property_listings"] });
-    },
   });
 
   const properties = useSupabase
@@ -164,6 +154,60 @@ export function useDataEntryProperties() {
     return map;
   }, [properties]);
 
+  const insertMutation = useMutation({
+    mutationFn: async ({
+      payload,
+      id,
+    }: {
+      payload: Record<string, unknown>;
+      id: string;
+    }) => {
+      if (!supabase) throw new Error("Supabase not configured");
+      const { data, error } = await supabase
+        .from(PROPERTIES_TABLE)
+        .insert({ ...payload, id })
+        .select("id")
+        .single();
+      if (error) throw error;
+      return data?.id != null ? String(data.id) : id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["properties"] });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: Record<string, unknown>;
+    }) => {
+      if (!supabase) throw new Error("Supabase not configured");
+      const { error } = await supabase
+        .from(PROPERTIES_TABLE)
+        .update(payload)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["properties"] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!supabase) throw new Error("Supabase not configured");
+      await supabase.from(PROPERTY_IMAGES_TABLE).delete().eq("property_id", id);
+      const { error } = await supabase.from(PROPERTIES_TABLE).delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["properties"] });
+    },
+  });
+
   const upsertProperty = useCallback(
     async (partial: Omit<Property, "id"> & { id?: string }): Promise<string> => {
       if (!useSupabase) return partial.id ?? "";
@@ -172,25 +216,34 @@ export function useDataEntryProperties() {
         (typeof crypto !== "undefined" && crypto.randomUUID
           ? crypto.randomUUID()
           : createPropertyId());
-      const row = {
+
+      const propertyPayload = {
         title: partial.title,
+        slug: partial.slug ?? null,
+        developer: partial.developer ?? "",
         location: partial.location,
-        price: partial.price,
+        city: partial.city ?? null,
+        price_display: partial.price,
+        price_value: partial.price_value ?? null,
         beds: partial.beds,
         baths: partial.baths,
         sqft: partial.sqft,
-        status: partial.status,
+        property_type: partial.property_type ?? "",
+        construction_status: partial.status,
+        possession_date: partial.possession_date ?? null,
         description: partial.description ?? null,
-        images: partial.images ?? [],
+        latitude: partial.latitude ?? null,
+        longitude: partial.longitude ?? null,
         amenities: partial.amenities ?? [],
-        highlights: partial.highlights ?? [],
       };
+
       try {
         if (partial.id && properties.some((p) => p.id === partial.id)) {
-          await updateMutation.mutateAsync({ id, row });
+          await updateMutation.mutateAsync({ id, payload: propertyPayload });
+          await syncPropertyImages(id, partial.images ?? []);
         } else {
-          const insertedId = await insertMutation.mutateAsync({ row, id });
-          return insertedId ?? id;
+          await insertMutation.mutateAsync({ payload: propertyPayload, id });
+          await syncPropertyImages(id, partial.images ?? []);
         }
         return id;
       } catch (e) {
@@ -209,26 +262,32 @@ export function useDataEntryProperties() {
   );
 
   const resetToDefaults = useCallback(async () => {
-    if (!useSupabase) return;
-    // Load sample into Supabase
-    await Promise.all(
-      DEFAULT_PROPERTIES.map((p) =>
-        insertPropertyListing({
-          title: p.title,
-          location: p.location,
-          price: p.price,
-          beds: p.beds,
-          baths: p.baths,
-          sqft: p.sqft,
-          status: p.status,
-          description: p.description ?? null,
-          images: p.images ?? [],
-          amenities: p.amenities ?? [],
-          highlights: p.highlights ?? [],
-        })
-      )
-    );
-    queryClient.invalidateQueries({ queryKey: ["property_listings"] });
+    if (!useSupabase || !supabase) return;
+    for (const p of DEFAULT_PROPERTIES) {
+      const id = p.id ?? createPropertyId();
+      const payload = {
+        title: p.title,
+        slug: null,
+        developer: "",
+        location: p.location,
+        city: null,
+        price_display: p.price,
+        price_value: null,
+        beds: p.beds,
+        baths: p.baths,
+        sqft: p.sqft,
+        property_type: "",
+        construction_status: p.status,
+        possession_date: null,
+        description: p.description ?? null,
+        latitude: null,
+        longitude: null,
+        amenities: p.amenities ?? [],
+      };
+      await supabase.from(PROPERTIES_TABLE).insert({ ...payload, id });
+      await syncPropertyImages(id, p.images ?? []);
+    }
+    queryClient.invalidateQueries({ queryKey: ["properties"] });
   }, [useSupabase, queryClient]);
 
   const mutationError =
@@ -251,13 +310,10 @@ export function useDataEntryProperties() {
   };
 }
 
-/** Unified hook: uses Supabase when configured, localStorage otherwise */
+/** Unified hook: uses Supabase when configured, localStorage otherwise. Both hooks called unconditionally to preserve React hook order. */
 export function useDataEntryPropertiesOrLocal() {
   const supabaseHook = useDataEntryProperties();
   const localHook = usePropertiesLocal();
-
-  if (supabase) {
-    return supabaseHook;
-  }
-  return localHook;
+  const useSupabase = !!supabase;
+  return useSupabase ? supabaseHook : localHook;
 }

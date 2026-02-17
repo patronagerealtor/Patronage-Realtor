@@ -80,7 +80,7 @@ export function DetailsSection({ data, sectionRef }: DetailsSectionProps) {
             {/* Project Info */}
             <DetailItem label="Developer" value={data.developer} />
             <DetailItem label="Property Type" value={data.propertyType} />
-            <DetailItem label="Possession By" value={data.possessionBy} />
+            <DetailItem label="Possession By" value={data.possessionBy ? new Date(data.possessionBy).toLocaleDateString() : "—"} />
 
           </div>
         </div>

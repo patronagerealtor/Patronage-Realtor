@@ -7,16 +7,10 @@ type AboutSectionProps = {
   sectionRef: (el: HTMLElement | null) => void;
 };
 
-const FALLBACK_DESCRIPTION =
-  "This premium project offers thoughtfully designed homes with modern amenities. The development is strategically located with easy access to IT parks, schools, and healthcare. Each unit is crafted to maximize space and natural light, with high-quality finishes and sustainable building practices.";
-
-const EXPANDED_SUFFIX =
-  " The project includes a clubhouse, children's play area, and 24/7 security. Green building certification ensures sustainable living.";
-
 export function AboutSection({ data, sectionRef }: AboutSectionProps) {
   const [expanded, setExpanded] = useState(false);
-  const baseText = data.description?.trim() || FALLBACK_DESCRIPTION;
-  const fullText = expanded ? baseText + EXPANDED_SUFFIX : baseText;
+  const baseText = data.description?.trim() || "No description provided.";
+  const fullText = baseText;
 
   return (
     <section

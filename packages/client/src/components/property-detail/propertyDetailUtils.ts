@@ -36,6 +36,13 @@ export function toPropertyDetailData(
         ? [property.image_url]
         : [];
 
+  const possessionBy =
+    "possession_date" in property && property.possession_date
+      ? property.possession_date
+      : "possession_date" in property
+        ? undefined
+        : DEFAULT_POSSESSION;
+
   return {
     id: String(property.id),
     title: property.title,
@@ -48,10 +55,12 @@ export function toPropertyDetailData(
     propertyType: isPropertyRow(property)
       ? property.property_type ?? "Apartment"
       : "Apartment",
-    possessionBy: DEFAULT_POSSESSION,
+    possessionBy: possessionBy ?? DEFAULT_POSSESSION,
     description: "description" in property ? property.description : undefined,
     images,
-    amenities: "amenities" in property ? property.amenities : undefined,
+    amenities: "amenities" in property ? (Array.isArray(property.amenities) ? property.amenities : undefined) : undefined,
     floorPlans: undefined,
+    latitude: "latitude" in property ? property.latitude : undefined,
+    longitude: "longitude" in property ? property.longitude : undefined,
   };
 }

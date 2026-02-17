@@ -1,52 +1,12 @@
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
-import { Card } from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../components/ui/table";
+import { PropertyForm } from "../components/admin/PropertyForm";
+import { PropertyList } from "../components/admin/PropertyList";
 import { PropertyDetailDialog } from "../components/shared/PropertyDetailDialog";
 import { useDataEntryPropertiesOrLocal } from "../hooks/useDataEntryProperties";
-import type { Property, PropertyStatus } from "../lib/propertyStore";
+import { uploadPropertyImages } from "../lib/supabase";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-
-const STATUS_OPTIONS: PropertyStatus[] = [
-  "For Sale",
-  "For Rent",
-  "Coming Soon",
-  "Sold",
-];
-
-function parseLines(val: string) {
-  return val
-    .split("\n")
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
-
-function parseCsv(val: string) {
-  return val
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
 
 export default function DataEntry() {
   const dataEntry = useDataEntryPropertiesOrLocal();
@@ -74,84 +34,138 @@ export default function DataEntry() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(null);
 
-  const [title, setTitle] = useState("");
-  const [status, setStatus] = useState<PropertyStatus>("For Sale");
-  const [price, setPrice] = useState("");
-  const [locationText, setLocationText] = useState("");
-  const [beds, setBeds] = useState(0);
-  const [baths, setBaths] = useState(0);
-  const [sqft, setSqft] = useState("");
-  const [description, setDescription] = useState("");
-  const [imagesText, setImagesText] = useState("");
-  const [amenitiesText, setAmenitiesText] = useState("");
-  const [highlightsText, setHighlightsText] = useState("");
-
+  const effectiveEditId = editId ?? editingId;
+  const editingProperty = effectiveEditId ? (byId.get(effectiveEditId) ?? null) : null;
   const selectedForPreview = previewId ? byId.get(previewId) ?? null : null;
-
-  const fillFormFromProperty = (p: Property) => {
-    setEditingId(p.id);
-    setTitle(p.title ?? "");
-    setStatus(p.status ?? "For Sale");
-    setPrice(p.price ?? "");
-    setLocationText(p.location ?? "");
-    setBeds(Number(p.beds ?? 0));
-    setBaths(Number(p.baths ?? 0));
-    setSqft(p.sqft ?? "");
-    setDescription(p.description ?? "");
-    setImagesText((p.images ?? []).join("\n"));
-    setAmenitiesText((p.amenities ?? []).join(", "));
-    setHighlightsText((p.highlights ?? []).join(", "));
-  };
-
-  const resetForm = () => {
-    setEditingId(null);
-    setTitle("");
-    setStatus("For Sale");
-    setPrice("");
-    setLocationText("");
-    setBeds(0);
-    setBaths(0);
-    setSqft("");
-    setDescription("");
-    setImagesText("");
-    setAmenitiesText("");
-    setHighlightsText("");
-
-    // remove edit param from URL (if present)
-    setLocation("/data-entry", { replace: true });
-  };
 
   useEffect(() => {
     if (!editId) return;
     const p = byId.get(editId);
     if (!p) return;
-    fillFormFromProperty(p);
+    setEditingId(editId);
   }, [editId, byId]);
 
-  const onSave = async () => {
-    if (!title.trim()) return;
-    try {
-      const nextId = await upsertProperty({
-        id: editingId ?? undefined,
-        title: title.trim(),
-        status,
-        price: price.trim(),
-        location: locationText.trim(),
-        beds: Math.max(0, Number(beds) || 0),
-        baths: Math.max(0, Number(baths) || 0),
-        sqft: sqft.trim(),
-        description: description.trim() || undefined,
-        images: parseLines(imagesText),
-        amenities: parseCsv(amenitiesText),
-        highlights: parseCsv(highlightsText),
+  const handleSave = async (payload: {
+    title: string;
+    status: string;
+    price: string;
+    location: string;
+    beds: number;
+    baths: number;
+    sqft: string;
+    description: string;
+    existingImageUrls: string[];
+    filesToUpload: File[];
+    amenities: string[];
+    highlights: string[];
+    developer: string;
+    property_type: string;
+    city: string;
+    possession_date: string;
+    latitude: string;
+    longitude: string;
+    price_value: string;
+    slug: string;
+  }) => {
+    const basePayload = {
+      title: payload.title,
+      status: payload.status as "For Sale" | "For Rent" | "Coming Soon" | "Sold",
+      price: payload.price,
+      location: payload.location,
+      beds: payload.beds,
+      baths: payload.baths,
+      sqft: payload.sqft,
+      description: payload.description || undefined,
+      amenities: payload.amenities,
+      highlights: payload.highlights,
+      developer: payload.developer.trim(),
+      property_type: payload.property_type.trim(),
+      city: payload.city.trim(),
+      possession_date: payload.possession_date || null,
+      latitude: payload.latitude ? Number(payload.latitude) : null,
+      longitude: payload.longitude ? Number(payload.longitude) : null,
+      price_value: payload.price_value ? Number(payload.price_value) : null,
+      slug: payload.slug.trim(),
+    };
+
+    let nextId: string;
+    let imageUrls = payload.existingImageUrls ?? [];
+
+    if (payload.filesToUpload?.length > 0) {
+      const isNew = !effectiveEditId;
+      if (isNew) {
+        nextId = await upsertProperty({
+          id: undefined,
+          ...basePayload,
+          images: [],
+        });
+        const uploaded = await uploadPropertyImages(nextId, payload.filesToUpload);
+        imageUrls = [...imageUrls, ...uploaded];
+        await upsertProperty({
+          id: nextId,
+          ...basePayload,
+          images: imageUrls,
+        });
+      } else {
+        nextId = effectiveEditId!;
+        const uploaded = await uploadPropertyImages(nextId, payload.filesToUpload);
+        imageUrls = [...imageUrls, ...uploaded];
+        await upsertProperty({
+          id: nextId,
+          ...basePayload,
+          images: imageUrls,
+        });
+      }
+    } else {
+      nextId = await upsertProperty({
+        id: effectiveEditId ?? undefined,
+        ...basePayload,
+        images: imageUrls,
       });
-      setPreviewId(nextId);
-      setLocation(`/data-entry?edit=${encodeURIComponent(nextId)}`, {
-        replace: true,
-      });
-    } catch {
-      // Error is shown via saveError / mutationError from hook
     }
+
+    setPreviewId(nextId);
+    setLocation(`/data-entry?edit=${encodeURIComponent(nextId)}`, {
+      replace: true,
+    });
+    return nextId;
+  };
+
+  const handleReset = () => {
+    setEditingId(null);
+    setLocation("/data-entry", { replace: true });
+  };
+
+  const handleEdit = (id: string) => {
+    const p = byId.get(id);
+    if (!p) return;
+    setEditingId(id);
+    setLocation(`/data-entry?edit=${encodeURIComponent(id)}`, { replace: true });
+  };
+
+  const handleDelete = (id: string) => {
+    deleteProperty(id);
+    if (editingId === id) {
+      setEditingId(null);
+      setLocation("/data-entry", { replace: true });
+    }
+    if (previewId === id) setPreviewId(null);
+  };
+
+  const handlePreviewFromList = (id: string) => {
+    setPreviewId(id);
+  };
+
+  const handlePreviewFromForm = () => {
+    const id = editingId ?? previewId;
+    if (id) setPreviewId(id);
+  };
+
+  const handleEditFromDialog = (id: string) => {
+    const p = byId.get(id);
+    if (p) setEditingId(id);
+    setPreviewId(null);
+    setLocation(`/data-entry?edit=${encodeURIComponent(id)}`);
   };
 
   return (
@@ -177,7 +191,7 @@ export default function DataEntry() {
               }
             >
               {dataSource === "supabase"
-                ? "Connected to Supabase (property_listings)"
+                ? "Connected to Supabase (properties)"
                 : "Using localStorage (set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in root .env for Supabase)"}
             </span>
             {isLoading && (
@@ -200,222 +214,27 @@ export default function DataEntry() {
         </div>
 
         <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-6">
-          {/* FORM */}
-          <Card className="lg:col-span-5 p-6 space-y-5 h-fit">
-            <div className="flex items-center justify-between gap-3">
-              <div className="space-y-1">
-                <p className="text-sm font-semibold">Property</p>
-                {editingId ? (
-                  <p className="text-xs text-muted-foreground">
-                    Editing: <span className="font-mono">{editingId}</span>
-                  </p>
-                ) : (
-                  <p className="text-xs text-muted-foreground">Create new</p>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={resetForm}>
-                  Reset
-                </Button>
-                <Button variant="outline" onClick={resetToDefaults}>
-                  Load sample
-                </Button>
-              </div>
-            </div>
+          <div className="lg:col-span-5 rounded-lg bg-muted/10 dark:bg-muted/15 p-4">
+            <PropertyForm
+            editingProperty={editingProperty}
+            editingId={effectiveEditId}
+            onSave={handleSave}
+            onReset={handleReset}
+            isMutating={isMutating}
+            onLoadSample={resetToDefaults}
+            onPreview={handlePreviewFromForm}
+            previewDisabled={!previewId && !editingId}
+          />
+          </div>
 
-            <div className="space-y-2">
-              <Label>Title</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Status</Label>
-                <Select
-                  value={status}
-                  onValueChange={(v) => setStatus(v as PropertyStatus)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STATUS_OPTIONS.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Price</Label>
-                <Input
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder='e.g. "$1,200,000"'
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Location</Label>
-              <Input
-                value={locationText}
-                onChange={(e) => setLocationText(e.target.value)}
-                placeholder="City, Neighborhood"
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Beds</Label>
-                <Input
-                  value={beds === 0 ? "" : String(beds)}
-                  onChange={(e) =>
-                    setBeds(e.target.value === "" ? 0 : Number(e.target.value))
-                  }
-                  inputMode="numeric"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Baths</Label>
-                <Input
-                  value={baths === 0 ? "" : String(baths)}
-                  onChange={(e) =>
-                    setBaths(e.target.value === "" ? 0 : Number(e.target.value))
-                  }
-                  inputMode="numeric"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Sqft</Label>
-                <Input value={sqft} onChange={(e) => setSqft(e.target.value)} />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Images (one URL per line)</Label>
-              <Textarea
-                value={imagesText}
-                onChange={(e) => setImagesText(e.target.value)}
-                rows={3}
-                placeholder="https://…"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Amenities (comma separated)</Label>
-              <Input
-                value={amenitiesText}
-                onChange={(e) => setAmenitiesText(e.target.value)}
-                placeholder="Pool, Gym, Parking"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Highlights (comma separated)</Label>
-              <Input
-                value={highlightsText}
-                onChange={(e) => setHighlightsText(e.target.value)}
-                placeholder="Ocean view, Renovated kitchen"
-              />
-            </div>
-
-            <div className="pt-2 flex gap-2">
-              <Button className="flex-1" onClick={onSave}>
-                Save
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  const id = editingId ?? previewId;
-                  if (id) setPreviewId(id);
-                }}
-                disabled={!previewId && !editingId}
-              >
-                Preview
-              </Button>
-            </div>
-          </Card>
-
-          {/* LIST */}
-          <Card className="lg:col-span-7 p-6 h-fit">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Properties</h2>
-              <Badge variant="secondary">{properties.length}</Badge>
-            </div>
-
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {properties.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell>
-                      <div className="space-y-0.5">
-                        <div className="font-medium">{p.title}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {p.location}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{p.status}</TableCell>
-                    <TableCell>{p.price}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="inline-flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            fillFormFromProperty(p);
-                            setLocation(
-                              `/data-entry?edit=${encodeURIComponent(p.id)}`,
-                              { replace: true },
-                            );
-                          }}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setPreviewId(p.id)}
-                        >
-                          Preview
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => {
-                            deleteProperty(p.id);
-                            if (editingId === p.id) resetForm();
-                            if (previewId === p.id) setPreviewId(null);
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
+          <div className="lg:col-span-7 rounded-lg bg-muted/5 dark:bg-muted/10">
+          <PropertyList
+            properties={properties}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            onPreview={handlePreviewFromList}
+          />
+          </div>
         </div>
       </main>
 
@@ -425,14 +244,8 @@ export default function DataEntry() {
         open={!!previewId}
         onOpenChange={(o) => !o && setPreviewId(null)}
         property={selectedForPreview}
-        onEdit={(id: string) => {
-          const p = byId.get(id);
-          if (p) fillFormFromProperty(p);
-          setPreviewId(null);
-          setLocation(`/data-entry?edit=${encodeURIComponent(id)}`);
-        }}
+        onEdit={handleEditFromDialog}
       />
     </div>
   );
 }
-
