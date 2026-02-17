@@ -18,4 +18,6 @@ export type PropertyDetailData = {
     price: string;
     image?: string;
   }[];
+  latitude?: number | null;
+  longitude?: number | null;
 };

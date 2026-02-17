@@ -13,6 +13,14 @@ export type Property = {
   images?: string[];
   amenities?: string[];
   highlights?: string[];
+  developer?: string;
+  property_type?: string;
+  city?: string;
+  possession_date?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  price_value?: number | null;
+  slug?: string;
 };
 
 const STORAGE_KEY = "patronage:properties:v1";

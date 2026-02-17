@@ -38,9 +38,9 @@ export function AmenitiesSection({
   data,
   sectionRef,
 }: AmenitiesSectionProps) {
-  const amenities = data.amenities ?? [];
+  const labels = data.amenities?.length ? data.amenities : [];
 
-  if (!amenities.length) {
+  if (!labels.length) {
     return (
       <section
         ref={sectionRef}
@@ -57,7 +57,7 @@ export function AmenitiesSection({
           </div>
 
           <p className="mt-4 text-sm text-muted-foreground">
-            Amenities information is not available.
+            No amenities added.
           </p>
         </div>
       </section>
@@ -76,7 +76,7 @@ export function AmenitiesSection({
         </h2>
 
         <div className="mt-8 grid gap-y-10 gap-x-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-          {amenities.map((label, index) => {
+          {labels.map((label, index) => {
             const Icon = getIcon(label);
 
             return (

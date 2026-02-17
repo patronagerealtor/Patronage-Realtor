@@ -10,21 +10,20 @@ type MapSectionProps = {
 export function MapSection({ data, sectionRef }: MapSectionProps) {
   const [mapType, setMapType] = useState<"map" | "satellite">("map");
 
-  // 🔥 Hardcoded test coordinates
-  const latitude = 18.59530120398497;
-  const longitude = 73.73494132498988;
+  const lat = data.latitude ?? 18.59530120398497;
+  const lng = data.longitude ?? 73.73494132498988;
 
   const embedUrl = useMemo(() => {
-    const base = `https://www.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
+    const base = `https://www.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
 
     if (mapType === "satellite") {
-      return `https://www.google.com/maps?q=${latitude},${longitude}&z=18&t=k&output=embed`;
+      return `https://www.google.com/maps?q=${lat},${lng}&z=18&t=k&output=embed`;
     }
 
     return base;
-  }, [mapType]);
+  }, [mapType, lat, lng]);
 
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 
   return (
     <section
