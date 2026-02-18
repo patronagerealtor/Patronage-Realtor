@@ -208,3 +208,102 @@ export async function uploadPropertyImages(
   }
   return urls;
 }
+
+// ---------------------------------------------------------------------------
+// Webinar registrations — run in Supabase SQL editor:
+// create table webinar_registrations (
+//   id uuid primary key default gen_random_uuid(),
+//   name text not null,
+//   email text not null,
+//   contact_number text not null,
+//   created_at timestamptz default now()
+// );
+// alter table webinar_registrations enable row level security;
+// create policy "Allow anonymous insert" on webinar_registrations for insert with (true);
+// create policy "Allow read for authenticated" on webinar_registrations for select using (auth.role() = 'authenticated' or auth.role() = 'service_role');
+// ---------------------------------------------------------------------------
+
+const WEBINAR_REGISTRATIONS_TABLE = "webinar_registrations";
+
+export type WebinarRegistrationRow = {
+  name: string;
+  email: string;
+  contact_number: string;
+};
+
+export type WebinarRegistrationResult =
+  | { success: true; id: string }
+  | { success: false; error: string };
+
+export async function insertWebinarRegistration(
+  row: WebinarRegistrationRow
+): Promise<WebinarRegistrationResult> {
+  if (!supabase) {
+    return {
+      success: false,
+      error: "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env",
+    };
+  }
+  const payload = {
+    name: row.name.trim(),
+    email: row.email.trim(),
+    contact_number: row.contact_number.trim(),
+  };
+  const { data, error } = await supabase
+    .from(WEBINAR_REGISTRATIONS_TABLE)
+    .insert(payload)
+    .select("id")
+    .single();
+  if (error) {
+    console.error("[Supabase] insert webinar_registrations error:", error);
+    return {
+      success: false,
+      error: error.message || "Database error. Check table name and RLS policies.",
+    };
+  }
+  return data?.id ? { success: true, id: String(data.id) } : { success: false, error: "No id returned" };
+}
+
+const WEBINAR_PAYMENT_BUCKET = "webinar-payment-proofs";
+
+export type UploadPaymentProofResult =
+  | { success: true; url: string }
+  | { success: false; error: string };
+
+export async function uploadWebinarPaymentProof(
+  registrationId: string,
+  file: File
+): Promise<UploadPaymentProofResult> {
+  if (!supabase) {
+    return {
+      success: false,
+      error: "Supabase is not configured.",
+    };
+  }
+  const ext = file.name.split(".").pop() || "jpg";
+  const path = `${registrationId}/proof.${ext}`;
+  const { error: uploadError } = await supabase.storage
+    .from(WEBINAR_PAYMENT_BUCKET)
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if (uploadError) {
+    console.error("[Supabase] storage upload error:", uploadError);
+    return {
+      success: false,
+      error: uploadError.message || "Upload failed.",
+    };
+  }
+  const { data: urlData } = supabase.storage.from(WEBINAR_PAYMENT_BUCKET).getPublicUrl(path);
+  const url = urlData.publicUrl;
+  const { error: updateError } = await supabase
+    .from(WEBINAR_REGISTRATIONS_TABLE)
+    .update({ payment_proof_url: url })
+    .eq("id", registrationId);
+  if (updateError) {
+    console.error("[Supabase] update payment_proof_url error:", updateError);
+    return {
+      success: false,
+      error: updateError.message || "Failed to save proof link.",
+    };
+  }
+  return { success: true, url };
+}
