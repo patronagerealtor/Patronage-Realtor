@@ -16,6 +16,9 @@ import {
   NavigationMenuTrigger,
 } from "../ui/navigation-menu";
 
+const CONTACT_FORM_URL =
+  import.meta.env.VITE_CONTACT_FORM_URL ?? "https://forms.gle/oSqrGhasHGWenKNf8";
+
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [location] = useLocation(); // Optional: to style active state
@@ -77,11 +80,6 @@ export function Header() {
               </NavigationMenuItem>
 
               {/* ✅ FIXED: Path is now '/webinars' (plural) to match mobile and Route */}
-              <NavigationMenuItem>
-                <Link href="/webinars" className={navLinkClass}>
-                  Webinars
-                </Link>
-              </NavigationMenuItem>
 
               <NavigationMenuItem>
                 <Link href="/calculators" className={navLinkClass}>
@@ -91,7 +89,19 @@ export function Header() {
 
               <NavigationMenuItem>
                 <Link href="/interiors" className={navLinkClass}>
-                  Interiors
+                  Design Studio
+                </Link>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <Link href="/webinars" className={navLinkClass}>
+                  Webinars
+                </Link>
+              </NavigationMenuItem>
+
+              <NavigationMenuItem>
+                <Link href="/blogs" className={navLinkClass}>
+                  Blogs
                 </Link>
               </NavigationMenuItem>
 
@@ -106,8 +116,17 @@ export function Header() {
 
         {/* Right Action */}
         <div className="hidden md:flex items-center">
-          <Button className="transition-all hover:scale-105 hover:shadow-md">
-            Contact Us
+          <Button
+            asChild
+            className="transition-all hover:scale-105 hover:shadow-md"
+          >
+            <a
+              href={CONTACT_FORM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Contact Us
+            </a>
           </Button>
         </div>
 
@@ -139,6 +158,13 @@ export function Header() {
                   Webinars
                 </Link>
                 <Link
+                  href="/blogs"
+                  onClick={() => setIsOpen(false)}
+                  className="text-lg font-medium"
+                >
+                  Blogs
+                </Link>
+                <Link
                   href="/calculators"
                   onClick={() => setIsOpen(false)}
                   className="text-lg font-medium"
@@ -159,7 +185,16 @@ export function Header() {
                 >
                   About Us
                 </Link>
-                <Button className="mt-6 w-full">Contact Us</Button>
+                <Button asChild className="mt-6 w-full">
+                  <a
+                    href={CONTACT_FORM_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Contact Us
+                  </a>
+                </Button>
               </nav>
             </SheetContent>
           </Sheet>

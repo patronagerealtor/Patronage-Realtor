@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Scene } from "../components/ui/hero-section";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
@@ -20,28 +20,30 @@ import {
 } from "../components/ui/dialog";
 import { Badge } from "../components/ui/badge";
 import {
-  Home,
   Sparkles,
-  Check,
   ArrowRight,
   Bed,
   Utensils,
   Bath,
   Sofa,
   Lamp,
-  Shield,
   Award,
   Clock,
   Users,
   ChevronDown,
+  Shield,
+  Check,
+  X,
   Minus,
 } from "lucide-react";
+
+const CONTACT_FORM_URL =
+  import.meta.env.VITE_CONTACT_FORM_URL ?? "https://forms.gle/oSqrGhasHGWenKNf8";
 
 interface Package {
   id: string;
   name: string;
   tagline: string;
-  priceRange: string;
   highlights: string[];
   deliveryTime: string;
   image: string;
@@ -74,7 +76,6 @@ const packages: Package[] = [
     id: "silver",
     name: "Silver",
     tagline: "Perfect for small spaces",
-    priceRange: "₹2,999 - ₹4,999",
     highlights: [
       "Basic 3D Design",
       "Up to 2 Rooms",
@@ -89,7 +90,6 @@ const packages: Package[] = [
     id: "gold",
     name: "Gold",
     tagline: "Ideal for medium homes",
-    priceRange: "₹5,999 - ₹9,999",
     highlights: [
       "Advanced 3D Design",
       "Up to 4 Rooms",
@@ -105,7 +105,6 @@ const packages: Package[] = [
     id: "platinum",
     name: "Platinum",
     tagline: "Complete home makeover",
-    priceRange: "₹9,999 - ₹15,999",
     highlights: [
       "Premium 3D Design",
       "Up to 6 Rooms",
@@ -120,7 +119,6 @@ const packages: Package[] = [
     id: "luxury",
     name: "Luxury",
     tagline: "Ultimate luxury experience",
-    priceRange: "₹19,999+",
     highlights: [
       "Ultra Premium 3D Design",
       "Unlimited Rooms",
@@ -133,7 +131,185 @@ const packages: Package[] = [
   },
 ];
 
+const bhkOptions = [
+  { bhk: 1, label: "1BHK" },
+  { bhk: 2, label: "2BHK" },
+  { bhk: 3, label: "3BHK" },
+] as const;
+
+type Bhk = 1 | 2 | 3;
+const packageByBhk: Record<string, Record<Bhk, { included: string[]; notIncluded: string[] }>> = {
+  silver: {
+    1: {
+      included: [
+        "Modular kitchen (basic laminate finish)",
+        "Bed + wardrobe + TV unit",
+        "False ceiling in key areas",
+        "Painting & basic electrical work",
+        "Basic lighting & storage solutions",
+      ],
+      notIncluded: [
+        "Premium hardware/veneer",
+        "Imported materials or high-end counters",
+        "Smart home/automation",
+        "Luxury decor items",
+      ],
+    },
+    2: {
+      included: [
+        "Modular kitchen (standard laminate)",
+        "Wardrobes in bedrooms",
+        "TV unit + simple furniture pieces",
+        "False ceiling (select rooms)",
+        "Painting + lighting + electrical setup",
+      ],
+      notIncluded: [
+        "Premium materials/veneer finishes",
+        "Branded appliances or automation",
+        "Luxury lighting/decor",
+      ],
+    },
+    3: {
+      included: [
+        "Modular kitchen (entry laminate)",
+        "Wardrobes + beds + living room setup",
+        "False ceiling (partial)",
+        "Painting & basic lighting",
+        "Utility area setup",
+      ],
+      notIncluded: [
+        "Designer finishes/premium hardware",
+        "Imported stones/rich textures",
+        "Smart home systems",
+      ],
+    },
+  },
+  gold: {
+    1: {
+      included: [
+        "Enhanced kitchen with better laminates/handles",
+        "Premium wardrobes & storage",
+        "Designer TV unit + quality lighting",
+        "Detailed false ceilings",
+        "Feature walls, textured paint",
+      ],
+      notIncluded: [
+        "Imported marble/stone",
+        "Full smart home automation",
+        "Ultra-luxury furnishings",
+      ],
+    },
+    2: {
+      included: [
+        "Mid-grade modular kitchen + countertop",
+        "Bedroom wardrobes & beds",
+        "Layered false ceilings + premium lighting",
+        "Decor pieces & good furniture",
+        "Electrical + civil work",
+      ],
+      notIncluded: [
+        "High-end smart home tech beyond basic control",
+        "Luxury imported materials",
+      ],
+    },
+    3: {
+      included: [
+        "Quality modular kitchen (better hardware)",
+        "Bedrooms + guest room cabinetry",
+        "Living room with feature walls + décor",
+        "Better lighting scheme + detail design",
+        "Branded hardware & decent counters",
+      ],
+      notIncluded: [
+        "Top-tier imported stone/marble",
+        "Fully integrated home automation",
+      ],
+    },
+  },
+  platinum: {
+    1: {
+      included: [
+        "High-end modular kitchen (quartz/granite options)",
+        "Premium wardrobes + designer furniture",
+        "Feature lighting & designer ceilings",
+        "Accent walls with special finishes",
+        "Better décor & upholstery",
+      ],
+      notIncluded: [
+        "Full smart home technology",
+        "Imported luxury art / world-class designer pieces",
+      ],
+    },
+    2: {
+      included: [
+        "Luxury kitchen with premium countertops",
+        "Custom wardrobe & storage systems",
+        "Rich décor + custom lighting plan",
+        "High-end hardware (Hettich/Blum etc.)",
+        "Premium upholstery & furniture pieces",
+      ],
+      notIncluded: [
+        "Top-tier home automation beyond basics",
+        "Rare imported materials or art",
+      ],
+    },
+    3: {
+      included: [
+        "Premium kitchen with luxury fittings",
+        "Bespoke furniture throughout",
+        "Designer lighting & layered ceilings",
+        "Accent stone/veneer walls",
+        "High quality décor, upholstery, finishes",
+      ],
+      notIncluded: [
+        "Full automation systems",
+        "Collector art & imported designer fixtures",
+      ],
+    },
+  },
+  luxury: {
+    1: {
+      included: [
+        "Bespoke metal/wood finishes",
+        "Imported stone/quartz & designer cabinetry",
+        "Integrated smart systems (lights/climate/audio)",
+        "Custom furniture by premium brands",
+      ],
+      notIncluded: [
+        "Designer art collections",
+        "High-end appliances (client choice)",
+      ],
+    },
+    2: {
+      included: [
+        "Fully custom interiors",
+        "High-end smart home system",
+        "Premium imported materials",
+        "Designer lighting and AV",
+      ],
+      notIncluded: ["Appliances beyond interior scope"],
+    },
+    3: {
+      included: [
+        "Luxury finishes everywhere",
+        "Complete automation (lights, HVAC, audio/video)",
+        "Imported marble & custom cabinetry",
+        "Art curation & bespoke décor",
+      ],
+      notIncluded: [
+        "Appliances/standalone equipments (client supply)",
+      ],
+    },
+  },
+};
+
 const interiorTypes: InteriorType[] = [
+  {
+    id: "living",
+    name: "Living Room",
+    icon: <Sofa className="w-8 h-8" />,
+    description: "Elegant living room designs",
+  },
   {
     id: "bedroom",
     name: "Bedroom",
@@ -153,12 +329,6 @@ const interiorTypes: InteriorType[] = [
     description: "Luxurious bathroom interiors",
   },
   {
-    id: "living",
-    name: "Living Room",
-    icon: <Sofa className="w-8 h-8" />,
-    description: "Elegant living room designs",
-  },
-  {
     id: "lighting",
     name: "Lighting",
     icon: <Lamp className="w-8 h-8" />,
@@ -170,42 +340,42 @@ const designImages: DesignImage[] = [
   {
     id: "1",
     title: "Modern Living Room",
-    category: "Living",
+    category: "living",
     image:
       "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop",
   },
   {
     id: "2",
     title: "Luxury Bedroom",
-    category: "Bedroom",
+    category: "bedroom",
     image:
       "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&h=600&fit=crop",
   },
   {
     id: "3",
     title: "Contemporary Kitchen",
-    category: "Kitchen",
+    category: "kitchen",
     image:
       "https://images.unsplash.com/photo-1556912173-3bb406ef7e77?w=800&h=600&fit=crop",
   },
   {
     id: "4",
     title: "Elegant Bathroom",
-    category: "Bathroom",
+    category: "bathroom",
     image:
       "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&h=600&fit=crop",
   },
   {
     id: "5",
     title: "Minimalist Office",
-    category: "Office",
+    category: "office",
     image:
       "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop",
   },
   {
     id: "6",
     title: "Cozy Dining",
-    category: "Dining",
+    category: "dining",
     image:
       "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800&h=600&fit=crop",
   },
@@ -237,215 +407,67 @@ const whyChooseUs: WhyChooseItem[] = [
   },
 ];
 
-const silverBhkOptions = [
-  { bhk: 1, label: "1BHK", range: "₹4 – 6 Lakhs" },
-  { bhk: 2, label: "2BHK", range: "₹6 – 8 Lakhs" },
-  { bhk: 3, label: "3BHK", range: "₹8 – 10 Lakhs" },
-] as const;
-
-const silverByBhk: Record<1 | 2 | 3, { included: string[]; notIncluded: string[] }> = {
-  1: {
-    included: [
-      "Modular kitchen (basic laminate finish)",
-      "Bed + wardrobe + TV unit",
-      "False ceiling in key areas",
-      "Painting & basic electrical work",
-      "Basic lighting & storage solutions",
-    ],
-    notIncluded: [
-      "Premium hardware/veneer",
-      "Imported materials or high-end counters",
-      "Smart home/automation",
-      "Luxury decor items",
-    ],
-  },
-  2: {
-    included: [
-      "Modular kitchen (standard laminate)",
-      "Wardrobes in bedrooms",
-      "TV unit + simple furniture pieces",
-      "False ceiling (select rooms)",
-      "Painting + lighting + electrical setup",
-    ],
-    notIncluded: [
-      "Premium materials/veneer finishes",
-      "Branded appliances or automation",
-      "Luxury lighting/decor",
-    ],
-  },
-  3: {
-    included: [
-      "Modular kitchen (entry laminate)",
-      "Wardrobes + beds + living room setup",
-      "False ceiling (partial)",
-      "Painting & basic lighting",
-      "Utility area setup",
-    ],
-    notIncluded: [
-      "Designer finishes/premium hardware",
-      "Imported stones/rich textures",
-      "Smart home systems",
-    ],
-  },
-};
-
-const goldBhkOptions = [
-  { bhk: 1, label: "1BHK", range: "₹6 – 10 Lakhs" },
-  { bhk: 2, label: "2BHK", range: "₹10 – 18 Lakhs" },
-  { bhk: 3, label: "3BHK", range: "₹15 – 28 Lakhs" },
-] as const;
-
-const goldByBhk: Record<1 | 2 | 3, { included: string[]; notIncluded: string[] }> = {
-  1: {
-    included: [
-      "Enhanced kitchen with better laminates/handles",
-      "Premium wardrobes & storage",
-      "Designer TV unit + quality lighting",
-      "Detailed false ceilings",
-      "Feature walls, textured paint",
-    ],
-    notIncluded: [
-      "Imported marble/stone",
-      "Full smart home automation",
-      "Ultra-luxury furnishings",
-    ],
-  },
-  2: {
-    included: [
-      "Mid-grade modular kitchen + countertop",
-      "Bedroom wardrobes & beds",
-      "Layered false ceilings + premium lighting",
-      "Decor pieces & good furniture",
-      "Electrical + civil work",
-    ],
-    notIncluded: [
-      "High-end smart home tech beyond basic control",
-      "Luxury imported materials",
-    ],
-  },
-  3: {
-    included: [
-      "Quality modular kitchen (better hardware)",
-      "Bedrooms + guest room cabinetry",
-      "Living room with feature walls + décor",
-      "Better lighting scheme + detail design",
-      "Branded hardware & decent counters",
-    ],
-    notIncluded: [
-      "Top-tier imported stone/marble",
-      "Fully integrated home automation",
-    ],
-  },
-};
-
-const platinumBhkOptions = [
-  { bhk: 1, label: "1BHK", range: "₹12 – 18 Lakhs" },
-  { bhk: 2, label: "2BHK", range: "₹20 – 40 Lakhs" },
-  { bhk: 3, label: "3BHK", range: "₹30 – 60L+" },
-] as const;
-
-const platinumByBhk: Record<1 | 2 | 3, { included: string[]; notIncluded: string[] }> = {
-  1: {
-    included: [
-      "High-end modular kitchen (quartz/granite options)",
-      "Premium wardrobes + designer furniture",
-      "Feature lighting & designer ceilings",
-      "Accent walls with special finishes",
-      "Better décor & upholstery",
-    ],
-    notIncluded: [
-      "Full smart home technology",
-      "Imported luxury art / world-class designer pieces",
-    ],
-  },
-  2: {
-    included: [
-      "Luxury kitchen with premium countertops",
-      "Custom wardrobe & storage systems",
-      "Rich décor + custom lighting plan",
-      "High-end hardware (Hettich/Blum etc.)",
-      "Premium upholstery & furniture pieces",
-    ],
-    notIncluded: [
-      "Top-tier home automation beyond basics",
-      "Rare imported materials or art",
-    ],
-  },
-  3: {
-    included: [
-      "Premium kitchen with luxury fittings",
-      "Bespoke furniture throughout",
-      "Designer lighting & layered ceilings",
-      "Accent stone/veneer walls",
-      "High quality décor, upholstery, finishes",
-    ],
-    notIncluded: [
-      "Full automation systems",
-      "Collector art & imported designer fixtures",
-    ],
-  },
-};
-
-const luxuryBhkOptions = [
-  { bhk: 1, label: "1BHK", range: "₹20 – 35 Lakhs+" },
-  { bhk: 2, label: "2BHK", range: "₹40 – 80 Lakhs+" },
-  { bhk: 3, label: "3BHK", range: "₹60L – 1.5 Cr+" },
-] as const;
-
-const luxuryByBhk: Record<1 | 2 | 3, { included: string[]; notIncluded: string[] }> = {
-  1: {
-    included: [
-      "Bespoke metal/wood finishes",
-      "Imported stone/quartz & designer cabinetry",
-      "Integrated smart systems (lights/climate/audio)",
-      "Custom furniture by premium brands",
-    ],
-    notIncluded: [
-      "Designer art collections",
-      "High-end appliances (client choice)",
-    ],
-  },
-  2: {
-    included: [
-      "Fully custom interiors",
-      "High-end smart home system",
-      "Premium imported materials",
-      "Designer lighting and AV",
-    ],
-    notIncluded: ["Appliances beyond interior scope"],
-  },
-  3: {
-    included: [
-      "Luxury finishes everywhere",
-      "Complete automation (lights, HVAC, audio/video)",
-      "Imported marble & custom cabinetry",
-      "Art curation & bespoke décor",
-    ],
-    notIncluded: [
-      "Appliances/standalone equipments (client supply)",
-    ],
-  },
-};
+const HERO_SCROLL_MAX = 700;
+const SCROLL_THROTTLE_STEP = 16; // ~60fps
 
 export default function Interiors() {
   const [scrollY, setScrollY] = useState(0);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
-  const [selectedBhk, setSelectedBhk] = useState<1 | 2 | 3>(1);
+  const [selectedBhk, setSelectedBhk] = useState<Bhk>(1);
+  const [galleryPopupImages, setGalleryPopupImages] = useState<DesignImage[] | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const lastScrollRef = useRef(0);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handleScroll = () => {
+      if (rafRef.current !== null) return;
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null;
+        const y = Math.min(HERO_SCROLL_MAX, window.scrollY);
+        const rounded = Math.floor(y / SCROLL_THROTTLE_STEP) * SCROLL_THROTTLE_STEP;
+        if (rounded !== lastScrollRef.current) {
+          lastScrollRef.current = rounded;
+          setScrollY(rounded);
+        }
+      });
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
-  const scrollToSection = (sectionId: string) => {
+  const scrollToSection = useCallback((sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) element.scrollIntoView({ behavior: "smooth" });
-  };
+  }, []);
+
+  const handleInteriorTypeClick = useCallback((categoryId: string) => {
+    const el = document.getElementById("gallery");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+    const images = designImages.filter((img) => img.category === categoryId);
+    const toShow = images.length > 0 ? images : designImages;
+    setTimeout(() => setGalleryPopupImages(toShow), 450);
+  }, []);
+
+  const handleImageClick = useCallback((category: string) => {
+    const images = designImages.filter((img) => img.category === category);
+    setGalleryPopupImages(images.length > 0 ? images : designImages);
+  }, []);
+
+  const heroStyle = useMemo(
+    () => ({
+      transform: `translateY(${scrollY * 0.3}px)`,
+      opacity: Math.max(0, 1 - scrollY / 500),
+      willChange: scrollY < 500 ? "transform, opacity" : "auto",
+    }),
+    [scrollY]
+  );
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -461,12 +483,8 @@ export default function Interiors() {
         </div>
         <div
           className="relative z-10 container mx-auto px-4 text-center"
-          style={{
-            transform: `translateY(${scrollY * 0.3}px)`,
-            opacity: Math.max(0, 1 - scrollY / 500),
-          }}
+          style={heroStyle}
         >
-          
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 font-heading">
             Design Your Dream
             <br />
@@ -491,9 +509,9 @@ export default function Interiors() {
       <section id="packages" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge className="mb-4" variant="outline">Pricing Plans</Badge>
+            <Badge className="mb-4" variant="outline">Our Packages</Badge>
             <h2 className="text-4xl md:text-5xl font-bold mb-4 font-heading">Choose Your Package</h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Select the perfect package that fits your needs and budget</p>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Select the package that fits your needs</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {packages.map((pkg) => (
@@ -512,6 +530,8 @@ export default function Interiors() {
                   <img
                     src={pkg.image}
                     alt={pkg.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
@@ -519,10 +539,6 @@ export default function Interiors() {
                 <CardHeader>
                   <CardTitle className="text-2xl">{pkg.name}</CardTitle>
                   <CardDescription>{pkg.tagline}</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-2xl font-bold">{pkg.priceRange}</span>
-                    <span className="text-muted-foreground">/project</span>
-                  </div>
                 </CardHeader>
                 <CardContent className="flex-1">
                   <ul className="space-y-3">
@@ -543,444 +559,108 @@ export default function Interiors() {
                     className="w-full group"
                     onClick={() => setSelectedPackage(pkg)}
                   >
-                    Get Started
+                    Learn More
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </CardFooter>
               </Card>
             ))}
           </div>
-
-          <Dialog
-            open={!!selectedPackage}
-            onOpenChange={(open) => {
-              if (!open) {
-                setSelectedPackage(null);
-                setSelectedBhk(1);
-              }
-            }}
-          >
-            <DialogContent
-              className={
-                selectedPackage?.id === "silver" || selectedPackage?.id === "gold" || selectedPackage?.id === "platinum" || selectedPackage?.id === "luxury"
-                  ? "max-w-4xl w-[95vw] max-h-[90vh] bg-background backdrop-blur-lg rounded-3xl shadow-2xl border border-primary/20 p-0 overflow-hidden ring-2 ring-primary/10 transition-all duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-bottom-4 data-[state=open]:slide-in-from-bottom-4"
-                  : ""
-              }
-            >
-              {selectedPackage?.id === "silver" ? (
-                <div className="flex flex-col h-full max-h-[90vh] overflow-hidden animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-                  {/* Image header with overlay */}
-                  <div className="relative h-40 flex-shrink-0 overflow-hidden rounded-t-3xl">
-                    <img
-                      src="https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?w=1200&h=400&fit=crop"
-                      alt="Budget-friendly interiors"
-                      className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-                    <div className="absolute bottom-5 left-6 right-6">
-                      <Badge className="mb-2 bg-slate-500/20 text-slate-700 dark:text-slate-300 border-0">Budget-Friendly</Badge>
-                      <h2 className="text-2xl font-bold tracking-tight">Silver Package</h2>
-                      <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-                        Best for new homeowners on a tight budget who want functional interiors without luxury finishes
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* BHK comparison cards */}
-                  <div className="px-6 pt-6 pb-3">
-                    <p className="text-sm font-medium text-muted-foreground mb-3">Compare by BHK</p>
-                    <div className="flex gap-3 overflow-x-auto pb-1 scroll-smooth">
-                      {silverBhkOptions.map((opt) => (
-                        <button
-                          key={opt.bhk}
-                          type="button"
-                          onClick={() => setSelectedBhk(opt.bhk)}
-                          className={`flex-shrink-0 px-6 py-4 rounded-2xl text-left min-w-[130px] transition-all duration-300 hover:scale-[1.03] hover:shadow-lg ${
-                            selectedBhk === opt.bhk
-                              ? "bg-primary text-primary-foreground shadow-xl ring-2 ring-primary/40"
-                              : "bg-muted/50 hover:bg-muted/80 border border-border/60 hover:border-primary/30"
-                          }`}
-                        >
-                          <span className="block text-base font-bold">{opt.label}</span>
-                          <span className="block text-sm opacity-90 mt-0.5">{opt.range}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Scrollable content */}
-                  <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-6 scroll-smooth">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Included */}
-                      <div
-                        key={selectedBhk}
-                        className="rounded-2xl border border-emerald-200/50 dark:border-emerald-900/30 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-6 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1 hover:border-emerald-500/30 transition-all duration-300"
-                      >
-                        <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 mb-4 flex items-center gap-2">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20">
-                            <Check className="w-4 h-4" />
-                          </span>
-                          What&apos;s Included
-                        </p>
-                        <ul className="space-y-2.5">
-                          {silverByBhk[selectedBhk].included.map((item, j) => (
-                            <li key={j} className="flex items-start gap-3 text-sm hover:translate-x-1 transition-transform duration-200">
-                              <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {/* Not Included */}
-                      <div
-                        key={`not-${selectedBhk}`}
-                        className="rounded-2xl border border-border/60 bg-gradient-to-br from-muted/50 to-muted/30 p-6 hover:shadow-lg hover:border-border hover:-translate-y-1 transition-all duration-300"
-                      >
-                        <p className="text-sm font-bold text-muted-foreground mb-4 flex items-center gap-2">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                            <Minus className="w-4 h-4" />
-                          </span>
-                          Not Included
-                        </p>
-                        <ul className="space-y-2.5 text-muted-foreground">
-                          {silverByBhk[selectedBhk].notIncluded.map((item, i) => (
-                            <li key={i} className="flex items-start gap-3 text-sm hover:translate-x-1 transition-transform duration-200">
-                              <Minus className="w-4 h-4 flex-shrink-0 mt-0.5 opacity-70" />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    <Button
-                      className="w-full rounded-2xl bg-primary text-white font-semibold text-base py-6 hover:scale-[1.02] hover:shadow-xl transition-all duration-300 group"
-                      size="lg"
-                    >
-                      Request Detailed Estimate
-                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </div>
-                </div>
-              ) : selectedPackage?.id === "gold" ? (
-                <div className="flex flex-col h-full max-h-[90vh] overflow-hidden animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-                  {/* Image header with overlay */}
-                  <div className="relative h-40 flex-shrink-0 overflow-hidden rounded-t-3xl">
-                    <img
-                      src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=1200&h=400&fit=crop"
-                      alt="Mid-range interiors"
-                      className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-                    <div className="absolute bottom-5 left-6 right-6">
-                      <Badge className="mb-2 bg-primary/20 text-primary border-0">⭐ Most Popular</Badge>
-                      <h2 className="text-2xl font-bold tracking-tight">Gold Package</h2>
-                      <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-                        Best for balanced quality, good materials, enhanced aesthetics without ultra-luxury
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* BHK comparison cards */}
-                  <div className="px-6 pt-6 pb-3">
-                    <p className="text-sm font-medium text-muted-foreground mb-3">Compare by BHK</p>
-                    <div className="flex gap-3 overflow-x-auto pb-1 scroll-smooth">
-                      {goldBhkOptions.map((opt) => (
-                        <button
-                          key={opt.bhk}
-                          type="button"
-                          onClick={() => setSelectedBhk(opt.bhk)}
-                          className={`flex-shrink-0 px-6 py-4 rounded-2xl text-left min-w-[130px] transition-all duration-300 hover:scale-[1.03] hover:shadow-lg ${
-                            selectedBhk === opt.bhk
-                              ? "bg-primary text-primary-foreground shadow-xl ring-2 ring-primary/40"
-                              : "bg-muted/50 hover:bg-muted/80 border border-border/60 hover:border-primary/30"
-                          }`}
-                        >
-                          <span className="block text-base font-bold">{opt.label}</span>
-                          <span className="block text-sm opacity-90 mt-0.5">{opt.range}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Scrollable content */}
-                  <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-6 scroll-smooth">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Included */}
-                      <div
-                        key={selectedBhk}
-                        className="rounded-2xl border border-emerald-200/50 dark:border-emerald-900/30 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-6 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1 hover:border-emerald-500/30 transition-all duration-300"
-                      >
-                        <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 mb-4 flex items-center gap-2">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20">
-                            <Check className="w-4 h-4" />
-                          </span>
-                          What&apos;s Included
-                        </p>
-                        <ul className="space-y-2.5">
-                          {goldByBhk[selectedBhk].included.map((item, j) => (
-                            <li key={j} className="flex items-start gap-3 text-sm hover:translate-x-1 transition-transform duration-200">
-                              <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {/* Not Included */}
-                      <div
-                        key={`not-${selectedBhk}`}
-                        className="rounded-2xl border border-border/60 bg-gradient-to-br from-muted/50 to-muted/30 p-6 hover:shadow-lg hover:border-border hover:-translate-y-1 transition-all duration-300"
-                      >
-                        <p className="text-sm font-bold text-muted-foreground mb-4 flex items-center gap-2">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                            <Minus className="w-4 h-4" />
-                          </span>
-                          Not Included
-                        </p>
-                        <ul className="space-y-2.5 text-muted-foreground">
-                          {goldByBhk[selectedBhk].notIncluded.map((item, i) => (
-                            <li key={i} className="flex items-start gap-3 text-sm hover:translate-x-1 transition-transform duration-200">
-                              <Minus className="w-4 h-4 flex-shrink-0 mt-0.5 opacity-70" />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    <Button
-                      className="w-full rounded-2xl bg-primary text-white font-semibold text-base py-6 hover:scale-[1.02] hover:shadow-xl transition-all duration-300 group"
-                      size="lg"
-                    >
-                      Get Personalized Estimate
-                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </div>
-                </div>
-              ) : selectedPackage?.id === "platinum" ? (
-                <div className="flex flex-col h-full max-h-[90vh] overflow-hidden animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-                  {/* Image header with overlay */}
-                  <div className="relative h-40 flex-shrink-0 overflow-hidden rounded-t-3xl">
-                    <img
-                      src="https://images.unsplash.com/photo-1556912173-3bb406ef7e77?w=1200&h=400&fit=crop"
-                      alt="Premium interiors"
-                      className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-                    <div className="absolute bottom-5 left-6 right-6">
-                      <Badge className="mb-2 bg-slate-400/20 text-slate-700 dark:text-slate-300 border-0">Luxury Package</Badge>
-                      <h2 className="text-2xl font-bold tracking-tight">Platinum Package</h2>
-                      <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-                        Best for premium material quality, bespoke furniture, rich finishes & comprehensive design
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* BHK comparison cards */}
-                  <div className="px-6 pt-6 pb-3">
-                    <p className="text-sm font-medium text-muted-foreground mb-3">Compare by BHK</p>
-                    <div className="flex gap-3 overflow-x-auto pb-1 scroll-smooth">
-                      {platinumBhkOptions.map((opt) => (
-                        <button
-                          key={opt.bhk}
-                          type="button"
-                          onClick={() => setSelectedBhk(opt.bhk)}
-                          className={`flex-shrink-0 px-6 py-4 rounded-2xl text-left min-w-[130px] transition-all duration-300 hover:scale-[1.03] hover:shadow-lg ${
-                            selectedBhk === opt.bhk
-                              ? "bg-primary text-primary-foreground shadow-xl ring-2 ring-primary/40"
-                              : "bg-muted/50 hover:bg-muted/80 border border-border/60 hover:border-primary/30"
-                          }`}
-                        >
-                          <span className="block text-base font-bold">{opt.label}</span>
-                          <span className="block text-sm opacity-90 mt-0.5">{opt.range}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Scrollable content */}
-                  <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-6 scroll-smooth">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Included */}
-                      <div
-                        key={selectedBhk}
-                        className="rounded-2xl border border-emerald-200/50 dark:border-emerald-900/30 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-6 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1 hover:border-emerald-500/30 transition-all duration-300"
-                      >
-                        <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 mb-4 flex items-center gap-2">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20">
-                            <Check className="w-4 h-4" />
-                          </span>
-                          What&apos;s Included
-                        </p>
-                        <ul className="space-y-2.5">
-                          {platinumByBhk[selectedBhk].included.map((item, j) => (
-                            <li key={j} className="flex items-start gap-3 text-sm hover:translate-x-1 transition-transform duration-200">
-                              <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {/* Not Included */}
-                      <div
-                        key={`not-${selectedBhk}`}
-                        className="rounded-2xl border border-border/60 bg-gradient-to-br from-muted/50 to-muted/30 p-6 hover:shadow-lg hover:border-border hover:-translate-y-1 transition-all duration-300"
-                      >
-                        <p className="text-sm font-bold text-muted-foreground mb-4 flex items-center gap-2">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                            <Minus className="w-4 h-4" />
-                          </span>
-                          Not Included
-                        </p>
-                        <ul className="space-y-2.5 text-muted-foreground">
-                          {platinumByBhk[selectedBhk].notIncluded.map((item, i) => (
-                            <li key={i} className="flex items-start gap-3 text-sm hover:translate-x-1 transition-transform duration-200">
-                              <Minus className="w-4 h-4 flex-shrink-0 mt-0.5 opacity-70" />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    <Button
-                      className="w-full rounded-2xl bg-primary text-white font-semibold text-base py-6 hover:scale-[1.02] hover:shadow-xl transition-all duration-300 group"
-                      size="lg"
-                    >
-                      Get Personalized Estimate
-                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </div>
-                </div>
-              ) : selectedPackage?.id === "luxury" ? (
-                <div className="flex flex-col h-full max-h-[90vh] overflow-hidden animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
-                  {/* Image header with overlay */}
-                  <div className="relative h-40 flex-shrink-0 overflow-hidden rounded-t-3xl">
-                    <img
-                      src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1200&h=400&fit=crop"
-                      alt="Ultra-luxury interiors"
-                      className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-                    <div className="absolute bottom-5 left-6 right-6">
-                      <Badge className="mb-2 bg-purple-500/20 text-purple-700 dark:text-purple-300 border-0">Ultra-Premium</Badge>
-                      <h2 className="text-2xl font-bold tracking-tight">Ultra-Luxury Package</h2>
-                      <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-                        Best for ultra-premium clients seeking bespoke finishes, imported materials, smart automation & curated art
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* BHK comparison cards */}
-                  <div className="px-6 pt-6 pb-3">
-                    <p className="text-sm font-medium text-muted-foreground mb-3">Compare by BHK</p>
-                    <div className="flex gap-3 overflow-x-auto pb-1 scroll-smooth">
-                      {luxuryBhkOptions.map((opt) => (
-                        <button
-                          key={opt.bhk}
-                          type="button"
-                          onClick={() => setSelectedBhk(opt.bhk)}
-                          className={`flex-shrink-0 px-6 py-4 rounded-2xl text-left min-w-[130px] transition-all duration-300 hover:scale-[1.03] hover:shadow-lg ${
-                            selectedBhk === opt.bhk
-                              ? "bg-primary text-primary-foreground shadow-xl ring-2 ring-primary/40"
-                              : "bg-muted/50 hover:bg-muted/80 border border-border/60 hover:border-primary/30"
-                          }`}
-                        >
-                          <span className="block text-base font-bold">{opt.label}</span>
-                          <span className="block text-sm opacity-90 mt-0.5">{opt.range}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Scrollable content */}
-                  <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-6 scroll-smooth">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Included */}
-                      <div
-                        key={selectedBhk}
-                        className="rounded-2xl border border-emerald-200/50 dark:border-emerald-900/30 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-6 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1 hover:border-emerald-500/30 transition-all duration-300"
-                      >
-                        <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 mb-4 flex items-center gap-2">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20">
-                            <Check className="w-4 h-4" />
-                          </span>
-                          What&apos;s Included
-                        </p>
-                        <ul className="space-y-2.5">
-                          {luxuryByBhk[selectedBhk].included.map((item, j) => (
-                            <li key={j} className="flex items-start gap-3 text-sm hover:translate-x-1 transition-transform duration-200">
-                              <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {/* Excluded */}
-                      <div
-                        key={`not-${selectedBhk}`}
-                        className="rounded-2xl border border-border/60 bg-gradient-to-br from-muted/50 to-muted/30 p-6 hover:shadow-lg hover:border-border hover:-translate-y-1 transition-all duration-300"
-                      >
-                        <p className="text-sm font-bold text-muted-foreground mb-4 flex items-center gap-2">
-                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                            <Minus className="w-4 h-4" />
-                          </span>
-                          Excluded
-                        </p>
-                        <ul className="space-y-2.5 text-muted-foreground">
-                          {luxuryByBhk[selectedBhk].notIncluded.map((item, i) => (
-                            <li key={i} className="flex items-start gap-3 text-sm hover:translate-x-1 transition-transform duration-200">
-                              <Minus className="w-4 h-4 flex-shrink-0 mt-0.5 opacity-70" />
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    <Button
-                      className="w-full rounded-2xl bg-primary text-white font-semibold text-base py-6 hover:scale-[1.02] hover:shadow-xl transition-all duration-300 group"
-                      size="lg"
-                    >
-                      Get Personalized Estimate
-                      <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </div>
-                </div>
-              ) : selectedPackage ? (
-                <>
-                  <DialogHeader>
-                    <DialogTitle>{selectedPackage.name} Package</DialogTitle>
-                    <DialogDescription>
-                      {selectedPackage.tagline} — {selectedPackage.priceRange}
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Delivery timeline: {selectedPackage.deliveryTime}
-                    </p>
-                    <ul className="space-y-2">
-                      {selectedPackage.highlights.map((h, idx) => (
-                        <li key={idx} className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-primary" />
-                          {h}
-                        </li>
-                      ))}
-                    </ul>
-                    <Button className="w-full">
-                      Proceed to Enquiry
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </div>
-                </>
-              ) : null}
-            </DialogContent>
-          </Dialog>
         </div>
+
+        <Dialog
+          open={!!selectedPackage}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelectedPackage(null);
+              setSelectedBhk(1);
+            }
+          }}
+        >
+          <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] p-0 overflow-hidden flex flex-col">
+            {selectedPackage && packageByBhk[selectedPackage.id] && (
+              <div className="flex flex-col h-full max-h-[90vh] overflow-hidden">
+                <div className="relative h-40 flex-shrink-0 overflow-hidden rounded-t-lg">
+                  <img
+                    src={selectedPackage.image}
+                    alt={selectedPackage.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+                  <div className="absolute bottom-4 left-6 right-6">
+                    <h2 className="text-2xl font-bold tracking-tight">{selectedPackage.name} Package</h2>
+                    <p className="text-sm text-muted-foreground mt-1">{selectedPackage.tagline}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      <Clock className="w-3 h-3 inline mr-1" />
+                      Delivery: {selectedPackage.deliveryTime}
+                    </p>
+                  </div>
+                </div>
+                <div className="px-6 pt-4 pb-3">
+                  <p className="text-sm font-medium text-muted-foreground mb-3">Compare by BHK</p>
+                  <div className="flex gap-3 overflow-x-auto pb-1">
+                    {bhkOptions.map((opt) => (
+                      <button
+                        key={opt.bhk}
+                        type="button"
+                        onClick={() => setSelectedBhk(opt.bhk)}
+                        className={`flex-shrink-0 px-6 py-4 rounded-2xl text-left min-w-[130px] transition-all ${
+                          selectedBhk === opt.bhk
+                            ? "bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/40"
+                            : "bg-muted/50 hover:bg-muted border border-border"
+                        }`}
+                      >
+                        <span className="block text-base font-bold">{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="rounded-2xl border border-emerald-200/50 dark:border-emerald-900/30 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 p-6">
+                      <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 mb-4 flex items-center gap-2">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/20">
+                          <Check className="w-4 h-4" />
+                        </span>
+                        What&apos;s Included
+                      </p>
+                      <ul className="space-y-2.5">
+                        {packageByBhk[selectedPackage.id][selectedBhk].included.map((item, j) => (
+                          <li key={j} className="flex items-start gap-3 text-sm">
+                            <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="rounded-2xl border border-border bg-muted/30 p-6">
+                      <p className="text-sm font-bold text-muted-foreground mb-4 flex items-center gap-2">
+                        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                          <Minus className="w-4 h-4" />
+                        </span>
+                        Not Included
+                      </p>
+                      <ul className="space-y-2.5 text-muted-foreground">
+                        {packageByBhk[selectedPackage.id][selectedBhk].notIncluded.map((item, i) => (
+                          <li key={i} className="flex items-start gap-3 text-sm">
+                            <Minus className="w-4 h-4 flex-shrink-0 mt-0.5 opacity-70" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                  <Button className="w-full rounded-2xl py-6 text-base font-semibold" size="lg" asChild>
+                    <a href={CONTACT_FORM_URL} target="_blank" rel="noopener noreferrer">
+                      Request Detailed Estimate
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </section>
 
       {/* Types of Interiors */}
@@ -997,29 +677,30 @@ export default function Interiors() {
               Comprehensive interior design solutions for every space in your
               home
             </p>
-          </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {interiorTypes.map((type) => (
-              <Card
+            <Card
                 key={type.id}
-                className="text-center transition-all duration-300 hover:scale-105 hover:shadow-xl hover:border-primary cursor-pointer group"
+                className="text-center transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer group border-2 hover:border-primary/50"
+                onClick={() => handleInteriorTypeClick(type.id)}
               >
                 <CardHeader>
                   <div className="mx-auto mb-4 p-4 rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                     {type.icon}
                   </div>
                   <CardTitle className="text-xl">{type.name}</CardTitle>
-                  <CardDescription>{type.description}</CardDescription>
-                </CardHeader>
-              </Card>
-            ))}
+                <CardDescription>{type.description}</CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
           </div>
         </div>
       </section>
 
-      {/* Gallery Section */}
-      <section id="gallery" className="py-20 bg-muted/30">
+      {/* Gallery Section — popup opens from this container */}
+      <section id="gallery" className="relative py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <Badge className="mb-4" variant="outline">
@@ -1029,7 +710,7 @@ export default function Interiors() {
               Existing Interior Designs
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Explore our stunning collection of completed projects
+              Explore our stunning collection — click a type above or an image below
             </p>
           </div>
 
@@ -1037,24 +718,84 @@ export default function Interiors() {
             {designImages.map((image) => (
               <div
                 key={image.id}
-                className="group relative overflow-hidden rounded-xl aspect-[4/3] cursor-pointer border border-border"
+                role="button"
+                tabIndex={0}
+                onClick={() => handleImageClick(image.category)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleImageClick(image.category);
+                  }
+                }}
+                className="group relative overflow-hidden rounded-xl aspect-[4/3] cursor-pointer border border-border hover:border-primary/50 transition-colors"
               >
                 <img
                   src={image.image}
                   alt={image.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                     <Badge className="mb-2">{image.category}</Badge>
-                    <h3 className="text-white text-xl font-bold">
-                      {image.title}
-                    </h3>
+                    <h3 className="text-white text-xl font-bold">{image.title}</h3>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+
+          {/* White full-screen popup after scroll */}
+          {galleryPopupImages !== null && (
+            <>
+              <div
+                className="fixed inset-0 z-40 bg-black/30"
+                aria-hidden
+                onClick={() => setGalleryPopupImages(null)}
+              />
+              <div
+                className="fixed inset-4 z-50 rounded-2xl bg-white shadow-2xl flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-300 md:inset-8"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="gallery-popup-title"
+              >
+                <div className="flex items-center justify-between gap-4 p-6 border-b border-gray-200 flex-shrink-0">
+                  <h3 id="gallery-popup-title" className="text-xl font-semibold text-gray-900">
+                    Gallery
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setGalleryPopupImages(null)}
+                    aria-label="Close gallery"
+                    className="text-gray-600 hover:text-gray-900"
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-6 min-h-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {galleryPopupImages.map((img) => (
+                      <div
+                      key={img.id}
+                        className="overflow-hidden rounded-lg border border-gray-200 aspect-[4/3] bg-gray-100"
+                    >
+                      <img
+                        src={img.image}
+                        alt={img.title}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover"
+                      />
+                        <p className="p-2 text-sm font-medium text-gray-900 truncate">{img.title}</p>
+                      </div>
+                  ))}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </section>
 

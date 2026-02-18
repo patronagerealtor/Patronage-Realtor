@@ -62,10 +62,35 @@ export function Footer() {
               </li>
               <li>
                 <a
+                  href="/calculators"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Calculators
+                </a>
+              </li>
+ 
+              <li>
+                <a
                   href="/interiors"
                   className="hover:text-foreground transition-colors"
                 >
-                  Interiors
+                  Design Studio
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/webinars"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Webinars
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/blogs"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Blogs
                 </a>
               </li>
               <li>
@@ -76,14 +101,7 @@ export function Footer() {
                   About Us
                 </a>
               </li>
-              <li>
-                <a
-                  href="/calculators"
-                  className="hover:text-foreground transition-colors"
-                >
-                  Calculators
-                </a>
-              </li>
+              
             </ul>
           </div>
 

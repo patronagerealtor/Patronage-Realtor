@@ -32,22 +32,22 @@ export function Interiors() {
             <h2 className="text-3xl md:text-4xl font-heading font-bold leading-tight">
               Design your home with <br className="hidden md:block"/> world-class interiors
             </h2>
-            <p className="text-muted-foreground text-lg leading-relaxed">
+            <p className="text-gray-650 text-lg leading-relaxed">
               Our partner interior designers help you transform your space into a sanctuary. 
               From minimalist aesthetics to classic luxury, we provide turnkey interior solutions.
             </p>
             
             <ul className="space-y-3 pt-2">
-              <li className="flex items-center gap-3 text-sm font-medium">
-                <div className="h-2 w-2 bg-primary rounded-full" /> 
+              <li className="flex items-center gap-3 text-sm text-gray-650 font-medium">
+                <div className="h-2 w-2 bg-gray-650 rounded-full" /> 
                 Custom Furniture Design
               </li>
-              <li className="flex items-center gap-3 text-sm font-medium">
-                <div className="h-2 w-2 bg-primary rounded-full" /> 
+              <li className="flex items-center gap-3 text-sm text-gray-650 font-medium">
+                <div className="h-2 w-2 bg-gray-650 rounded-full" /> 
                 Lighting & Ambience Planning
               </li>
-              <li className="flex items-center gap-3 text-sm font-medium">
-                <div className="h-2 w-2 bg-primary rounded-full" /> 
+              <li className="flex items-center gap-3 text-sm text-gray-650 font-medium">
+                <div className="h-2 w-2 bg-gray-650 rounded-full" /> 
                 Space Optimization Consulting
               </li>
             </ul>
