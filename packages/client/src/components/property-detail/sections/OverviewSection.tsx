@@ -13,9 +13,9 @@ function getImages(data: PropertyDetailData): string[] {
 function getBhkRange(data: PropertyDetailData): string | null {
   if (!data.floorPlans || data.floorPlans.length === 0) return null;
 
-  const bhks = data.floorPlans.map((fp) =>
-    parseInt(fp.bhk.replace(/\D/g, ""), 10)
-  ).filter(Boolean);
+  const bhks = data.floorPlans
+    .map((fp) => parseInt(fp.bhk.replace(/\D/g, ""), 10))
+    .filter(Boolean);
 
   if (bhks.length === 0) return null;
 
@@ -60,24 +60,6 @@ function MainImage({ src }: { src?: string }) {
   );
 }
 
-function SideImage({ src }: { src?: string }) {
-  return (
-    <div className="relative aspect-video overflow-hidden rounded-lg border border-border">
-      {src ? (
-        <img
-          src={src}
-          alt=""
-          className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]"
-        />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center bg-muted">
-          <LayoutGrid className="h-8 w-8 text-muted-foreground" />
-        </div>
-      )}
-    </div>
-  );
-}
-
 export function OverviewSection({ data, sectionRef }: OverviewSectionProps) {
   const images = getImages(data);
   const bhkRange = getBhkRange(data);
@@ -89,27 +71,18 @@ export function OverviewSection({ data, sectionRef }: OverviewSectionProps) {
       data-section="Overview"
       className="scroll-mt-24 space-y-6"
     >
-      {/* IMAGE GRID */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-border md:col-span-2">
-          <MainImage src={images[0]} />
+      {/* SINGLE MAIN IMAGE */}
+      <div className="relative aspect-[16/9] overflow-hidden rounded-lg border border-border">
+        <MainImage src={images[0]} />
 
-          {images.length > 0 && (
-            <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-md bg-background/90 px-2 py-1 text-xs text-foreground backdrop-blur">
-              <ImageIcon className="h-3.5 w-3.5" />
-              {images.length}
-            </div>
-          )}
+        {images.length > 0 && (
+          <div className="absolute bottom-3 right-3 flex items-center gap-1 rounded-md bg-background/90 px-2 py-1 text-xs text-foreground backdrop-blur">
+            <ImageIcon className="h-3.5 w-3.5" />
+            {images.length}
+          </div>
+        )}
 
-          <span className="absolute bottom-3 left-3 rounded border border-border bg-background/90 px-2 py-1 text-xs text-foreground backdrop-blur">
-            Artist&apos;s impression
-          </span>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <SideImage src={images[1]} />
-          <SideImage src={images[2]} />
-        </div>
+      
       </div>
 
       {/* PROPERTY META */}
@@ -127,12 +100,10 @@ export function OverviewSection({ data, sectionRef }: OverviewSectionProps) {
           <span>{data.location ?? "Location"}</span>
         </div>
 
-        {/* Price */}
         <p className="text-lg font-semibold text-primary">
           {data.price ?? "Price on request"}
         </p>
 
-        {/* Dynamic Summary Row */}
         <div className="flex flex-wrap items-center gap-2 pt-2 text-xs">
           {bhkRange && (
             <span className="rounded-md border border-border bg-secondary px-3 py-1.5 text-secondary-foreground">

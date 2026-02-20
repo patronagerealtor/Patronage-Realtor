@@ -7,7 +7,7 @@ import { Badge } from "../ui/badge";
 import { PlaceholderImage } from "../shared/PlaceholderImage";
 import { PropertyDetailDialog } from "../shared/PropertyDetailDialog";
 import { cn } from "../../lib/utils";
-import { MapPin, Bed, Bath, Square, ArrowRight, Building2, Home } from "lucide-react";
+import { MapPin, ArrowRight, Building2, Home, CalendarDays, Ruler } from "lucide-react";
 import { useProperties } from "../../hooks/use-properties";
 import type { PropertyRow } from "../../lib/supabase";
 
@@ -79,14 +79,31 @@ export function FeaturedProperties() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
-            <Card className="overflow-hidden group border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <Card
+              className="overflow-hidden group border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer"
+              onClick={() => openDetail(property)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  openDetail(property);
+                }
+              }}
+            >
               <CardHeader className="p-0 relative">
                 <Badge className="absolute top-4 left-4 z-10 bg-background/90 text-foreground backdrop-blur-sm shadow-sm">
                   {property.status}
                 </Badge>
 
                 <div className="overflow-hidden h-64">
-                  {property.image_url ? (
+                  {property.images && property.images.length > 0 ? (
+                    <img
+                      src={property.images[0]}
+                      alt={property.title}
+                      className="w-full h-full object-cover rounded-none group-hover:scale-110 transition-transform duration-500"
+                    />
+                  ) : property.image_url ? (
                     <img
                       src={property.image_url}
                       alt={property.title}
@@ -108,7 +125,7 @@ export function FeaturedProperties() {
                     {property.title}
                   </h3>
                   <span className="font-bold text-lg text-primary">
-                    {property.price}
+                    {property.price.startsWith("₹") ? property.price : `₹ ${property.price}`}
                   </span>
                 </div>
 
@@ -136,14 +153,19 @@ export function FeaturedProperties() {
                 )}
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground pt-4 border-t border-border">
+                  {property.bhk_type ? (
+                    <span className="flex items-center gap-1">
+                      <Home className="h-4 w-4" /> {property.bhk_type}
+                    </span>
+                  ) : null}
+                  {property.possession_by ? (
+                    <span className="flex items-center gap-1">
+                      <CalendarDays className="h-4 w-4" />{" "}
+                      {property.possession_by.replace(/^(\d{4})-(\d{2})$/, "$2/$1")}
+                    </span>
+                  ) : null}
                   <span className="flex items-center gap-1">
-                    <Bed className="h-4 w-4" /> {property.beds} Beds
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Bath className="h-4 w-4" /> {property.baths} Baths
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Square className="h-4 w-4" /> {property.sqft} sq.ft
+                    <Ruler className="h-4 w-4" /> {property.sqft} sq.ft
                   </span>
                 </div>
               </CardContent>
@@ -152,7 +174,7 @@ export function FeaturedProperties() {
                 <Button
                   className="w-full transition-transform duration-300 hover:scale-105"
                   variant="outline"
-                  onClick={() => openDetail(property)}
+                  type="button"
                 >
                   View Details
                 </Button>

@@ -20,6 +20,28 @@ const STATUS_OPTIONS: PropertyStatus[] = [
   "Sold",
 ];
 
+const BHK_OPTIONS = [
+  "1 BHK",
+  "2 BHK",
+  "3 BHK",
+  "4 BHK",
+  "5 BHK",
+  "1 to 3 BHK",
+  "1 to 4 BHK",
+  "2 to 3 BHK",
+  "2 to 4 BHK",
+  "2 to 5 BHK",
+];
+
+const PROPERTY_TYPE_OPTIONS = [
+  "Apartment",
+  "Villa",
+  "Commercial space",
+  "Office space",
+  "Hotel space",
+  "Hospital space",
+];
+
 function parseLines(val: string) {
   return val
     .split("\n")
@@ -68,8 +90,6 @@ export type PropertyFormPayload = {
   status: PropertyStatus;
   price: string;
   location: string;
-  beds: number;
-  baths: number;
   sqft: string;
   description: string;
   /** Existing image URLs to keep (when editing). */
@@ -81,7 +101,8 @@ export type PropertyFormPayload = {
   developer: string;
   property_type: string;
   city: string;
-  possession_date: string;
+  bhk_type: string;
+  possession_by: string;
   latitude: string;
   longitude: string;
   price_value: string;
@@ -113,8 +134,9 @@ export function PropertyForm({
   const [status, setStatus] = useState<PropertyStatus>("For Sale");
   const [price, setPrice] = useState("");
   const [locationText, setLocationText] = useState("");
-  const [beds, setBeds] = useState(0);
-  const [baths, setBaths] = useState(0);
+  const [bhkTypeDropdown, setBhkTypeDropdown] = useState("");
+  const [bhkTypeManual, setBhkTypeManual] = useState("");
+  const [possessionBy, setPossessionBy] = useState("");
   const [sqft, setSqft] = useState("");
   const [description, setDescription] = useState("");
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
@@ -122,9 +144,9 @@ export function PropertyForm({
   const [amenitiesText, setAmenitiesText] = useState("");
   const [highlightsText, setHighlightsText] = useState("");
   const [developer, setDeveloper] = useState("");
-  const [propertyType, setPropertyType] = useState("");
+  const [propertyTypeDropdown, setPropertyTypeDropdown] = useState("");
+  const [propertyTypeManual, setPropertyTypeManual] = useState("");
   const [city, setCity] = useState("");
-  const [possessionDate, setPossessionDate] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [priceValue, setPriceValue] = useState("");
@@ -135,8 +157,10 @@ export function PropertyForm({
     setStatus(p.status ?? "For Sale");
     setPrice(p.price ?? "");
     setLocationText(p.location ?? "");
-    setBeds(Number(p.beds ?? 0));
-    setBaths(Number(p.baths ?? 0));
+    const bhk = p.bhk_type ?? "";
+    setBhkTypeDropdown(BHK_OPTIONS.includes(bhk) ? bhk : "");
+    setBhkTypeManual(BHK_OPTIONS.includes(bhk) ? "" : bhk);
+    setPossessionBy(p.possession_by ?? "");
     setSqft(p.sqft ?? "");
     setDescription(p.description ?? "");
     setExistingImageUrls(p.images ?? []);
@@ -144,9 +168,10 @@ export function PropertyForm({
     setAmenitiesText((p.amenities ?? []).join(", "));
     setHighlightsText((p.highlights ?? []).join(", "));
     setDeveloper(p.developer ?? "");
-    setPropertyType(p.property_type ?? "");
+    const pt = p.property_type ?? "";
+    setPropertyTypeDropdown(PROPERTY_TYPE_OPTIONS.includes(pt) ? pt : "");
+    setPropertyTypeManual(PROPERTY_TYPE_OPTIONS.includes(pt) ? "" : pt);
     setCity(p.city ?? "");
-    setPossessionDate(p.possession_date ?? "");
     setLatitude(p.latitude != null ? String(p.latitude) : "");
     setLongitude(p.longitude != null ? String(p.longitude) : "");
     setPriceValue(p.price_value != null ? String(p.price_value) : "");
@@ -158,8 +183,9 @@ export function PropertyForm({
     setStatus("For Sale");
     setPrice("");
     setLocationText("");
-    setBeds(0);
-    setBaths(0);
+    setBhkTypeDropdown("");
+    setBhkTypeManual("");
+    setPossessionBy("");
     setSqft("");
     setDescription("");
     setExistingImageUrls([]);
@@ -167,9 +193,9 @@ export function PropertyForm({
     setAmenitiesText("");
     setHighlightsText("");
     setDeveloper("");
-    setPropertyType("");
+    setPropertyTypeDropdown("");
+    setPropertyTypeManual("");
     setCity("");
-    setPossessionDate("");
     setLatitude("");
     setLongitude("");
     setPriceValue("");
@@ -185,17 +211,18 @@ export function PropertyForm({
       setStatus("For Sale");
       setPrice("");
       setLocationText("");
-      setBeds(0);
-      setBaths(0);
+      setBhkTypeDropdown("");
+      setBhkTypeManual("");
+      setPossessionBy("");
       setSqft("");
       setExistingImageUrls([]);
       setFilesToUpload([]);
       setAmenitiesText("");
       setHighlightsText("");
       setDeveloper("");
-      setPropertyType("");
+      setPropertyTypeDropdown("");
+      setPropertyTypeManual("");
       setCity("");
-      setPossessionDate("");
       setLatitude("");
       setLongitude("");
       setPriceValue("");
@@ -217,13 +244,13 @@ export function PropertyForm({
   const handleSave = async () => {
     if (!title.trim()) return;
     try {
+      const resolvedBhk = bhkTypeManual.trim() || bhkTypeDropdown || "";
+      const resolvedPropertyType = propertyTypeManual.trim() || propertyTypeDropdown || "";
       await onSave({
         title: title.trim(),
         status,
         price: price.trim(),
         location: locationText.trim(),
-        beds: Math.max(0, Number(beds) || 0),
-        baths: Math.max(0, Number(baths) || 0),
         sqft: sqft.trim(),
         description: description.trim() || "",
         existingImageUrls,
@@ -231,9 +258,10 @@ export function PropertyForm({
         amenities: parseCsv(amenitiesText),
         highlights: parseCsv(highlightsText),
         developer: developer.trim(),
-        property_type: propertyType.trim(),
+        property_type: resolvedPropertyType,
         city: city.trim(),
-        possession_date: possessionDate.trim() || "",
+        bhk_type: resolvedBhk,
+        possession_by: possessionBy.trim(),
         latitude: latitude.trim(),
         longitude: longitude.trim(),
         price_value: priceValue.trim(),
@@ -361,49 +389,63 @@ export function PropertyForm({
       <Card className="p-6">
         <h3 className={sectionHeading}>Property Specifications</h3>
         <div className="mt-4 space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Beds</Label>
-              <Input
-                value={beds === 0 ? "" : String(beds)}
-                onChange={(e) =>
-                  setBeds(e.target.value === "" ? 0 : Number(e.target.value))
-                }
-                inputMode="numeric"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Baths</Label>
-              <Input
-                value={baths === 0 ? "" : String(baths)}
-                onChange={(e) =>
-                  setBaths(e.target.value === "" ? 0 : Number(e.target.value))
-                }
-                inputMode="numeric"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Sqft</Label>
-              <Input value={sqft} onChange={(e) => setSqft(e.target.value)} />
-            </div>
+          <div className="space-y-2">
+            <Label>BHK Type</Label>
+            <Select
+              value={bhkTypeDropdown || "_none_"}
+              onValueChange={(v) => setBhkTypeDropdown(v === "_none_" ? "" : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select BHK type" />
+              </SelectTrigger>
+              <SelectContent>
+                {BHK_OPTIONS.map((opt) => (
+                  <SelectItem key={opt} value={opt}>
+                    {opt}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
+              value={bhkTypeManual}
+              onChange={(e) => setBhkTypeManual(e.target.value)}
+              placeholder="Or enter manually (overrides dropdown)"
+            />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Property Type</Label>
-              <Input
-                value={propertyType}
-                onChange={(e) => setPropertyType(e.target.value)}
-                placeholder="e.g. Villa, Apartment"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Possession Date</Label>
-              <Input
-                type="date"
-                value={possessionDate}
-                onChange={(e) => setPossessionDate(e.target.value)}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label>Possession By</Label>
+            <Input
+              type="month"
+              value={possessionBy}
+              onChange={(e) => setPossessionBy(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Sqft</Label>
+            <Input value={sqft} onChange={(e) => setSqft(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label>Property Type</Label>
+            <Select
+              value={propertyTypeDropdown || "_none_"}
+              onValueChange={(v) => setPropertyTypeDropdown(v === "_none_" ? "" : v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select property type" />
+              </SelectTrigger>
+              <SelectContent>
+                {PROPERTY_TYPE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt} value={opt}>
+                    {opt}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
+              value={propertyTypeManual}
+              onChange={(e) => setPropertyTypeManual(e.target.value)}
+              placeholder="Or enter manually (overrides dropdown)"
+            />
           </div>
         </div>
       </Card>

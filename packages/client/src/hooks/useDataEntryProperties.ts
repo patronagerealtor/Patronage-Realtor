@@ -13,6 +13,18 @@ import { useEffect, useState } from "react";
 
 const PROPERTIES_TABLE = "properties";
 const PROPERTY_IMAGES_TABLE = "property_images";
+const STORAGE_BUCKET = "property-images";
+
+/** Extract storage path from public URL: ".../property-images/{propertyId}/file" -> "{propertyId}/file" */
+function getStoragePathsFromImageUrls(urls: { image_url: string }[]): string[] {
+  const paths: string[] = [];
+  for (const { image_url } of urls) {
+    if (!image_url || typeof image_url !== "string") continue;
+    const parts = image_url.split(`/${STORAGE_BUCKET}/`);
+    if (parts.length >= 2 && parts[1]) paths.push(parts[1].trim());
+  }
+  return paths;
+}
 
 /** Map PropertyRow (from Supabase) to Property (used by DataEntry/UI) */
 function toProperty(row: PropertyRow): Property {
@@ -33,6 +45,8 @@ function toProperty(row: PropertyRow): Property {
     property_type: row.property_type,
     city: undefined,
     possession_date: row.possession_date ?? undefined,
+    bhk_type: row.bhk_type ?? undefined,
+    possession_by: row.possession_by ?? undefined,
     latitude: row.latitude,
     longitude: row.longitude,
     price_value: row.price_value,
@@ -199,9 +213,42 @@ export function useDataEntryProperties() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!supabase) throw new Error("Supabase not configured");
-      await supabase.from(PROPERTY_IMAGES_TABLE).delete().eq("property_id", id);
-      const { error } = await supabase.from(PROPERTIES_TABLE).delete().eq("id", id);
-      if (error) throw error;
+      try {
+        const { data: imageRows } = await supabase
+          .from(PROPERTY_IMAGES_TABLE)
+          .select("image_url")
+          .eq("property_id", id);
+        const urls = Array.isArray(imageRows) ? imageRows : [];
+        const paths = getStoragePathsFromImageUrls(urls);
+        if (paths.length > 0) {
+          try {
+            const { error: storageError } = await supabase.storage
+              .from(STORAGE_BUCKET)
+              .remove(paths);
+            if (storageError) {
+              console.error("[Supabase] storage cleanup error:", storageError);
+            }
+          } catch (e) {
+            console.error("[Supabase] storage cleanup exception:", e);
+          }
+        }
+        const { error: imagesError } = await supabase
+          .from(PROPERTY_IMAGES_TABLE)
+          .delete()
+          .eq("property_id", id);
+        if (imagesError) {
+          console.error("[Supabase] delete property_images error:", imagesError);
+        }
+        const { error: propError } = await supabase
+          .from(PROPERTIES_TABLE)
+          .delete()
+          .eq("id", id);
+        if (propError) {
+          console.error("[Supabase] delete property error:", propError);
+        }
+      } catch (e) {
+        console.error("[Supabase] delete property exception:", e);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
@@ -225,12 +272,14 @@ export function useDataEntryProperties() {
         city: partial.city ?? null,
         price_display: partial.price,
         price_value: partial.price_value ?? null,
-        beds: partial.beds,
-        baths: partial.baths,
+        beds: partial.beds ?? null,
+        baths: partial.baths ?? null,
         sqft: partial.sqft,
         property_type: partial.property_type ?? "",
         construction_status: partial.status,
         possession_date: partial.possession_date ?? null,
+        bhk_type: partial.bhk_type ?? null,
+        possession_by: partial.possession_by ?? null,
         description: partial.description ?? null,
         latitude: partial.latitude ?? null,
         longitude: partial.longitude ?? null,

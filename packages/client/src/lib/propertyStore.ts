@@ -5,8 +5,8 @@ export type Property = {
   title: string;
   location: string;
   price: string;
-  beds: number;
-  baths: number;
+  beds?: number;
+  baths?: number;
   sqft: string;
   status: PropertyStatus;
   description?: string;
@@ -17,6 +17,8 @@ export type Property = {
   property_type?: string;
   city?: string;
   possession_date?: string | null;
+  bhk_type?: string;
+  possession_by?: string;
   latitude?: number | null;
   longitude?: number | null;
   price_value?: number | null;

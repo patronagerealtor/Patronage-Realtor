@@ -19,6 +19,8 @@ export type BlogPost = {
   date: string;
   category: string;
   image: string;
+  /** Optional e.g. "5 min read" */
+  readTime?: string;
 };
 
 /* -------------------- Data -------------------- */
