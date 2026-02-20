@@ -12,6 +12,8 @@ import {
 import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
 import type { Property, PropertyStatus } from "../../lib/propertyStore";
+import { supabase } from "../../lib/supabase";
+import { AmenityIcon } from "../shared/AmenityIcon";
 
 const STATUS_OPTIONS: PropertyStatus[] = [
   "For Sale",
@@ -134,22 +136,19 @@ export function PropertyForm({
   const [status, setStatus] = useState<PropertyStatus>("For Sale");
   const [price, setPrice] = useState("");
   const [locationText, setLocationText] = useState("");
-  const [bhkTypeDropdown, setBhkTypeDropdown] = useState("");
-  const [bhkTypeManual, setBhkTypeManual] = useState("");
+  const [bhkType, setBhkType] = useState("");
   const [possessionBy, setPossessionBy] = useState("");
   const [sqft, setSqft] = useState("");
   const [description, setDescription] = useState("");
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
   const [filesToUpload, setFilesToUpload] = useState<File[]>([]);
-  const [amenitiesText, setAmenitiesText] = useState("");
-  const [highlightsText, setHighlightsText] = useState("");
+  const [amenitiesList, setAmenitiesList] = useState<{ id: string; name: string; icon: string }[]>([]);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [developer, setDeveloper] = useState("");
-  const [propertyTypeDropdown, setPropertyTypeDropdown] = useState("");
-  const [propertyTypeManual, setPropertyTypeManual] = useState("");
+  const [propertyType, setPropertyType] = useState("");
   const [city, setCity] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
-  const [priceValue, setPriceValue] = useState("");
   const [slug, setSlug] = useState("");
 
   const fillFormFromProperty = (p: Property) => {
@@ -157,24 +156,18 @@ export function PropertyForm({
     setStatus(p.status ?? "For Sale");
     setPrice(p.price ?? "");
     setLocationText(p.location ?? "");
-    const bhk = p.bhk_type ?? "";
-    setBhkTypeDropdown(BHK_OPTIONS.includes(bhk) ? bhk : "");
-    setBhkTypeManual(BHK_OPTIONS.includes(bhk) ? "" : bhk);
+    setBhkType(p.bhk_type ?? "");
     setPossessionBy(p.possession_by ?? "");
     setSqft(p.sqft ?? "");
     setDescription(p.description ?? "");
     setExistingImageUrls(p.images ?? []);
     setFilesToUpload([]);
-    setAmenitiesText((p.amenities ?? []).join(", "));
-    setHighlightsText((p.highlights ?? []).join(", "));
+    setSelectedAmenities((p.amenities ?? []).map((a) => String(a.id).toLowerCase()));
     setDeveloper(p.developer ?? "");
-    const pt = p.property_type ?? "";
-    setPropertyTypeDropdown(PROPERTY_TYPE_OPTIONS.includes(pt) ? pt : "");
-    setPropertyTypeManual(PROPERTY_TYPE_OPTIONS.includes(pt) ? "" : pt);
+    setPropertyType(p.property_type ?? "");
     setCity(p.city ?? "");
     setLatitude(p.latitude != null ? String(p.latitude) : "");
     setLongitude(p.longitude != null ? String(p.longitude) : "");
-    setPriceValue(p.price_value != null ? String(p.price_value) : "");
     setSlug(p.slug ?? "");
   };
 
@@ -183,22 +176,18 @@ export function PropertyForm({
     setStatus("For Sale");
     setPrice("");
     setLocationText("");
-    setBhkTypeDropdown("");
-    setBhkTypeManual("");
+    setBhkType("");
     setPossessionBy("");
     setSqft("");
     setDescription("");
     setExistingImageUrls([]);
     setFilesToUpload([]);
-    setAmenitiesText("");
-    setHighlightsText("");
+    setSelectedAmenities([]);
     setDeveloper("");
-    setPropertyTypeDropdown("");
-    setPropertyTypeManual("");
+    setPropertyType("");
     setCity("");
     setLatitude("");
     setLongitude("");
-    setPriceValue("");
     setSlug("");
     onReset();
   };
@@ -211,24 +200,20 @@ export function PropertyForm({
       setStatus("For Sale");
       setPrice("");
       setLocationText("");
-      setBhkTypeDropdown("");
-      setBhkTypeManual("");
+      setBhkType("");
       setPossessionBy("");
       setSqft("");
       setExistingImageUrls([]);
       setFilesToUpload([]);
-      setAmenitiesText("");
-      setHighlightsText("");
+      setSelectedAmenities([]);
       setDeveloper("");
-      setPropertyTypeDropdown("");
-      setPropertyTypeManual("");
+      setPropertyType("");
       setCity("");
       setLatitude("");
       setLongitude("");
-      setPriceValue("");
       setSlug("");
     }
-  }, [editingProperty?.id, editingProperty === null]);
+  }, [editingProperty]);
 
   useEffect(() => {
     if (!slug && title) {
@@ -241,11 +226,36 @@ export function PropertyForm({
     }
   }, [title, slug]);
 
+  useEffect(() => {
+    if (!supabase) return;
+    supabase
+      .from("amenities")
+      .select("*")
+      .then(({ data }) => {
+        if (Array.isArray(data)) {
+          setAmenitiesList(
+            data.map((r: { id: string; name: string; icon: string }) => ({
+              id: String(r.id).toLowerCase(),
+              name: r.name ?? "",
+              icon: r.icon ?? "",
+            }))
+          );
+        }
+      });
+  }, []);
+
+  const toggleAmenity = (id: string) => {
+    const normalizedId = String(id).toLowerCase();
+    setSelectedAmenities((prev) =>
+      prev.includes(normalizedId)
+        ? prev.filter((a) => a !== normalizedId)
+        : [...prev, normalizedId]
+    );
+  };
+
   const handleSave = async () => {
     if (!title.trim()) return;
     try {
-      const resolvedBhk = bhkTypeManual.trim() || bhkTypeDropdown || "";
-      const resolvedPropertyType = propertyTypeManual.trim() || propertyTypeDropdown || "";
       await onSave({
         title: title.trim(),
         status,
@@ -255,16 +265,16 @@ export function PropertyForm({
         description: description.trim() || "",
         existingImageUrls,
         filesToUpload,
-        amenities: parseCsv(amenitiesText),
-        highlights: parseCsv(highlightsText),
+        amenities: selectedAmenities,
+        highlights: [],
         developer: developer.trim(),
-        property_type: resolvedPropertyType,
+        property_type: propertyType.trim(),
         city: city.trim(),
-        bhk_type: resolvedBhk,
+        bhk_type: bhkType.trim(),
         possession_by: possessionBy.trim(),
         latitude: latitude.trim(),
         longitude: longitude.trim(),
-        price_value: priceValue.trim(),
+        price_value: "",
         slug: slug.trim(),
       });
     } catch {
@@ -352,19 +362,10 @@ export function PropertyForm({
               <Label>Price</Label>
               <Input
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                onChange={(e) => setPrice(e.target.value.replace(/[a-zA-Z]/g, ""))}
                 placeholder='e.g. "$1,200,000"'
               />
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label>Price Value</Label>
-            <Input
-              value={priceValue}
-              onChange={(e) => setPriceValue(e.target.value)}
-              placeholder="Numeric value (e.g. 1200000)"
-              inputMode="numeric"
-            />
           </div>
           <div className="space-y-2">
             <Label>Location</Label>
@@ -391,26 +392,18 @@ export function PropertyForm({
         <div className="mt-4 space-y-4">
           <div className="space-y-2">
             <Label>BHK Type</Label>
-            <Select
-              value={bhkTypeDropdown || "_none_"}
-              onValueChange={(v) => setBhkTypeDropdown(v === "_none_" ? "" : v)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select BHK type" />
-              </SelectTrigger>
-              <SelectContent>
-                {BHK_OPTIONS.map((opt) => (
-                  <SelectItem key={opt} value={opt}>
-                    {opt}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             <Input
-              value={bhkTypeManual}
-              onChange={(e) => setBhkTypeManual(e.target.value)}
-              placeholder="Or enter manually (overrides dropdown)"
+              type="text"
+              list="bhk-options"
+              value={bhkType}
+              onChange={(e) => setBhkType(e.target.value)}
+              placeholder="Select or type BHK range"
             />
+            <datalist id="bhk-options">
+              {BHK_OPTIONS.map((opt) => (
+                <option key={opt} value={opt} />
+              ))}
+            </datalist>
           </div>
           <div className="space-y-2">
             <Label>Possession By</Label>
@@ -422,30 +415,22 @@ export function PropertyForm({
           </div>
           <div className="space-y-2">
             <Label>Sqft</Label>
-            <Input value={sqft} onChange={(e) => setSqft(e.target.value)} />
+            <Input value={sqft} onChange={(e) => setSqft(e.target.value.replace(/[a-zA-Z]/g, ""))} />
           </div>
           <div className="space-y-2">
             <Label>Property Type</Label>
-            <Select
-              value={propertyTypeDropdown || "_none_"}
-              onValueChange={(v) => setPropertyTypeDropdown(v === "_none_" ? "" : v)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select property type" />
-              </SelectTrigger>
-              <SelectContent>
-                {PROPERTY_TYPE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt} value={opt}>
-                    {opt}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             <Input
-              value={propertyTypeManual}
-              onChange={(e) => setPropertyTypeManual(e.target.value)}
-              placeholder="Or enter manually (overrides dropdown)"
+              type="text"
+              list="property-type-options"
+              value={propertyType}
+              onChange={(e) => setPropertyType(e.target.value)}
+              placeholder="Select or type property type"
             />
+            <datalist id="property-type-options">
+              {PROPERTY_TYPE_OPTIONS.map((opt) => (
+                <option key={opt} value={opt} />
+              ))}
+            </datalist>
           </div>
         </div>
       </Card>
@@ -471,7 +456,7 @@ export function PropertyForm({
             <Label>Latitude</Label>
             <Input
               value={latitude}
-              onChange={(e) => setLatitude(e.target.value)}
+              onChange={(e) => setLatitude(e.target.value.replace(/[a-zA-Z]/g, ""))}
               placeholder="e.g. 34.0522"
               inputMode="decimal"
             />
@@ -480,7 +465,7 @@ export function PropertyForm({
             <Label>Longitude</Label>
             <Input
               value={longitude}
-              onChange={(e) => setLongitude(e.target.value)}
+              onChange={(e) => setLongitude(e.target.value.replace(/[a-zA-Z]/g, ""))}
               placeholder="e.g. -118.2437"
               inputMode="decimal"
             />
@@ -497,10 +482,16 @@ export function PropertyForm({
             type="file"
             accept="image/*"
             multiple
+            disabled={existingImageUrls.length + filesToUpload.length >= 4}
             className="cursor-pointer file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-primary-foreground"
             onChange={(e) => {
               const files = e.target.files ? Array.from(e.target.files) : [];
-              setFilesToUpload((prev) => [...prev, ...files]);
+              setFilesToUpload((prev) => {
+                const total = existingImageUrls.length + prev.length;
+                const remaining = Math.max(0, 4 - total);
+                const toAdd = files.slice(0, remaining);
+                return [...prev, ...toAdd];
+              });
               e.target.value = "";
             }}
           />
@@ -544,7 +535,7 @@ export function PropertyForm({
             </div>
           )}
           <p className="text-xs text-muted-foreground">
-            Upload images to Supabase Storage. They will appear in the gallery after save.
+            Upload images to Supabase Storage (max 4 per property). They will appear in the gallery after save.
           </p>
         </div>
       </Card>
@@ -554,20 +545,32 @@ export function PropertyForm({
         <h3 className={sectionHeading}>Features</h3>
         <div className="mt-4 space-y-4">
           <div className="space-y-2">
-            <Label>Amenities (comma separated)</Label>
-            <Input
-              value={amenitiesText}
-              onChange={(e) => setAmenitiesText(e.target.value)}
-              placeholder="Pool, Gym, Parking"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Highlights (comma separated)</Label>
-            <Input
-              value={highlightsText}
-              onChange={(e) => setHighlightsText(e.target.value)}
-              placeholder="Ocean view, Renovated kitchen"
-            />
+            <Label>Amenities</Label>
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
+              {amenitiesList.length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  No amenities in database. Add rows to the <code className="rounded bg-muted px-1">amenities</code> table in Supabase.
+                </p>
+              )}
+              {amenitiesList.map((amenity) => {
+                const isChecked = selectedAmenities.includes(amenity.id);
+                return (
+                  <label
+                    key={amenity.id}
+                    className="flex cursor-pointer items-center gap-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => toggleAmenity(amenity.id)}
+                      className="h-4 w-4 rounded border-input"
+                    />
+                    <AmenityIcon name={amenity.icon} />
+                    <span>{amenity.name}</span>
+                  </label>
+                );
+              })}
+            </div>
           </div>
         </div>
       </Card>

@@ -58,7 +58,13 @@ export function toPropertyDetailData(
     possessionBy: possessionBy ?? DEFAULT_POSSESSION,
     description: "description" in property ? property.description : undefined,
     images,
-    amenities: "amenities" in property ? (Array.isArray(property.amenities) ? property.amenities : undefined) : undefined,
+    amenities:
+      "amenities" in property && Array.isArray(property.amenities)
+        ? property.amenities.filter(
+            (a): a is { id: string; name: string; icon: string } =>
+              a != null && typeof a === "object" && "id" in a && "name" in a && "icon" in a
+          )
+        : undefined,
     floorPlans: undefined,
     latitude: "latitude" in property ? property.latitude : undefined,
     longitude: "longitude" in property ? property.longitude : undefined,

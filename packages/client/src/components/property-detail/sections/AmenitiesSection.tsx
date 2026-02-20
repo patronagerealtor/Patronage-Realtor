@@ -1,15 +1,5 @@
-import {
-  Car,
-  Dumbbell,
-  Radio,
-  Waves,
-  TreePine,
-  Flower2,
-  Activity,
-  Droplets,
-  LayoutGrid,
-  type LucideIcon,
-} from "lucide-react";
+import { LayoutGrid } from "lucide-react";
+import { AmenityIcon } from "@/components/shared/AmenityIcon";
 import type { PropertyDetailData } from "@/types/propertyDetail";
 
 type AmenitiesSectionProps = {
@@ -17,30 +7,13 @@ type AmenitiesSectionProps = {
   sectionRef: (el: HTMLElement | null) => void;
 };
 
-const LABEL_TO_ICON: Record<string, LucideIcon> = {
-  "Car Parking": Car,
-  Gym: Dumbbell,
-  "Basketball Court": Activity,
-  Intercom: Radio,
-  "Swimming Pool": Waves,
-  Amphitheater: Waves,
-  "Meditation Space": Flower2,
-  "Landscaped Garden": TreePine,
-  "Jogging Track": Activity,
-  "Rainwater Harvesting": Droplets,
-};
-
-function getIcon(label: string): LucideIcon {
-  return LABEL_TO_ICON[label] ?? LayoutGrid;
-}
-
 export function AmenitiesSection({
   data,
   sectionRef,
 }: AmenitiesSectionProps) {
-  const labels = data.amenities?.length ? data.amenities : [];
+  const amenities = data.amenities?.length ? data.amenities : [];
 
-  if (!labels.length) {
+  if (!amenities.length) {
     return (
       <section
         ref={sectionRef}
@@ -75,25 +48,21 @@ export function AmenitiesSection({
           Amenities
         </h2>
 
-        <div className="mt-8 grid gap-y-10 gap-x-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-          {labels.map((label, index) => {
-            const Icon = getIcon(label);
-
-            return (
-              <div
-                key={`${label}-${index}`}
-                className="group flex flex-col items-center text-center transition-transform duration-200 hover:-translate-y-1"
-              >
-                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-border bg-muted/40 transition-colors duration-200 group-hover:border-primary group-hover:bg-primary/10">
-                  <Icon className="h-6 w-6 text-foreground transition-colors duration-200 group-hover:text-primary" />
-                </div>
-
-                <p className="mt-3 text-sm font-medium text-foreground">
-                  {label}
-                </p>
-              </div>
-            );
-          })}
+        <div className="mt-8 grid grid-cols-2 gap-10 text-center sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {data.amenities?.map((amenity) => (
+            <div
+              key={amenity.id}
+              className="group flex flex-col items-center gap-3 transition-transform duration-200 hover:scale-105"
+            >
+              <AmenityIcon
+                name={amenity.icon}
+                className="h-10 w-10 text-primary"
+              />
+              <p className="text-sm font-medium text-muted-foreground transition-colors group-hover:text-foreground">
+                {amenity.name}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

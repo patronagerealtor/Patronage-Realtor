@@ -11,7 +11,7 @@ export type Property = {
   status: PropertyStatus;
   description?: string;
   images?: string[];
-  amenities?: string[];
+  amenities?: { id: string; name: string; icon: string }[];
   highlights?: string[];
   developer?: string;
   property_type?: string;
@@ -39,7 +39,7 @@ export const DEFAULT_PROPERTIES: Property[] = [
     status: "For Sale",
     description:
       "A bright, contemporary villa with open-plan living, expansive glazing, and a private outdoor lounge.",
-    amenities: ["Pool", "Garden", "2-Car Garage", "Smart Home"],
+    amenities: [],
   },
   {
     id: "2",
@@ -52,7 +52,7 @@ export const DEFAULT_PROPERTIES: Property[] = [
     status: "For Rent",
     description:
       "Industrial-chic loft with high ceilings, exposed brick, and walkable access to the best of downtown.",
-    amenities: ["Doorman", "Gym", "Rooftop", "Pet Friendly"],
+    amenities: [],
   },
   {
     id: "3",
@@ -65,7 +65,7 @@ export const DEFAULT_PROPERTIES: Property[] = [
     status: "For Sale",
     description:
       "Ocean-view condo featuring a breezy balcony, modern finishes, and resort-style building amenities.",
-    amenities: ["Ocean View", "Pool", "Concierge", "Parking"],
+    amenities: [],
   },
   {
     id: "4",
@@ -78,7 +78,7 @@ export const DEFAULT_PROPERTIES: Property[] = [
     status: "For Sale",
     description:
       "A serene mountain home with cozy interiors, panoramic views, and quick access to trails and slopes.",
-    amenities: ["Fireplace", "Hot Tub", "Ski Room", "Deck"],
+    amenities: [],
   },
   {
     id: "5",
@@ -91,7 +91,7 @@ export const DEFAULT_PROPERTIES: Property[] = [
     status: "For Sale",
     description:
       "Charming lakeside cottage with natural light, warm wood accents, and peaceful waterfront vibes.",
-    amenities: ["Lake Access", "Dock", "Patio", "Outdoor Grill"],
+    amenities: [],
   },
   {
     id: "6",
@@ -104,7 +104,7 @@ export const DEFAULT_PROPERTIES: Property[] = [
     status: "For Rent",
     description:
       "Top-floor penthouse with skyline views, spacious entertaining areas, and premium finishes throughout.",
-    amenities: ["Terrace", "Skyline View", "Elevator", "Security"],
+    amenities: [],
   },
 ];
 

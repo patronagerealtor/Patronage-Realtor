@@ -11,7 +11,7 @@ export type PropertyDetailData = {
   possessionBy?: string;
   description?: string;
   images?: string[];
-  amenities?: string[];
+  amenities?: { id: string; name: string; icon: string }[];
   floorPlans?: {
     bhk: string;
     carpet: string;
