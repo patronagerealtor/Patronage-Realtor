@@ -5,8 +5,11 @@ import { PropertyList } from "../components/admin/PropertyList";
 import { PropertyDetailDialog } from "../components/shared/PropertyDetailDialog";
 import { useDataEntryPropertiesOrLocal } from "../hooks/useDataEntryProperties";
 import { uploadPropertyImages } from "../lib/supabase";
+import type { Property } from "../lib/propertyStore";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
+
+type UpsertPropertyArg = Omit<Property, "id"> & { id?: string };
 
 export default function DataEntry() {
   const dataEntry = useDataEntryPropertiesOrLocal();
@@ -96,14 +99,14 @@ export default function DataEntry() {
           id: undefined,
           ...basePayload,
           images: [],
-        });
+        } as unknown as UpsertPropertyArg);
         const uploaded = await uploadPropertyImages(nextId, payload.filesToUpload);
         imageUrls = [...imageUrls, ...uploaded];
         await upsertProperty({
           id: nextId,
           ...basePayload,
           images: imageUrls,
-        });
+        } as unknown as UpsertPropertyArg);
       } else {
         nextId = effectiveEditId!;
         const uploaded = await uploadPropertyImages(nextId, payload.filesToUpload);
@@ -112,14 +115,14 @@ export default function DataEntry() {
           id: nextId,
           ...basePayload,
           images: imageUrls,
-        });
+        } as unknown as UpsertPropertyArg);
       }
     } else {
       nextId = await upsertProperty({
         id: effectiveEditId ?? undefined,
         ...basePayload,
         images: imageUrls,
-      });
+      } as unknown as UpsertPropertyArg);
     }
 
     setPreviewId(nextId);

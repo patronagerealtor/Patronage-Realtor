@@ -92,7 +92,11 @@ export type PropertyRow = {
   possession_date?: string | null;
   bhk_type?: string | null;
   possession_by?: string | null;
-  amenities?: string[] | null;
+  amenities?: {
+    id: string;
+    name: string;
+    icon: string;
+  }[];
   price_value?: number | null;
   slug?: string;
 };
@@ -120,7 +124,9 @@ type PropertiesTableRow = {
   price_value?: number | null;
   slug?: string | null;
   description?: string | null;
-  amenities?: string[] | null;
+  property_amenities?: {
+    amenities: { id: string; name: string; icon: string } | null;
+  }[] | null;
   property_images?: PropertyImageRow[] | null;
 };
 
@@ -151,7 +157,13 @@ function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
     possession_date: row.possession_date ?? null,
     bhk_type: row.bhk_type ?? undefined,
     possession_by: row.possession_by ?? undefined,
-    amenities: Array.isArray(row.amenities) ? row.amenities : [],
+    amenities: (() => {
+      const list = row.property_amenities?.map((pa) => pa.amenities) ?? [];
+      return list.filter(
+        (a): a is { id: string; name: string; icon: string } =>
+          a != null && typeof a === "object" && "id" in a && "name" in a && "icon" in a
+      );
+    })(),
     price_value: row.price_value ?? null,
     slug: row.slug ?? undefined,
   };
@@ -168,6 +180,13 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
         property_images (
           image_url,
           sort_order
+        ),
+        property_amenities (
+          amenities (
+            id,
+            name,
+            icon
+          )
         )
       `
       )

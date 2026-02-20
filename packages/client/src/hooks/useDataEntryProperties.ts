@@ -13,15 +13,17 @@ import { useEffect, useState } from "react";
 
 const PROPERTIES_TABLE = "properties";
 const PROPERTY_IMAGES_TABLE = "property_images";
+const PROPERTY_AMENITIES_TABLE = "property_amenities";
 const STORAGE_BUCKET = "property-images";
 
 /** Extract storage path from public URL: ".../property-images/{propertyId}/file" -> "{propertyId}/file" */
 function getStoragePathsFromImageUrls(urls: { image_url: string }[]): string[] {
   const paths: string[] = [];
+  const bucketRegex = /\/property-images\/([^?#]+)/;
   for (const { image_url } of urls) {
     if (!image_url || typeof image_url !== "string") continue;
-    const parts = image_url.split(`/${STORAGE_BUCKET}/`);
-    if (parts.length >= 2 && parts[1]) paths.push(parts[1].trim());
+    const match = image_url.match(bucketRegex);
+    if (match && match[1]) paths.push(match[1].trim());
   }
   return paths;
 }
@@ -76,6 +78,29 @@ async function syncPropertyImages(
       }))
     );
   if (insertError) console.error("[Supabase] insert property_images error:", insertError);
+}
+
+/** Sync property_amenities junction table: replace all rows for property_id with given amenity IDs */
+async function syncPropertyAmenities(
+  propertyId: string,
+  amenityIds: string[]
+): Promise<void> {
+  if (!supabase) return;
+  const { error: delError } = await supabase
+    .from(PROPERTY_AMENITIES_TABLE)
+    .delete()
+    .eq("property_id", propertyId);
+  if (delError) console.error("[Supabase] delete property_amenities error:", delError);
+  if (amenityIds.length === 0) return;
+  const { error: insertError } = await supabase
+    .from(PROPERTY_AMENITIES_TABLE)
+    .insert(
+      amenityIds.map((amenity_id) => ({
+        property_id: propertyId,
+        amenity_id,
+      }))
+    );
+  if (insertError) console.error("[Supabase] insert property_amenities error:", insertError);
 }
 
 /** localStorage-backed fallback (same API as useProperties) */
@@ -221,6 +246,7 @@ export function useDataEntryProperties() {
         const urls = Array.isArray(imageRows) ? imageRows : [];
         const paths = getStoragePathsFromImageUrls(urls);
         if (paths.length > 0) {
+          console.log("Deleting storage paths:", paths);
           try {
             const { error: storageError } = await supabase.storage
               .from(STORAGE_BUCKET)
@@ -283,16 +309,21 @@ export function useDataEntryProperties() {
         description: partial.description ?? null,
         latitude: partial.latitude ?? null,
         longitude: partial.longitude ?? null,
-        amenities: partial.amenities ?? [],
       };
+
+      const amenityIds = Array.isArray(partial.amenities)
+        ? partial.amenities.map((a) => (typeof a === "string" ? a : a.id))
+        : [];
 
       try {
         if (partial.id && properties.some((p) => p.id === partial.id)) {
           await updateMutation.mutateAsync({ id, payload: propertyPayload });
           await syncPropertyImages(id, partial.images ?? []);
+          await syncPropertyAmenities(id, amenityIds);
         } else {
           await insertMutation.mutateAsync({ payload: propertyPayload, id });
           await syncPropertyImages(id, partial.images ?? []);
+          await syncPropertyAmenities(id, amenityIds);
         }
         return id;
       } catch (e) {
@@ -331,10 +362,13 @@ export function useDataEntryProperties() {
         description: p.description ?? null,
         latitude: null,
         longitude: null,
-        amenities: p.amenities ?? [],
       };
       await supabase.from(PROPERTIES_TABLE).insert({ ...payload, id });
       await syncPropertyImages(id, p.images ?? []);
+      const defaultAmenityIds = Array.isArray(p.amenities)
+        ? p.amenities.map((a) => (typeof a === "string" ? a : a.id))
+        : [];
+      await syncPropertyAmenities(id, defaultAmenityIds);
     }
     queryClient.invalidateQueries({ queryKey: ["properties"] });
   }, [useSupabase, queryClient]);

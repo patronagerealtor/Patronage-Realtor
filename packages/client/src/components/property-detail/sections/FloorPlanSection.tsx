@@ -49,13 +49,22 @@ export function FloorPlanSection({
             Floor Plan
           </h2>
 
-          <div className="mt-6 flex aspect-[4/3] items-center justify-center rounded-lg border border-border bg-muted">
-            <LayoutGrid className="h-12 w-12 text-muted-foreground" />
-          </div>
+          <div className="relative mt-6 w-full overflow-hidden rounded-lg border border-border">
+            <img
+              src="/Hero/FloorPlan Fallback Image.png"
+              alt="Floor plan fallback"
+              className="h-full w-full object-cover"
+            />
 
-          <p className="mt-4 text-sm text-muted-foreground">
-            Floor plan details are not available.
-          </p>
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+              <button
+                type="button"
+                className="rounded-md bg-primary px-6 py-3 font-medium text-primary-foreground shadow-lg transition-transform duration-200 hover:scale-105"
+              >
+                Request a Floor Plan
+              </button>
+            </div>
+          </div>
         </div>
       </section>
     );
