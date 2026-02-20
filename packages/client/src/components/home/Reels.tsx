@@ -7,6 +7,7 @@ import {
   MapPin,
   ChevronLeft,
   ChevronRight,
+  Instagram,
   Play,
   Pause,
   VolumeX,
@@ -18,11 +19,10 @@ import { getReelPublicUrl } from "@/lib/supabase";
 const REELS = [
   {
     id: 1,
-    projectName: "The Canary",
-    config: "2 to 4 BHK",
-    price: "₹98.82 Lakh",
-    location: "Balewadi, Pune",
-    instagramUrl: "https://www.instagram.com/reel/DC9bKzZPkdq/",
+    projectName: "Ram Smruti",
+    config: "4 BHK",
+    location: "Aundh, Pune",
+    instagramUrl: "https://www.instagram.com/reel/DUiOYhEjJYv/?igsh=MTgxZjVzcWwzZmZzMA==",
     videoPath: "canary.mp4" as const,
   },
   {
@@ -272,7 +272,6 @@ export function Reels() {
                 <div className="absolute bottom-0 p-6 text-white">
                   <h3 className="text-lg font-bold">{reel.projectName}</h3>
                   <p className="text-sm text-gray-300">{reel.config}</p>
-                  <p className="text-lg font-semibold mb-2">{reel.price}</p>
                   <div className="flex items-center gap-2 text-xs text-gray-000">
                     <MapPin className="w-3 h-3" />
                     {reel.location}
