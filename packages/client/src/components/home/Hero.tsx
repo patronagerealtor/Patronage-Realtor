@@ -14,6 +14,10 @@ import {
 // Static data outside component
 const TITLES = ["Home", "Sanctuary", "Space", "Heaven", "Dream"];
 
+// Animation opacity: adjust these to change how much the hero fades
+const SCROLL_FADE_END = 0; // opacity when scrolled (0 = fully fade out, 0.5 = half visible)
+const ENTRY_OPACITY = 1; // opacity when elements finish animating in (0–1)
+
 const tagItemVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
   visible: {
@@ -64,7 +68,7 @@ export function Hero() {
     offset: ["start start", "end start"],
   });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, SCROLL_FADE_END]);
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
 
   useEffect(() => {
@@ -93,7 +97,7 @@ export function Hero() {
           {/* Heading Entry Animation */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: ENTRY_OPACITY, y: 0 }}
             transition={{ duration: 0.8 }}
             className="max-w-4xl"
           >
@@ -105,7 +109,7 @@ export function Hero() {
                     <motion.span
                       key={titleNumber}
                       initial={{ opacity: 0, y: 24 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      animate={{ opacity: ENTRY_OPACITY, y: 0 }}
                       exit={{ opacity: 0, y: -24 }}
                       transition={{ duration: 0.5, ease: "easeOut" }}
                       className="
@@ -131,7 +135,7 @@ export function Hero() {
           <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-8 md:gap-12 pt-8">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
+              animate={{ opacity: ENTRY_OPACITY, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="flex flex-col items-center md:items-end space-y-4"
             >
@@ -151,7 +155,7 @@ export function Hero() {
 
             <motion.div
               initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
+              animate={{ opacity: ENTRY_OPACITY, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="flex flex-col items-center md:items-start space-y-4"
             >

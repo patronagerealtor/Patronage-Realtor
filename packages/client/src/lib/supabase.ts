@@ -12,6 +12,23 @@ export const supabase: SupabaseClient | null =
     ? createClient(supabaseUrl, supabaseAnonKey)
     : null;
 
+// ---------------------------------------------------------------------------
+// Storage: public "reels" bucket (MP4 videos, CDN URLs, no signed URLs)
+// ---------------------------------------------------------------------------
+
+const REELS_BUCKET = "reels";
+
+/**
+ * Returns the public CDN URL for an MP4 reel in the Supabase Storage bucket `reels`.
+ * Use with native <video>; no signed URLs, no server proxy.
+ * Requires VITE_SUPABASE_URL to be set.
+ */
+export function getReelPublicUrl(path: string): string {
+  if (!supabaseUrl) return "";
+  const normalized = path.startsWith("/") ? path.slice(1) : path;
+  return `${supabaseUrl}/storage/v1/object/public/${REELS_BUCKET}/${normalized}`;
+}
+
 export type SupabaseConnectionResult =
   | { connected: true; message: string; count: number }
   | { connected: false; message: string; error?: unknown };

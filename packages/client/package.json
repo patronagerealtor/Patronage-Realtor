@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite dev --port 5000",
-    "build": "vite build",
+    "dev": "npx vite dev --port 5000",
+    "build": "npx vite build",
     "check": "tsc --noEmit"
   },
   "dependencies": {

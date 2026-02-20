@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useLocation } from "wouter";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { PropertySearch } from "../components/home/PropertySearch";
@@ -16,10 +17,47 @@ import { MapPin, Bed, Bath, Square, Building2, Home } from "lucide-react";
 import { useProperties } from "../hooks/use-properties";
 import type { PropertyRow } from "../lib/supabase";
 
+function getSearchParams(): URLSearchParams {
+  if (typeof window === "undefined") return new URLSearchParams();
+  const loc = window.location.pathname + window.location.search;
+  const query = loc.includes("?") ? loc.slice(loc.indexOf("?")) : "";
+  return new URLSearchParams(query);
+}
+
+function filterProperties(
+  properties: PropertyRow[],
+  params: URLSearchParams
+): PropertyRow[] {
+  const locationQ = params.get("location")?.trim().toLowerCase();
+  const typeQ = params.get("type")?.trim().toLowerCase();
+  const budgetQ = params.get("budget")?.trim();
+
+  return properties.filter((p) => {
+    if (locationQ && !(p.location ?? "").toLowerCase().includes(locationQ))
+      return false;
+    if (typeQ && (p.property_type ?? "").toLowerCase() !== typeQ) return false;
+    if (budgetQ && p.price_value != null) {
+      const v = p.price_value;
+      if (budgetQ === "low" && v > 50) return false;
+      if (budgetQ === "med" && (v <= 50 || v > 100)) return false;
+      if (budgetQ === "high" && v <= 100) return false;
+    }
+    if (budgetQ && p.price_value == null) return false;
+    return true;
+  });
+}
+
 export default function Properties() {
+  const [location] = useLocation();
   const { properties } = useProperties();
   const [detailProperty, setDetailProperty] = useState<PropertyRow | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+
+  const searchKey = location.includes("?") ? location.slice(location.indexOf("?")) : "";
+  const filteredProperties = useMemo(
+    () => filterProperties(properties, getSearchParams()),
+    [properties, searchKey]
+  );
 
   const openDetail = (property: PropertyRow) => {
     setDetailProperty(property);
@@ -52,11 +90,18 @@ export default function Properties() {
         </div>
 
         <div className="mb-16">
-          <PropertySearch />
+          <PropertySearch key={searchKey} />
         </div>
 
+        {filteredProperties.length === 0 ? (
+          <p className="text-muted-foreground text-center py-12">
+            {searchKey
+              ? "No properties match your filters. Try adjusting location, type, or budget."
+              : "No properties available."}
+          </p>
+        ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {properties.map((property) => (
+          {filteredProperties.map((property) => (
             <Card
               key={property.id}
               className="overflow-hidden group border-border shadow-sm hover:shadow-md transition-shadow"
@@ -135,6 +180,7 @@ export default function Properties() {
             </Card>
           ))}
         </div>
+        )}
       </main>
 
       <PropertyDetailDialog
@@ -144,7 +190,7 @@ export default function Properties() {
           setDetailOpen(open);
           if (!open) setDetailProperty(null);
         }}
-        similarProperties={properties.filter((p) => p.id !== detailProperty?.id).slice(0, 4)}
+        similarProperties={filteredProperties.filter((p) => p.id !== detailProperty?.id).slice(0, 4)}
       />
 
       <Footer />
