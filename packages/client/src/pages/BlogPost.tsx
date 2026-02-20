@@ -72,7 +72,9 @@ export default function BlogPost() {
                   <Calendar className="h-4 w-4" />
                   {post.date}
                 </span>
-                <span>{post.readTime}</span>
+                {post.readTime != null && post.readTime !== "" && (
+                  <span>{post.readTime}</span>
+                )}
               </div>
 
               <h1 className="text-3xl md:text-4xl font-heading font-bold mb-4 leading-tight">

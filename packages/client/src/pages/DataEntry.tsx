@@ -50,8 +50,6 @@ export default function DataEntry() {
     status: string;
     price: string;
     location: string;
-    beds: number;
-    baths: number;
     sqft: string;
     description: string;
     existingImageUrls: string[];
@@ -61,7 +59,8 @@ export default function DataEntry() {
     developer: string;
     property_type: string;
     city: string;
-    possession_date: string;
+    bhk_type: string;
+    possession_by: string;
     latitude: string;
     longitude: string;
     price_value: string;
@@ -72,8 +71,6 @@ export default function DataEntry() {
       status: payload.status as "For Sale" | "For Rent" | "Coming Soon" | "Sold",
       price: payload.price,
       location: payload.location,
-      beds: payload.beds,
-      baths: payload.baths,
       sqft: payload.sqft,
       description: payload.description || undefined,
       amenities: payload.amenities,
@@ -81,7 +78,8 @@ export default function DataEntry() {
       developer: payload.developer.trim(),
       property_type: payload.property_type.trim(),
       city: payload.city.trim(),
-      possession_date: payload.possession_date || null,
+      bhk_type: payload.bhk_type.trim() || undefined,
+      possession_by: payload.possession_by.trim() || undefined,
       latitude: payload.latitude ? Number(payload.latitude) : null,
       longitude: payload.longitude ? Number(payload.longitude) : null,
       price_value: payload.price_value ? Number(payload.price_value) : null,

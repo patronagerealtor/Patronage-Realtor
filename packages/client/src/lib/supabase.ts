@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import imageCompression from "browser-image-compression";
 
 const supabaseUrl = typeof import.meta?.env?.VITE_SUPABASE_URL === "string"
   ? import.meta.env.VITE_SUPABASE_URL
@@ -89,6 +90,8 @@ export type PropertyRow = {
   latitude?: number | null;
   longitude?: number | null;
   possession_date?: string | null;
+  bhk_type?: string | null;
+  possession_by?: string | null;
   amenities?: string[] | null;
   price_value?: number | null;
   slug?: string;
@@ -110,6 +113,8 @@ type PropertiesTableRow = {
   created_at?: string | null;
   city?: string | null;
   possession_date?: string | null;
+  bhk_type?: string | null;
+  possession_by?: string | null;
   latitude?: number | null;
   longitude?: number | null;
   price_value?: number | null;
@@ -144,6 +149,8 @@ function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
     latitude: row.latitude ?? null,
     longitude: row.longitude ?? null,
     possession_date: row.possession_date ?? null,
+    bhk_type: row.bhk_type ?? undefined,
+    possession_by: row.possession_by ?? undefined,
     amenities: Array.isArray(row.amenities) ? row.amenities : [],
     price_value: row.price_value ?? null,
     slug: row.slug ?? undefined,
@@ -178,9 +185,18 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
 
 const STORAGE_BUCKET = "property-images";
 
+const COMPRESSION_OPTIONS = {
+  maxSizeMB: 0.5,
+  maxWidthOrHeight: 1600,
+  useWebWorker: true,
+  fileType: "image/webp" as const,
+  initialQuality: 0.8,
+};
+
 /**
- * Uploads files to Supabase Storage under property-images/{propertyId}/{uuid}.{ext},
+ * Uploads files to Supabase Storage under property-images/{propertyId}/{uuid}.webp,
  * then inserts each into property_images (property_id, image_url, sort_order).
+ * Images are compressed client-side (resize max 1600px, WebP, target &lt;500 KB) before upload.
  * Returns an array of public URLs for successfully uploaded files.
  */
 export async function uploadPropertyImages(
@@ -191,17 +207,39 @@ export async function uploadPropertyImages(
   const urls: string[] = [];
   for (let index = 0; index < files.length; index++) {
     const file = files[index];
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const safeExt = /^[a-z0-9]+$/i.test(ext) ? ext : "jpg";
+    const originalSizeMB = file.size / (1024 * 1024);
+    let fileToUpload: File = file;
+    let path: string;
     const name =
       typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const path = `${propertyId}/${name}.${safeExt}`;
+
+    try {
+      const compressed = await imageCompression(file, COMPRESSION_OPTIONS);
+      if (compressed && compressed.size > 0) {
+        fileToUpload = compressed;
+        path = `${propertyId}/${name}.webp`;
+        const compressedSizeMB = compressed.size / (1024 * 1024);
+        console.log(
+          `[Supabase] Image compression: original ${originalSizeMB.toFixed(3)} MB → compressed ${compressedSizeMB.toFixed(3)} MB`
+        );
+      } else {
+        const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const safeExt = /^[a-z0-9]+$/i.test(ext) ? ext : "jpg";
+        path = `${propertyId}/${name}.${safeExt}`;
+      }
+    } catch (e) {
+      console.error("[Supabase] image compression error (using original):", e);
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const safeExt = /^[a-z0-9]+$/i.test(ext) ? ext : "jpg";
+      path = `${propertyId}/${name}.${safeExt}`;
+    }
+
     try {
       const { error: uploadError } = await supabase.storage
         .from(STORAGE_BUCKET)
-        .upload(path, file, { upsert: true });
+        .upload(path, fileToUpload, { upsert: true });
       if (uploadError) {
         console.error("[Supabase] upload image error:", uploadError);
         continue;
