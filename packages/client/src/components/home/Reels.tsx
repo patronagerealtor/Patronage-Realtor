@@ -7,7 +7,6 @@ import {
   MapPin,
   ChevronLeft,
   ChevronRight,
-  Instagram,
   Play,
   Pause,
   VolumeX,
