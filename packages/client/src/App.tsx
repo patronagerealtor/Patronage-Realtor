@@ -12,9 +12,8 @@ import Calculators from "./pages/Calculators";
 import NotFound from "./pages/not-found";
 import DataEntry from "./pages/DataEntry";
 import Blogs from "./pages/Blogs";
-import BlogPost from "./pages/BlogPost";
+import Investment from "./pages/Investment";
 
-// ✅ FIX 1: Use curly braces { } for named import
 import { Webinar } from "./pages/Webinar";
 
 function Router() {
@@ -22,10 +21,11 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/properties" component={Properties} />
+      <Route path="/investment" component={Investment} />
 
       {/* ✅ FIX 2: Change path to plural '/webinars' to match Header */}
       <Route path="/webinars" component={Webinar} />
-      <Route path="/blogs/:id" component={BlogPost} />
+      <Route path="/blogs/:id" component={Blogs} />
       <Route path="/blogs" component={Blogs} />
 
       <Route path="/interiors" component={Interiors} />

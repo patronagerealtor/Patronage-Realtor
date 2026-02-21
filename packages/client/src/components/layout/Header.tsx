@@ -51,15 +51,15 @@ export function Header() {
                   <ul className="grid w-[400px] gap-3 p-4 md:w-[600px] md:grid-cols-2">
                     <li>
                       <Link
-                        href="/#featured-properties"
+                        href="/investment"
                         className="flex flex-col rounded-md bg-secondary p-5 hover:bg-secondary/80 transition-colors"
                       >
                         <MapPin className="h-4 w-4 mb-2" />
                         <span className="font-medium">
-                          Featured Properties
+                          Invest
                         </span>
                         <p className="text-sm text-muted-foreground">
-                          Discover premium listings
+                          Grow your money
                         </p>
                       </Link>
                     </li>
