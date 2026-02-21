@@ -3,7 +3,6 @@ import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 
 const tabs = ["Overview", "Commercial", "Land Acquisition"];
-
 const stats = [
   { label: "Assets Under Management", value: "$2.4B+" },
   { label: "Active Projects", value: "140+" },
