@@ -16,10 +16,11 @@ import { supabase } from "../../lib/supabase";
 import { AmenityIcon } from "../shared/AmenityIcon";
 
 const STATUS_OPTIONS: PropertyStatus[] = [
-  "For Sale",
-  "For Rent",
-  "Coming Soon",
-  "Sold",
+  "Pre-Launch",
+  "Under Construction",
+  "Near Possession",
+  "Ready to Move",
+  "Resale",
 ];
 
 const BHK_OPTIONS = [
@@ -92,6 +93,7 @@ export type PropertyFormPayload = {
   status: PropertyStatus;
   price: string;
   location: string;
+  address: string;
   sqft: string;
   description: string;
   /** Existing image URLs to keep (when editing). */
@@ -109,6 +111,8 @@ export type PropertyFormPayload = {
   longitude: string;
   price_value: string;
   slug: string;
+  rera_applicable: boolean;
+  rera_number: string | null;
 };
 
 export type PropertyFormProps = {
@@ -133,9 +137,10 @@ export function PropertyForm({
   previewDisabled = true,
 }: PropertyFormProps) {
   const [title, setTitle] = useState("");
-  const [status, setStatus] = useState<PropertyStatus>("For Sale");
+  const [status, setStatus] = useState<PropertyStatus>("Under Construction");
   const [price, setPrice] = useState("");
   const [locationText, setLocationText] = useState("");
+  const [address, setAddress] = useState("");
   const [bhkType, setBhkType] = useState("");
   const [possessionBy, setPossessionBy] = useState("");
   const [sqft, setSqft] = useState("");
@@ -146,16 +151,18 @@ export function PropertyForm({
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [developer, setDeveloper] = useState("");
   const [propertyType, setPropertyType] = useState("");
-  const [city, setCity] = useState("");
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [slug, setSlug] = useState("");
+  const [reraApplicable, setReraApplicable] = useState(false);
+  const [reraNumber, setReraNumber] = useState("");
 
   const fillFormFromProperty = (p: Property) => {
     setTitle(p.title ?? "");
-    setStatus(p.status ?? "For Sale");
+    setStatus(p.status ?? "Under Construction");
     setPrice(p.price ?? "");
     setLocationText(p.location ?? "");
+    setAddress(p.address ?? "");
     setBhkType(p.bhk_type ?? "");
     setPossessionBy(p.possession_by ?? "");
     setSqft(p.sqft ?? "");
@@ -165,17 +172,19 @@ export function PropertyForm({
     setSelectedAmenities((p.amenities ?? []).map((a) => String(a.id).toLowerCase()));
     setDeveloper(p.developer ?? "");
     setPropertyType(p.property_type ?? "");
-    setCity(p.city ?? "");
     setLatitude(p.latitude != null ? String(p.latitude) : "");
     setLongitude(p.longitude != null ? String(p.longitude) : "");
     setSlug(p.slug ?? "");
+    setReraApplicable(p.rera_applicable ?? false);
+    setReraNumber(p.rera_number ?? "");
   };
 
   const resetForm = () => {
     setTitle("");
-    setStatus("For Sale");
+    setStatus("Under Construction");
     setPrice("");
     setLocationText("");
+    setAddress("");
     setBhkType("");
     setPossessionBy("");
     setSqft("");
@@ -185,10 +194,11 @@ export function PropertyForm({
     setSelectedAmenities([]);
     setDeveloper("");
     setPropertyType("");
-    setCity("");
     setLatitude("");
     setLongitude("");
     setSlug("");
+    setReraApplicable(false);
+    setReraNumber("");
     onReset();
   };
 
@@ -197,9 +207,10 @@ export function PropertyForm({
       fillFormFromProperty(editingProperty);
     } else {
       setTitle("");
-      setStatus("For Sale");
+      setStatus("Under Construction");
       setPrice("");
       setLocationText("");
+      setAddress("");
       setBhkType("");
       setPossessionBy("");
       setSqft("");
@@ -208,10 +219,11 @@ export function PropertyForm({
       setSelectedAmenities([]);
       setDeveloper("");
       setPropertyType("");
-      setCity("");
       setLatitude("");
       setLongitude("");
       setSlug("");
+      setReraApplicable(false);
+      setReraNumber("");
     }
   }, [editingProperty]);
 
@@ -261,6 +273,7 @@ export function PropertyForm({
         status,
         price: price.trim(),
         location: locationText.trim(),
+        address: address.trim(),
         sqft: sqft.trim(),
         description: description.trim() || "",
         existingImageUrls,
@@ -269,13 +282,15 @@ export function PropertyForm({
         highlights: [],
         developer: developer.trim(),
         property_type: propertyType.trim(),
-        city: city.trim(),
+        city: "",
         bhk_type: bhkType.trim(),
         possession_by: possessionBy.trim(),
         latitude: latitude.trim(),
         longitude: longitude.trim(),
         price_value: "",
         slug: slug.trim(),
+        rera_applicable: reraApplicable,
+        rera_number: reraApplicable ? reraNumber.trim() || null : null,
       });
     } catch {
       // Error shown via mutationError from parent
@@ -370,17 +385,65 @@ export function PropertyForm({
           <div className="space-y-2">
             <Label>Location</Label>
             <Input
+              type="text"
+              list="location-options"
               value={locationText}
               onChange={(e) => setLocationText(e.target.value)}
-              placeholder="City, Neighborhood"
+              placeholder="Select location"
+            />
+            <datalist id="location-options">
+              <option value="Ravet" />
+              <option value="Kiwle" />
+              <option value="Gahunje" />
+              <option value="Mamurdi" />
+              <option value="Nigdi" />
+              <option value="Akurdi" />
+              <option value="Pimpri" />
+              <option value="Chinchwad" />
+              <option value="Punawale" />
+              <option value="Tathwade" />
+              <option value="Hijewadi Phase 1" />
+              <option value="Hijewadi Phase 2" />
+              <option value="Hijewadi Phase 3" />
+              <option value="Wakad" />
+              <option value="Balewadi" />
+              <option value="Baner" />
+              <option value="Pimple Nilakh" />
+              <option value="Pimple Saudagar" />
+              <option value="Bavdhan" />
+              <option value="Aundh" />
+
+            </datalist>
+          </div>
+          <div className="space-y-2">
+            <Label>Address</Label>
+            <Input
+              type="text"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="Enter complete address"
             />
           </div>
           <div className="space-y-2">
-            <Label>City</Label>
+            <Label>RERA</Label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={reraApplicable}
+                onChange={(e) => {
+                  setReraApplicable(e.target.checked);
+                  if (!e.target.checked) setReraNumber("");
+                }}
+                className="h-4 w-4 rounded border-input"
+              />
+              <span>RERA applicable</span>
+            </label>
             <Input
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              placeholder="City"
+              type="text"
+              disabled={!reraApplicable}
+              value={reraNumber}
+              onChange={(e) => setReraNumber(e.target.value)}
+              placeholder="RERA number"
             />
           </div>
         </div>

@@ -53,6 +53,7 @@ export default function DataEntry() {
     status: string;
     price: string;
     location: string;
+    address: string;
     sqft: string;
     description: string;
     existingImageUrls: string[];
@@ -68,12 +69,15 @@ export default function DataEntry() {
     longitude: string;
     price_value: string;
     slug: string;
+    rera_applicable: boolean;
+    rera_number: string | null;
   }) => {
     const basePayload = {
       title: payload.title,
-      status: payload.status as "For Sale" | "For Rent" | "Coming Soon" | "Sold",
+      status: payload.status as "Pre-Launch" | "Under Construction" | "Near Possession" | "Ready to Move" | "Resale",
       price: payload.price,
       location: payload.location,
+      address: payload.address,
       sqft: payload.sqft,
       description: payload.description || undefined,
       amenities: payload.amenities,
@@ -87,6 +91,8 @@ export default function DataEntry() {
       longitude: payload.longitude ? Number(payload.longitude) : null,
       price_value: payload.price_value ? Number(payload.price_value) : null,
       slug: payload.slug.trim(),
+      rera_applicable: payload.rera_applicable,
+      rera_number: payload.rera_number,
     };
 
     let nextId: string;

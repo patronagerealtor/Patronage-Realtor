@@ -1,9 +1,15 @@
-export type PropertyStatus = "For Sale" | "For Rent" | "Sold" | "Coming Soon";
+export type PropertyStatus =
+  | "Pre-Launch"
+  | "Under Construction"
+  | "Near Possession"
+  | "Ready to Move"
+  | "Resale";
 
 export type Property = {
   id: string;
   title: string;
   location: string;
+  address?: string;
   price: string;
   beds?: number;
   baths?: number;
@@ -23,6 +29,8 @@ export type Property = {
   longitude?: number | null;
   price_value?: number | null;
   slug?: string;
+  rera_applicable?: boolean;
+  rera_number?: string | null;
 };
 
 const STORAGE_KEY = "patronage:properties:v1";
@@ -36,7 +44,7 @@ export const DEFAULT_PROPERTIES: Property[] = [
     beds: 4,
     baths: 3,
     sqft: "3,200",
-    status: "For Sale",
+    status: "Under Construction",
     description:
       "A bright, contemporary villa with open-plan living, expansive glazing, and a private outdoor lounge.",
     amenities: [],
@@ -49,7 +57,7 @@ export const DEFAULT_PROPERTIES: Property[] = [
     beds: 2,
     baths: 2,
     sqft: "1,400",
-    status: "For Rent",
+    status: "Ready to Move",
     description:
       "Industrial-chic loft with high ceilings, exposed brick, and walkable access to the best of downtown.",
     amenities: [],
@@ -62,7 +70,7 @@ export const DEFAULT_PROPERTIES: Property[] = [
     beds: 3,
     baths: 2,
     sqft: "1,800",
-    status: "For Sale",
+    status: "Under Construction",
     description:
       "Ocean-view condo featuring a breezy balcony, modern finishes, and resort-style building amenities.",
     amenities: [],
@@ -75,7 +83,7 @@ export const DEFAULT_PROPERTIES: Property[] = [
     beds: 5,
     baths: 4,
     sqft: "4,500",
-    status: "For Sale",
+    status: "Under Construction",
     description:
       "A serene mountain home with cozy interiors, panoramic views, and quick access to trails and slopes.",
     amenities: [],
@@ -88,7 +96,7 @@ export const DEFAULT_PROPERTIES: Property[] = [
     beds: 3,
     baths: 2,
     sqft: "2,100",
-    status: "For Sale",
+    status: "Under Construction",
     description:
       "Charming lakeside cottage with natural light, warm wood accents, and peaceful waterfront vibes.",
     amenities: [],
@@ -101,7 +109,7 @@ export const DEFAULT_PROPERTIES: Property[] = [
     beds: 3,
     baths: 3,
     sqft: "2,800",
-    status: "For Rent",
+    status: "Ready to Move",
     description:
       "Top-floor penthouse with skyline views, spacious entertaining areas, and premium finishes throughout.",
     amenities: [],

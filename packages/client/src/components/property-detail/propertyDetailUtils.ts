@@ -20,6 +20,7 @@ export function toPropertyDetailData(
       developer: "ABC Developers",
       location: "Hinjewadi, Pune",
       price: "Price on request",
+      price_value: null,
       beds: 2,
       sqft: "850",
       status: "Under Construction",
@@ -36,25 +37,32 @@ export function toPropertyDetailData(
         ? [property.image_url]
         : [];
 
-  const possessionBy =
+  const possessionByFromDate =
     "possession_date" in property && property.possession_date
       ? property.possession_date
       : "possession_date" in property
         ? undefined
         : DEFAULT_POSSESSION;
+  const possessionBy =
+    "possession_by" in property && (property as { possession_by?: string }).possession_by
+      ? (property as { possession_by: string }).possession_by
+      : possessionByFromDate ?? DEFAULT_POSSESSION;
 
   return {
     id: String(property.id),
     title: property.title,
     developer: "developer" in property ? property.developer ?? "Developer" : undefined,
     location: property.location || "Location",
+    address: "address" in property ? property.address ?? undefined : undefined,
     price: property.price,
+    price_value: "price_value" in property ? property.price_value : undefined,
     beds: property.beds,
     sqft: property.sqft,
     status: property.status,
     propertyType: isPropertyRow(property)
       ? property.property_type ?? "Apartment"
       : "Apartment",
+    bhkType: "bhk_type" in property ? (property as { bhk_type?: string }).bhk_type ?? undefined : undefined,
     possessionBy: possessionBy ?? DEFAULT_POSSESSION,
     description: "description" in property ? property.description : undefined,
     images,
@@ -68,5 +76,7 @@ export function toPropertyDetailData(
     floorPlans: undefined,
     latitude: "latitude" in property ? property.latitude : undefined,
     longitude: "longitude" in property ? property.longitude : undefined,
+    reraApplicable: "rera_applicable" in property ? property.rera_applicable ?? false : undefined,
+    reraNumber: "rera_number" in property ? property.rera_number ?? undefined : undefined,
   };
 }

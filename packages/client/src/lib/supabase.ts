@@ -77,6 +77,7 @@ export type PropertyRow = {
   id: string;
   title: string;
   location: string;
+  address?: string;
   developer?: string;
   property_type?: string;
   price: string;
@@ -99,6 +100,8 @@ export type PropertyRow = {
   }[];
   price_value?: number | null;
   slug?: string;
+  rera_applicable?: boolean;
+  rera_number?: string | null;
 };
 
 type PropertyImageRow = { image_url: string; sort_order: number };
@@ -107,6 +110,7 @@ type PropertiesTableRow = {
   id?: string;
   title?: string | null;
   location?: string | null;
+  address?: string | null;
   developer?: string | null;
   property_type?: string | null;
   price_display?: string | null;
@@ -124,6 +128,8 @@ type PropertiesTableRow = {
   price_value?: number | null;
   slug?: string | null;
   description?: string | null;
+  rera_applicable?: boolean | null;
+  rera_number?: string | null;
   property_amenities?: {
     amenities: { id: string; name: string; icon: string } | null;
   }[] | null;
@@ -142,6 +148,7 @@ function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
     id: String(row.id),
     title: row.title ?? "",
     location: row.location ?? "",
+    address: row.address ?? "",
     developer: row.developer ?? undefined,
     property_type: row.property_type ?? undefined,
     price: row.price_display ?? "Price on request",
@@ -164,8 +171,10 @@ function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
           a != null && typeof a === "object" && "id" in a && "name" in a && "icon" in a
       );
     })(),
-    price_value: row.price_value ?? null,
+    price_value: row.price_value != null ? Number(row.price_value) : null,
     slug: row.slug ?? undefined,
+    rera_applicable: row.rera_applicable ?? false,
+    rera_number: row.rera_number ?? undefined,
   };
 }
 

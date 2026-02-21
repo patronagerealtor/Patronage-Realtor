@@ -3,11 +3,14 @@ export type PropertyDetailData = {
   title: string;
   developer?: string;
   location?: string;
+  address?: string;
   price?: string;
+  price_value?: number | null;
   beds?: number;
   sqft?: string;
   status?: string;
   propertyType?: string;
+  bhkType?: string;
   possessionBy?: string;
   description?: string;
   images?: string[];
@@ -20,4 +23,6 @@ export type PropertyDetailData = {
   }[];
   latitude?: number | null;
   longitude?: number | null;
-};
+  reraApplicable?: boolean;
+  reraNumber?: string | null;
+}

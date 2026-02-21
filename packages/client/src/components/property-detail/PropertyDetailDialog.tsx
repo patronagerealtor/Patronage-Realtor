@@ -55,6 +55,7 @@ export function PropertyDetailDialog({
     developer: p.developer,
     location: p.location,
     price: p.price,
+    price_value: p.price_value,
     image_url: p.image_url,
   }));
 
