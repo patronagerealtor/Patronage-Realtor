@@ -1,13 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import {
-  Search,
-  MapPin,
-  DollarSign,
-  Home,
-} from "lucide-react";
+import { Search, MapPin, DollarSign, Building2, Layers } from "lucide-react";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import {
   Select,
   SelectContent,
@@ -16,13 +10,12 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Separator } from "../ui/separator";
-
-const PROPERTY_TYPES = [
-  { value: "house", label: "House" },
-  { value: "apartment", label: "Apartment" },
-  { value: "condo", label: "Condo" },
-  { value: "land", label: "Land" },
-] as const;
+export type FilterOptions = {
+  statuses: string[];
+  locations: string[];
+  bhkTypes: string[];
+  propertyTypes: string[];
+};
 
 const BUDGET_OPTIONS = [
   { value: "low", label: "Up to ₹50 Lakh" },
@@ -37,22 +30,32 @@ function getSearchParamsFromLocation(): URLSearchParams {
   return new URLSearchParams(query);
 }
 
-export function PropertySearch() {
+type PropertySearchProps = {
+  filterOptions?: FilterOptions;
+};
+
+export function PropertySearch({ filterOptions = { statuses: [], locations: [], bhkTypes: [], propertyTypes: [] } }: PropertySearchProps) {
   const [, setLocation] = useLocation();
-  const [locationInput, setLocationInput] = useState("");
+  const [status, setStatus] = useState<string>("");
+  const [locationVal, setLocationVal] = useState<string>("");
+  const [bhkType, setBhkType] = useState<string>("");
   const [propertyType, setPropertyType] = useState<string>("");
   const [budget, setBudget] = useState<string>("");
 
   useEffect(() => {
     const params = getSearchParamsFromLocation();
-    setLocationInput(params.get("location") ?? "");
+    setStatus(params.get("status") ?? "");
+    setLocationVal(params.get("location") ?? "");
+    setBhkType(params.get("bhk") ?? "");
     setPropertyType(params.get("type") ?? "");
     setBudget(params.get("budget") ?? "");
   }, []);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (locationInput.trim()) params.set("location", locationInput.trim());
+    if (status) params.set("status", status);
+    if (locationVal.trim()) params.set("location", locationVal.trim());
+    if (bhkType) params.set("bhk", bhkType);
     if (propertyType) params.set("type", propertyType);
     if (budget) params.set("budget", budget);
     const qs = params.toString();
@@ -65,144 +68,166 @@ export function PropertySearch() {
         {/* Mobile View - Stacked */}
         <div className="md:hidden space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">
-              Location
-            </label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="City, Neighborhood, or Zip"
-                className="pl-9 h-12"
-                value={locationInput}
-                onChange={(e) => setLocationInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">
-              Property Type
-            </label>
-            <Select value={propertyType || undefined} onValueChange={setPropertyType}>
+            <label className="text-sm font-medium text-muted-foreground">Status</label>
+            <Select value={status || undefined} onValueChange={setStatus}>
               <SelectTrigger className="h-12">
-                <SelectValue placeholder="Select Type" />
+                <SelectValue placeholder="Any Status" />
               </SelectTrigger>
               <SelectContent>
-                {PROPERTY_TYPES.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
+                {filterOptions.statuses.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-
           <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">
-              Budget
-            </label>
+            <label className="text-sm font-medium text-muted-foreground">Location</label>
+            <Select value={locationVal || undefined} onValueChange={setLocationVal}>
+              <SelectTrigger className="h-12">
+                <SelectValue placeholder="Any Location" />
+              </SelectTrigger>
+              <SelectContent>
+                {filterOptions.locations.map((loc) => (
+                  <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">BHK Type</label>
+            <Select value={bhkType || undefined} onValueChange={setBhkType}>
+              <SelectTrigger className="h-12">
+                <SelectValue placeholder="Any BHK" />
+              </SelectTrigger>
+              <SelectContent>
+                {filterOptions.bhkTypes.map((b) => (
+                  <SelectItem key={b} value={b}>{b}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">Property Type</label>
+            <Select value={propertyType || undefined} onValueChange={setPropertyType}>
+              <SelectTrigger className="h-12">
+                <SelectValue placeholder="Any Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {filterOptions.propertyTypes.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-muted-foreground">Budget</label>
             <Select value={budget || undefined} onValueChange={setBudget}>
               <SelectTrigger className="h-12">
                 <SelectValue placeholder="Any Price" />
               </SelectTrigger>
               <SelectContent>
                 {BUDGET_OPTIONS.map((b) => (
-                  <SelectItem key={b.value} value={b.value}>
-                    {b.label}
-                  </SelectItem>
+                  <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-
           <Button
-            className="w-full h-12 text-lg shadow-sm"
+            type="button"
+            className="w-full h-12 min-h-[44px] text-base sm:text-lg shadow-sm touch-manipulation"
             data-testid="button-search-mobile"
             onClick={handleSearch}
           >
-            <Search className="mr-2 h-4 w-4" /> Search
+            <Search className="mr-2 h-4 w-4 shrink-0" /> Search
           </Button>
         </div>
 
         {/* Desktop View - Horizontal */}
-        <div className="hidden md:flex items-center gap-4">
-          <div className="flex-1 space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-              Location
-            </label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="City, Zip..."
-                className="pl-9 h-12 border-transparent bg-secondary/30 hover:bg-secondary/50 focus:bg-background transition-colors"
-                value={locationInput}
-                onChange={(e) => setLocationInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              />
-            </div>
-          </div>
-
-          <Separator
-            orientation="vertical"
-            className="h-12 w-[1px] bg-border"
-          />
-
-          <div className="w-[200px] space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-              Type
-            </label>
-            <Select value={propertyType || undefined} onValueChange={setPropertyType}>
+        <div className="hidden md:flex flex-wrap items-end gap-3">
+          <div className="w-[140px] space-y-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">Status</label>
+            <Select value={status || undefined} onValueChange={setStatus}>
               <SelectTrigger className="h-12 border-transparent bg-secondary/30 hover:bg-secondary/50 focus:bg-background transition-colors">
-                <div className="flex items-center gap-2">
-                  <Home className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="Property" />
-                </div>
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                {PROPERTY_TYPES.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
+                {filterOptions.statuses.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-
-          <Separator
-            orientation="vertical"
-            className="h-12 w-[1px] bg-border"
-          />
-
-          <div className="w-[200px] space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">
-              Budget
-            </label>
+          <Separator orientation="vertical" className="h-12 w-[1px] bg-border hidden lg:block" />
+          <div className="w-[180px] space-y-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">Location</label>
+            <Select value={locationVal || undefined} onValueChange={setLocationVal}>
+              <SelectTrigger className="h-12 border-transparent bg-secondary/30 hover:bg-secondary/50 focus:bg-background transition-colors">
+                <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+                <SelectValue placeholder="Location" />
+              </SelectTrigger>
+              <SelectContent>
+                {filterOptions.locations.map((loc) => (
+                  <SelectItem key={loc} value={loc}>{loc}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Separator orientation="vertical" className="h-12 w-[1px] bg-border hidden lg:block" />
+          <div className="w-[140px] space-y-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">BHK Type</label>
+            <Select value={bhkType || undefined} onValueChange={setBhkType}>
+              <SelectTrigger className="h-12 border-transparent bg-secondary/30 hover:bg-secondary/50 focus:bg-background transition-colors">
+                <Layers className="h-4 w-4 text-muted-foreground shrink-0" />
+                <SelectValue placeholder="BHK" />
+              </SelectTrigger>
+              <SelectContent>
+                {filterOptions.bhkTypes.map((b) => (
+                  <SelectItem key={b} value={b}>{b}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Separator orientation="vertical" className="h-12 w-[1px] bg-border hidden lg:block" />
+          <div className="w-[160px] space-y-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">Property Type</label>
+            <Select value={propertyType || undefined} onValueChange={setPropertyType}>
+              <SelectTrigger className="h-12 border-transparent bg-secondary/30 hover:bg-secondary/50 focus:bg-background transition-colors">
+                <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {filterOptions.propertyTypes.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Separator orientation="vertical" className="h-12 w-[1px] bg-border hidden lg:block" />
+          <div className="w-[160px] space-y-1.5">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">Budget</label>
             <Select value={budget || undefined} onValueChange={setBudget}>
               <SelectTrigger className="h-12 border-transparent bg-secondary/30 hover:bg-secondary/50 focus:bg-background transition-colors">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  <SelectValue placeholder="Price Range" />
-                </div>
+                <DollarSign className="h-4 w-4 text-muted-foreground shrink-0" />
+                <SelectValue placeholder="Price" />
               </SelectTrigger>
               <SelectContent>
                 {BUDGET_OPTIONS.map((b) => (
-                  <SelectItem key={b.value} value={b.value}>
-                    {b.label}
-                  </SelectItem>
+                  <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-
-          <Button
-            size="lg"
-            className="h-12 px-8 ml-2 shadow-sm"
-            data-testid="button-search-desktop"
-            onClick={handleSearch}
-          >
-            <Search className="h-4 w-4 mr-2" /> Search
-          </Button>
+          <div className="shrink-0 min-w-[120px] md:min-w-[140px] ml-0 md:ml-2 w-full md:w-auto">
+            <Button
+              type="button"
+              size="lg"
+              className="w-full h-12 min-h-[44px] px-6 md:px-8 shadow-sm touch-manipulation"
+              data-testid="button-search-desktop"
+              onClick={handleSearch}
+            >
+              <Search className="h-4 w-4 mr-2 shrink-0" /> Search
+            </Button>
+          </div>
         </div>
       </div>
     </section>

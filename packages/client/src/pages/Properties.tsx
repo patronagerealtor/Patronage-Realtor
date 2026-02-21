@@ -17,6 +17,7 @@ import { MapPin, Building2, Home, CalendarDays, Ruler } from "lucide-react";
 import { useProperties } from "../hooks/use-properties";
 import type { PropertyRow } from "../lib/supabase";
 import { formatIndianPrice } from "../lib/formatIndianPrice";
+import type { FilterOptions } from "../components/home/PropertySearch";
 
 function getSearchParams(): URLSearchParams {
   if (typeof window === "undefined") return new URLSearchParams();
@@ -25,18 +26,29 @@ function getSearchParams(): URLSearchParams {
   return new URLSearchParams(query);
 }
 
+function deriveFilterOptions(properties: PropertyRow[]): FilterOptions {
+  const statuses = [...new Set(properties.map((p) => p.status).filter(Boolean))].sort();
+  const locations = [...new Set(properties.map((p) => (p.location ?? "").trim()).filter(Boolean))].sort();
+  const bhkTypes = [...new Set(properties.map((p) => p.bhk_type).filter((v): v is string => v != null && v !== ""))].sort();
+  const propertyTypes = [...new Set(properties.map((p) => p.property_type).filter((v): v is string => v != null && v !== ""))].sort();
+  return { statuses, locations, bhkTypes, propertyTypes };
+}
+
 function filterProperties(
   properties: PropertyRow[],
   params: URLSearchParams
 ): PropertyRow[] {
+  const statusQ = params.get("status")?.trim();
   const locationQ = params.get("location")?.trim().toLowerCase();
-  const typeQ = params.get("type")?.trim().toLowerCase();
+  const bhkQ = params.get("bhk")?.trim();
+  const typeQ = params.get("type")?.trim();
   const budgetQ = params.get("budget")?.trim();
 
   return properties.filter((p) => {
-    if (locationQ && !(p.location ?? "").toLowerCase().includes(locationQ))
-      return false;
-    if (typeQ && (p.property_type ?? "").toLowerCase() !== typeQ) return false;
+    if (statusQ && (p.status ?? "") !== statusQ) return false;
+    if (locationQ && !(p.location ?? "").toLowerCase().includes(locationQ)) return false;
+    if (bhkQ && (p.bhk_type ?? "") !== bhkQ) return false;
+    if (typeQ && (p.property_type ?? "") !== typeQ) return false;
     if (budgetQ && p.price_value != null) {
       const v = p.price_value;
       if (budgetQ === "low" && v > 50) return false;
@@ -59,6 +71,7 @@ export default function Properties() {
     () => filterProperties(properties, getSearchParams()),
     [properties, searchKey]
   );
+  const filterOptions = useMemo(() => deriveFilterOptions(properties), [properties]);
 
   const openDetail = (property: PropertyRow) => {
     setDetailProperty(property);
@@ -91,7 +104,7 @@ export default function Properties() {
         </div>
 
         <div className="mb-16">
-          <PropertySearch key={searchKey} />
+          <PropertySearch key={searchKey} filterOptions={filterOptions} />
         </div>
 
         {filteredProperties.length === 0 ? (
