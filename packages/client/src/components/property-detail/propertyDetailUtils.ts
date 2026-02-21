@@ -76,6 +76,7 @@ export function toPropertyDetailData(
     floorPlans: undefined,
     latitude: "latitude" in property ? property.latitude : undefined,
     longitude: "longitude" in property ? property.longitude : undefined,
+    google_map_link: "google_map_link" in property ? property.google_map_link : undefined,
     reraApplicable: "rera_applicable" in property ? property.rera_applicable ?? false : undefined,
     reraNumber: "rera_number" in property ? property.rera_number ?? undefined : undefined,
   };
