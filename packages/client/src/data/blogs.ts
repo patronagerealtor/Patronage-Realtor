@@ -1,238 +1,183 @@
-// blog.ts
+export interface BlogSection {
+  heading: string;
+  paragraphs: string[];
+  bullets?: string[];
+}
 
 export interface BlogPost {
   id: string;
   title: string;
   slug: string;
   date: string;
-  content: string;
   image?: string;
   category?: string;
   readTime?: string;
+  sections: BlogSection[];
 }
 
-export const blogPost: BlogPost = {
-  id: '1',
-  title: 'How to reduce the stress while buying your Dream home?',
-  slug: 'stress-free-home-buying',
-  date: 'Feb 15, 2026',
-  content: `# How to reduce the stress while buying your Dream home?
+export const blogPosts: BlogPost[] = [
+  {
+    id: "1",
+    title: "How to Reduce Stress While Buying Your Dream Home",
+    slug: "stress-free-home-buying",
+    date: "Feb 15, 2026",
+    category: "Home Buying",
+    readTime: "6 min read",
+    sections: [
+      {
+        heading: "Define Your Vision Clearly",
+        paragraphs: [
+          "The first step in buying your dream home is understanding what it truly means to you.",
+          "Without clarity, you risk decision fatigue and emotional burnout."
+        ],
+        bullets: [
+          "Location preferences",
+          "Size and layout",
+          "Proximity to work, schools, and amenities",
+          "Budget constraints"
+        ]
+      },
+      {
+        heading: "Set a Realistic Budget",
+        paragraphs: [
+          "Money is the biggest stress trigger in home buying.",
+          "A realistic budget protects you from long-term regret."
+        ],
+        bullets: [
+          "Analyze savings and monthly income",
+          "Account for taxes, maintenance, and closing costs",
+          "Get pre-approved for a home loan"
+        ]
+      },
+      {
+        heading: "Work with Trusted Professionals",
+        paragraphs: [
+          "Trying to do everything yourself is a mistake.",
+          "Experienced professionals save time, money, and mental bandwidth."
+        ],
+        bullets: [
+          "Real estate agent",
+          "Mortgage broker",
+          "Home inspector"
+        ]
+      },
+      {
+        heading: "Conclusion",
+        paragraphs: [
+          "Buying a home doesn’t need to be stressful.",
+          "With planning, patience, and the right support, it becomes a rewarding journey."
+        ]
+      }
+    ]
+  },
 
-## 1. Define Your Vision Clearly
-Start by identifying what your dream home looks like. Is it a cozy apartment in the city or a sprawling house in the countryside? Consider factors like:
-- Location preferences
-- Size and layout
-- Proximity to work, schools, or amenities
-- Budget constraints
-
-Having a clear vision helps you focus on what truly matters and reduces decision fatigue when evaluating properties.
-
-The first step in buying your dream home is understanding what "dream home" means to you. Without a clear vision, you might feel overwhelmed by endless options or risk settling for a property that doesn’t truly meet your needs. Here’s how to break this process down:
-
-### Location Preferences
-Where you choose to live has a significant impact on your lifestyle. Think about:
-- **Urban vs. Suburban vs. Rural:** Do you prefer the hustle and bustle of a city, the tranquility of the countryside, or a balance in the suburbs?
-- **Proximity to Key Areas:** How far do you want to be from your workplace, schools, grocery stores, or entertainment options?
-- **Neighborhood Vibe:** Are you looking for a family-friendly area, a vibrant social scene, or a peaceful retreat?
-
-Choosing the right location ensures your dream home aligns with your daily routines and long-term goals.
-
-### Size and Layout
-The size and design of your home play a big role in its functionality and comfort. Consider:
-- **Square Footage:** How much space do you realistically need for your family or lifestyle?
-- **Number of Bedrooms and Bathrooms:** Will you need extra rooms for guests, a home office, or future expansion?
-- **Layout Preferences:** Do you want an open floor plan for entertaining, or do you prefer more defined, private spaces?
-
-Visualizing how you’ll use the space daily can help you decide what’s truly important.
-
-### Proximity to Work, Schools, or Amenities
-Your dream home should make life easier, not harder. Ask yourself:
-- **Commute Time:** How much time are you willing to spend commuting to work or school?
-- **Accessibility to Amenities:** Are you close to grocery stores, hospitals, parks, gyms, or restaurants?
-- **Transportation:** Is public transportation available, or do you need a home with parking for your vehicles?
-
-Prioritizing convenience can save you time and stress in the long run.
-
-### Budget Constraints
-Your dream home must also fit within your financial reality. Determine:
-- **Your Overall Budget:** What’s the maximum amount you’re willing to spend, including down payment and closing costs?
-- **Long-Term Affordability:** Can you comfortably handle mortgage payments, property taxes, insurance, and maintenance costs?
-- **Compromises:** Are there any non-essential features you’re willing to sacrifice to stay within budget?
-
-Setting a clear budget ensures you don’t overextend yourself financially, which can lead to stress down the road.
-
-### Why Having a Clear Vision Matters
-Defining your vision upfront gives you a roadmap for the home-buying process. This clarity helps:
-- Narrow down choices
-- Avoid decision fatigue
-- Stay focused on priorities
-
-In the end, a well-defined vision makes the journey to finding your dream home more efficient, less stressful, and deeply rewarding.
-
-## 2. Set a Realistic Budget
-Money is often the biggest stressor in home-buying. To avoid financial strain:
-- Analyze your savings and monthly income
-- Factor in additional costs like taxes, maintenance, and closing fees
-- Get pre-approved for a mortgage to understand how much you can afford
-
-Sticking to a realistic budget ensures you won’t stretch yourself too thin financially.
-
-Buying a home is one of the most significant financial decisions you’ll make, and setting a realistic budget is crucial to avoid unnecessary stress.
-
-### Analyze Your Savings and Monthly Income
-**Evaluate Your Savings**
-- Calculate how much you’ve saved for the down payment
-- Set aside emergency savings
-
-**Review Your Monthly Income**
-- Assess total household income
-- Follow the 28/36 Rule
-
-### Factor in Additional Costs
-**Upfront Costs**
-- Closing costs
-- Moving expenses
-
-**Ongoing Costs**
-- Property taxes
-- Homeowners insurance
-- Maintenance and repairs
-
-**Utilities and HOA Fees**
-- Monthly utilities
-- HOA fees if applicable
-
-### Get Pre-Approved for a Mortgage
-- Understand borrowing capacity
-- Strengthen offers
-- Avoid over-borrowing
-
-### Stick to Your Budget
-- Resist emotional spending
-- Prioritize needs over wants
-- Leave room for flexibility
-
-### Why a Realistic Budget Matters
-- Prevents financial strain
-- Increases confidence
-- Promotes long-term stability
-
-## 3. Work with Trusted Professionals
-Hiring experienced professionals can simplify the process significantly. Partner with:
-- A reliable real estate agent
-- A mortgage broker
-- A home inspector
-
-Having a competent team reduces uncertainty and saves time.
-
-## 4. Do Your Research
-Knowledge is power. Spend time researching:
-- Property prices in your preferred area
-- Market trends
-- Neighborhood details like schools, transportation, and safety
-
-Being informed boosts confidence and minimizes surprises.
-
-### Property Prices in Your Preferred Area
-- Compare similar properties
-- Understand price drivers
-- Track historical prices
-- Consult professionals
-
-### Market Trends
-- Buyer’s vs. seller’s market
-- Seasonal trends
-- Interest rates
-- Economic factors
-
-### The Neighborhood
-- Schools
-- Transportation
-- Safety
-- Amenities
-
-### Why Research Matters:
-- Boosts confidence
-- Minimizes surprises
-- Empowers negotiation
-- Supports long-term satisfaction
-
-## 5. Stay Organized
-Create a checklist for:
-- Visiting and comparing properties
-- Tracking paperwork and deadlines
-- Communicating with agents and lenders
-
-Using digital tools can help you stay organized effortlessly.
-
-## 6. Take Your Time
-Patience pays off. Avoid impulsive decisions and give yourself time to evaluate options properly.
-
-### Why Rushing Can Lead to Mistakes
-- Overlooking details
-- Impulse decisions
-- Limited market awareness
-
-### Benefits of Taking Your Time
-- Thorough research
-- Negotiation power
-- Emotional clarity
-
-### Tips for Staying Patient
-- Set realistic expectations
-- Establish a timeline
-- Avoid peer pressure
-- Be prepared to walk away
-
-## 7. Manage Emotional Expectations
-Buying a home is an emotional journey. Staying balanced helps you make sound decisions.
-
-### Why Emotional Attachment Can Be Risky
-- Overpaying
-- Ignoring red flags
-- Disappointment
-
-### Tips for Managing Emotional Expectations
-- Stick to priorities
-- Remember it’s a process
-- Detach from outcomes
-- Get a second opinion
-- Celebrate small wins
-
-## 8. Visualize the Big Picture
-Keep your focus on the end goal—a home where you’ll create cherished memories.
-
-### Why It Matters
-- Motivation during challenges
-- Emotional resilience
-- Clearer decision-making
-
-### How to Visualize
-- Imagine daily life in the home
-- Create a vision board
-- Focus on purpose
-- Break the process into steps
-
-### Benefits
-- Reduced stress
-- Enhanced patience
-- Stronger decisions
-- Sense of fulfillment
-
-## Conclusion
-Buying your dream home doesn’t have to be stressful. With planning, organization, patience, and the right support, the journey can be rewarding and fulfilling.
-
-**You're closer than you think.** Stay focused, patient, and supported.
-
-- **Planning ahead:** Set clear goals, create a timeline, and budget carefully.
-- **Staying organized:** Keep a checklist, records, and stay on top of deadlines.
-- **Right support:** Lean on real estate agents, mortgage brokers, home inspectors, and family and friends.
-- **One step at a time:** Celebrate small wins, stay flexible, and enjoy the journey.
-
-Happy house hunting!
-`
-};
+  {
+    id: "2",
+    title: "Patronage Realtor’s Ultimate Guide to Buying Property",
+    slug: "patronage-realtor-ultimate-guide-to-buying-property",
+    date: "Feb 21, 2026",
+    category: "Property Buying",
+    readTime: "8 min read",
+    sections: [
+      {
+        heading: "Introduction",
+        paragraphs: [
+          "Purchasing a property is one of the most significant financial and emotional decisions you will ever make.",
+          "Whether you’re buying your first home, investing in real estate, or searching for your dream property, having a clear understanding of the process can transform a daunting task into a rewarding journey.",
+          "At Patronage Realtor, we believe in empowering our clients with knowledge and guidance to make confident, informed decisions."
+        ]
+      },
+      {
+        heading: "Step 1: Define Your Vision",
+        paragraphs: [
+          "Before entering the market, take time to define what you are truly looking for in a property.",
+          "Identify your non-negotiables and think about the lifestyle you envision—whether it’s city living, suburban comfort, or long-term investment growth.",
+          "Clarity at this stage helps you filter options efficiently and avoid costly compromises later."
+        ]
+      },
+      {
+        heading: "Step 2: Set a Realistic Budget",
+        paragraphs: [
+          "Establishing a realistic budget is one of the most critical steps in the buying process.",
+          "Assess your savings, income, and existing obligations, while accounting for additional costs such as taxes, insurance, maintenance, and closing fees.",
+          "Mortgage pre-approval gives you a clear financial boundary and strengthens your position as a buyer."
+        ]
+      },
+      {
+        heading: "Step 3: Research the Market",
+        paragraphs: [
+          "In real estate, knowledge directly impacts outcomes.",
+          "Research local property prices, demand trends, and neighborhood growth potential to evaluate whether a property is fairly priced.",
+          "Infrastructure development, amenities, and long-term prospects play a major role in determining future value."
+        ]
+      },
+      {
+        heading: "Step 4: Work with Trusted Professionals",
+        paragraphs: [
+          "The property market is complex, and expert guidance can save you significant time, stress, and money.",
+          "A reliable real estate agent, mortgage broker, and qualified home inspector form the backbone of a smooth transaction.",
+          "With the right professionals, you gain clarity, negotiation strength, and confidence at every step."
+        ]
+      },
+      {
+        heading: "Step 5: Visit Properties and Evaluate Options",
+        paragraphs: [
+          "Seeing a property in person provides insights no listing can convey.",
+          "Evaluate layout, condition, functionality, and how well the property aligns with your lifestyle or investment goals.",
+          "Equally important is assessing the surrounding neighborhood, safety, connectivity, and future development plans."
+        ]
+      },
+      {
+        heading: "Step 6: Make an Offer",
+        paragraphs: [
+          "Once you find the right property, making a well-informed and competitive offer is crucial.",
+          "Your agent will help structure an offer based on market data, negotiation scope, and seller expectations.",
+          "Remain patient and flexible, as counteroffers and competition are common in active markets."
+        ]
+      },
+      {
+        heading: "Step 7: Due Diligence and Inspections",
+        paragraphs: [
+          "After offer acceptance, due diligence ensures there are no unpleasant surprises.",
+          "Professional inspections and legal verification help identify structural issues, documentation risks, or hidden liabilities.",
+          "If concerns arise, this stage allows for renegotiation or corrective action before final commitment."
+        ]
+      },
+      {
+        heading: "Step 8: Secure Financing",
+        paragraphs: [
+          "With due diligence complete, finalize your financing.",
+          "Lenders will assess the property value and your financial profile before approving the loan.",
+          "Timely documentation and coordination with your broker ensure a smooth transition to closing."
+        ]
+      },
+      {
+        heading: "Step 9: Closing the Deal",
+        paragraphs: [
+          "Closing formalizes ownership transfer through legal documentation and payment of statutory charges.",
+          "Once documents are signed and funds are disbursed, the property officially becomes yours.",
+          "This marks the successful completion of the transaction."
+        ]
+      },
+      {
+        heading: "Step 10: Celebrate Your New Property",
+        paragraphs: [
+          "Buying property is a major milestone worth celebrating.",
+          "Whether for personal use or investment, your achievement reflects planning, discipline, and informed decision-making."
+        ]
+      },
+      {
+        heading: "Conclusion: The Patronage Realtor Difference",
+        paragraphs: [
+          "At Patronage Realtor, we view property buying as more than a transaction—it’s the foundation of your future.",
+          "Our commitment is to guide you with transparency, expertise, and confidence at every stage.",
+          "Let us help you turn your property goals into lasting success."
+        ]
+      }
+    ]
+  }
+];
 
 export function getBlogPostById(id: string): BlogPost | undefined {
-  return blogPost.id === id ? blogPost : undefined;
+  return blogPosts.find(post => post.id === id);
 }
