@@ -1,6 +1,14 @@
-import { useMemo, useState } from "react";
-import { MapPin, Navigation } from "lucide-react";
+import { MapPin } from "lucide-react";
 import type { PropertyDetailData } from "@/types/propertyDetail";
+
+/** Validates and returns embed URL only if it contains google.com/maps. Prevents invalid URLs. */
+function buildGoogleEmbedUrl(rawLink?: string | null): string | null {
+  if (rawLink == null || typeof rawLink !== "string") return null;
+  const link = rawLink.trim();
+  if (!link) return null;
+  if (!link.includes("google.com/maps")) return null;
+  return link;
+}
 
 type MapSectionProps = {
   data: PropertyDetailData;
@@ -8,22 +16,7 @@ type MapSectionProps = {
 };
 
 export function MapSection({ data, sectionRef }: MapSectionProps) {
-  const [mapType, setMapType] = useState<"map" | "satellite">("map");
-
-  const lat = data.latitude ?? 18.59530120398497;
-  const lng = data.longitude ?? 73.73494132498988;
-
-  const embedUrl = useMemo(() => {
-    const base = `https://www.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
-
-    if (mapType === "satellite") {
-      return `https://www.google.com/maps?q=${lat},${lng}&z=18&t=k&output=embed`;
-    }
-
-    return base;
-  }, [mapType, lat, lng]);
-
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  const embedUrl = buildGoogleEmbedUrl(data.google_map_link);
 
   return (
     <section
@@ -41,54 +34,25 @@ export function MapSection({ data, sectionRef }: MapSectionProps) {
           <span>{data.location ?? "Property Location"}</span>
         </div>
 
-        {/* Toggle Buttons */}
-        <div className="mt-6 flex gap-2">
-          <button
-            type="button"
-            onClick={() => setMapType("map")}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-              mapType === "map"
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Map
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setMapType("satellite")}
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
-              mapType === "satellite"
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Satellite
-          </button>
-        </div>
-
-        {/* Map Frame */}
-        <div className="mt-6 aspect-video overflow-hidden rounded-lg border border-border bg-muted">
-          <iframe
-            src={embedUrl}
-            className="h-full w-full"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
-        </div>
-
-        {/* Directions Button */}
-        <div className="mt-6">
-          <a
-            href={directionsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-primary bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90"
-          >
-            <Navigation className="h-4 w-4" />
-            Get Directions
-          </a>
+        <div className="mt-6 h-[400px] w-full overflow-hidden rounded-lg border border-border bg-muted">
+          {embedUrl ? (
+            <iframe
+              src={embedUrl}
+              width="100%"
+              height="400"
+              style={{ border: 0, display: "block" }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Property Location Map"
+              className="h-full w-full rounded-lg"
+            />
+          ) : (
+            <div className="flex h-full min-h-[200px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <MapPin className="h-12 w-12" />
+              <p className="text-sm font-medium">Location Map Coming Soon</p>
+            </div>
+          )}
         </div>
       </div>
     </section>

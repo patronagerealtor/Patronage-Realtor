@@ -90,6 +90,7 @@ export type PropertyRow = {
   description?: string;
   latitude?: number | null;
   longitude?: number | null;
+  google_map_link?: string | null;
   possession_date?: string | null;
   bhk_type?: string | null;
   possession_by?: string | null;
@@ -125,6 +126,7 @@ type PropertiesTableRow = {
   possession_by?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  google_map_link?: string | null;
   price_value?: number | null;
   slug?: string | null;
   description?: string | null;
@@ -161,6 +163,7 @@ function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
     description: row.description ?? "",
     latitude: row.latitude ?? null,
     longitude: row.longitude ?? null,
+    google_map_link: row.google_map_link ?? null,
     possession_date: row.possession_date ?? null,
     bhk_type: row.bhk_type ?? undefined,
     possession_by: row.possession_by ?? undefined,

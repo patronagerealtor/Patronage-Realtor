@@ -43,9 +43,22 @@ function formatValue(value: string | number | undefined | null): string {
   return value;
 }
 
+/** Derive bedroom display from BHK type string (e.g. "5 BHK" → "5", "2 to 5 BHK" → "2 to 5"). */
+function getBedroomsFromBhk(bhkTypeOrRange: string | null | undefined): string | null {
+  if (bhkTypeOrRange == null || bhkTypeOrRange === "") return null;
+  const trimmed = bhkTypeOrRange.trim().replace(/\s*BHK\s*$/i, "").trim();
+  return trimmed || null;
+}
+
 export function DetailsSection({ data, sectionRef }: DetailsSectionProps) {
   const bhkRange = getBhkRange(data);
   const carpetRange = getCarpetRange(data);
+  const bhkDisplay = typeof data.beds === "number" && data.beds > 0
+    ? `${data.beds} BHK`
+    : (data.bhkType ?? bhkRange);
+  const bedroomsDisplay =
+    getBedroomsFromBhk(data.bhkType ?? bhkRange) ??
+    (typeof data.beds === "number" ? String(data.beds) : null);
 
   return (
     <section
@@ -60,17 +73,17 @@ export function DetailsSection({ data, sectionRef }: DetailsSectionProps) {
 
         <div className="mt-6 border-t border-border pt-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-10">
-            {/* ROW 1 */}
+            {/* ROW 1: BHK Type and Bedrooms derived from same source */}
             <div>
               <p className="text-sm text-muted-foreground">BHK Type</p>
               <p className="text-lg font-semibold text-foreground">
-                {formatValue(data.bhkType ?? bhkRange)}
+                {formatValue(bhkDisplay)}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Bedrooms</p>
               <p className="text-lg font-semibold text-foreground">
-                {formatValue(data.beds)}
+                {formatValue(bedroomsDisplay)}
               </p>
             </div>
             <div>
