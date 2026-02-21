@@ -33,14 +33,16 @@ type Webinar = {
   role: string;
   category: "Upcoming" | "Most Recent" | "Past Webinar";
   image: string;
+  /** Optional PDF URL for "Get Presentation" (e.g. in public/webinars/) */
+  presentationPdf?: string;
 };
 
 /* -------------------- Data -------------------- */
 // Add your images to public/webinars/ (e.g. webinar-1.jpg, webinar-2.jpg, webinar-3.jpg)
 const WEBINAR_IMAGES = {
   "1": "/webinars/webinar-1.jpg",
-  "2": "/webinars/webinar-2.jpg",
-  "3": "/webinars/webinar-3.jpg",
+  "2": "/webinars/webinar-2.png",
+  "3": "/webinars/webinar-3.png",
 } as const;
 
 const WEBINAR: Webinar[] = [
@@ -67,6 +69,7 @@ const WEBINAR: Webinar[] = [
     role: "CoFounder & CEO of Patronage Realtor",
     category: "Most Recent",
     image: WEBINAR_IMAGES["2"],
+    presentationPdf: "/webinars/first-home-buying-presentation.pdf",
   },
   {
     id: "3",
@@ -422,22 +425,37 @@ export function Webinar() {
                           </p>
                         </div>
                       </div>
-                      <Button
-                        className="w-full mt-4"
-                        size="lg"
-                        onClick={() => {
-                          if (selectedWebinar.category === "Upcoming") {
-                            scrollToRegister();
-                          }
-                        }}
-                      >
-                        {selectedWebinar.category === "Most Recent"
-                          ? "Watch Recording"
-                          : selectedWebinar.category === "Upcoming"
-                            ? "Register Now"
-                            : "View Details"}
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
+                      {selectedWebinar.category === "Most Recent" &&
+                      selectedWebinar.presentationPdf ? (
+                        <Button asChild className="w-full mt-4" size="lg">
+                          <a
+                            href={selectedWebinar.presentationPdf}
+                            download="webinar-presentation.pdf"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Get Presentation
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </a>
+                        </Button>
+                      ) : (
+                        <Button
+                          className="w-full mt-4"
+                          size="lg"
+                          onClick={() => {
+                            if (selectedWebinar.category === "Upcoming") {
+                              scrollToRegister();
+                            }
+                          }}
+                        >
+                          {selectedWebinar.category === "Most Recent"
+                            ? "Get Presentation"
+                            : selectedWebinar.category === "Upcoming"
+                              ? "Register Now"
+                              : "View Details"}
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </Button>
+                      )}
                     </div>
                   </>
                 )}
