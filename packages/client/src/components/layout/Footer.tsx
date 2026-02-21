@@ -54,10 +54,18 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <a
-                  href="/interiors"
+                  href="/properties"
                   className="hover:text-foreground transition-colors"
                 >
                   Properties
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/investment"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Investment
                 </a>
               </li>
               <li>
@@ -110,18 +118,33 @@ export function Footer() {
             <h4 className="font-heading font-semibold text-lg">Contact Us</h4>
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 mt-0.5" />
-                <span>
+                <MapPin className="h-5 w-5 mt-0.5 shrink-0" />
+                <a
+                  href="https://maps.app.goo.gl/RacQu6QHEgJnaXH48"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground transition-colors"
+                >
                   09, IT-59 office spaces & food court, Phase 1 Hinjewadi, Pune
-                </span>
+                </a>
               </li>
               <li className="flex items-center gap-3">
-                <Phone className="h-5 w-5" />
-                <span>+91 88880 50348</span>
+                <Phone className="h-5 w-5 shrink-0" />
+                <a
+                  href="tel:+918888050348"
+                  className="hover:text-foreground transition-colors"
+                >
+                  +91 88880 50348
+                </a>
               </li>
               <li className="flex items-center gap-3">
-                <Mail className="h-5 w-5" />
-                <span>patronagerealtor@gmail.com</span>
+                <Mail className="h-5 w-5 shrink-0" />
+                <a
+                  href="mailto:patronagerealtor@gmail.com"
+                  className="hover:text-foreground transition-colors"
+                >
+                  patronagerealtor@gmail.com
+                </a>
               </li>
             </ul>
           </div>
