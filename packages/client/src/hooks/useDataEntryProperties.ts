@@ -34,11 +34,12 @@ function toProperty(row: PropertyRow): Property {
     id: String(row.id),
     title: row.title,
     location: row.location ?? "",
+    address: row.address ?? "",
     price: row.price ?? "",
     beds: Number(row.beds ?? 0),
     baths: Number(row.baths ?? 0),
     sqft: String(row.sqft ?? ""),
-    status: (row.status as Property["status"]) ?? "For Sale",
+    status: (row.status as Property["status"]) ?? "Under Construction",
     description: row.description ?? undefined,
     images: row.images ?? [],
     amenities: row.amenities ?? [],
@@ -53,6 +54,8 @@ function toProperty(row: PropertyRow): Property {
     longitude: row.longitude,
     price_value: row.price_value,
     slug: undefined,
+    rera_applicable: row.rera_applicable ?? false,
+    rera_number: row.rera_number ?? undefined,
   };
 }
 
@@ -295,6 +298,7 @@ export function useDataEntryProperties() {
         slug: partial.slug ?? null,
         developer: partial.developer ?? "",
         location: partial.location,
+        address: partial.address ?? null,
         city: partial.city ?? null,
         price_display: partial.price,
         price_value: partial.price_value ?? null,
@@ -309,6 +313,8 @@ export function useDataEntryProperties() {
         description: partial.description ?? null,
         latitude: partial.latitude ?? null,
         longitude: partial.longitude ?? null,
+        rera_applicable: partial.rera_applicable ?? false,
+        rera_number: partial.rera_number ?? null,
       };
 
       const amenityIds = Array.isArray(partial.amenities)
@@ -350,6 +356,7 @@ export function useDataEntryProperties() {
         slug: null,
         developer: "",
         location: p.location,
+        address: null,
         city: null,
         price_display: p.price,
         price_value: null,
@@ -362,6 +369,8 @@ export function useDataEntryProperties() {
         description: p.description ?? null,
         latitude: null,
         longitude: null,
+        rera_applicable: false,
+        rera_number: null,
       };
       await supabase.from(PROPERTIES_TABLE).insert({ ...payload, id });
       await syncPropertyImages(id, p.images ?? []);

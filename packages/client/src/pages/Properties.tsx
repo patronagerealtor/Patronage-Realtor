@@ -16,6 +16,7 @@ import { PropertyDetailDialog } from "../components/shared/PropertyDetailDialog"
 import { MapPin, Building2, Home, CalendarDays, Ruler } from "lucide-react";
 import { useProperties } from "../hooks/use-properties";
 import type { PropertyRow } from "../lib/supabase";
+import { formatIndianPrice } from "../lib/formatIndianPrice";
 
 function getSearchParams(): URLSearchParams {
   if (typeof window === "undefined") return new URLSearchParams();
@@ -119,6 +120,11 @@ export default function Properties() {
                 <Badge className="absolute top-4 left-4 z-10 bg-background/90 text-foreground backdrop-blur-sm shadow-sm">
                   {property.status}
                 </Badge>
+                {property.rera_applicable && (
+                  <span className="absolute top-4 right-4 z-10 rounded bg-green-600 px-2 py-0.5 text-xs font-medium text-white shadow-sm">
+                    ✓ RERA
+                  </span>
+                )}
                 <div className="overflow-hidden h-64">
                   {property.images && property.images.length > 0 ? (
                     <img
@@ -147,7 +153,7 @@ export default function Properties() {
                     {property.title}
                   </h3>
                   <span className="font-bold text-lg text-primary">
-                    {property.price.startsWith("₹") ? property.price : `₹ ${property.price}`}
+                    {formatIndianPrice(property.price_value ?? property.price)}
                   </span>
                 </div>
                 {property.developer ? (

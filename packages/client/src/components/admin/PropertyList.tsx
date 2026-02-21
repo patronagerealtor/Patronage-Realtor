@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "../ui/table";
 import type { Property } from "../../lib/propertyStore";
+import { formatIndianPrice } from "../../lib/formatIndianPrice";
 
 export type PropertyListProps = {
   properties: Property[];
@@ -52,7 +53,9 @@ export function PropertyList({
                 </div>
               </TableCell>
               <TableCell className="py-3">{p.status}</TableCell>
-              <TableCell className="py-3">{p.price}</TableCell>
+              <TableCell className="py-3">
+                {formatIndianPrice(p.price_value ?? p.price)}
+              </TableCell>
               <TableCell className="text-right py-3">
                 <div className="inline-flex gap-2">
                   <Button

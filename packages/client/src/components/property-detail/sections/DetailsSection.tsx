@@ -37,21 +37,10 @@ function getCarpetRange(data: PropertyDetailData): string | null {
     : `${min.toLocaleString()} – ${max.toLocaleString()} Sq.Ft`;
 }
 
-function DetailItem({
-  label,
-  value,
-}: {
-  label: string;
-  value?: string | null;
-}) {
-  if (!value) return null;
-
-  return (
-    <div className="space-y-1">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="text-lg font-semibold tracking-tight">{value}</p>
-    </div>
-  );
+function formatValue(value: string | number | undefined | null): string {
+  if (value === undefined || value === null || value === "") return "—";
+  if (typeof value === "number") return String(value);
+  return value;
 }
 
 export function DetailsSection({ data, sectionRef }: DetailsSectionProps) {
@@ -70,18 +59,56 @@ export function DetailsSection({ data, sectionRef }: DetailsSectionProps) {
         </h2>
 
         <div className="mt-6 border-t border-border pt-6">
-          <div className="grid gap-y-8 gap-x-12 sm:grid-cols-2 lg:grid-cols-3">
-            
-            {/* Configuration */}
-            <DetailItem label="BHK Type" value={bhkRange} />
-            <DetailItem label="Carpet Area" value={carpetRange} />
-            <DetailItem label="Construction Status" value={data.status} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-10">
+            {/* ROW 1 */}
+            <div>
+              <p className="text-sm text-muted-foreground">BHK Type</p>
+              <p className="text-lg font-semibold text-foreground">
+                {formatValue(data.bhkType ?? bhkRange)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Bedrooms</p>
+              <p className="text-lg font-semibold text-foreground">
+                {formatValue(data.beds)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Carpet Area</p>
+              <p className="text-lg font-semibold text-foreground">
+                {formatValue(data.sqft ?? carpetRange)}
+              </p>
+            </div>
 
-            {/* Project Info */}
-            <DetailItem label="Developer" value={data.developer} />
-            <DetailItem label="Property Type" value={data.propertyType} />
-            <DetailItem label="Possession By" value={data.possessionBy ? new Date(data.possessionBy).toLocaleDateString() : "—"} />
+            {/* ROW 2 */}
+            <div>
+              <p className="text-sm text-muted-foreground">Developer</p>
+              <p className="text-lg font-semibold text-foreground">
+                {formatValue(data.developer)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Property Type</p>
+              <p className="text-lg font-semibold text-foreground">
+                {formatValue(data.propertyType)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Construction Status</p>
+              <p className="text-lg font-semibold text-foreground">
+                {formatValue(data.status)}
+              </p>
+            </div>
+          </div>
 
+          {/* ROW 3: Possession By full width */}
+          <div className="mt-10">
+            <p className="text-sm text-muted-foreground">Possession By</p>
+            <p className="text-lg font-semibold text-foreground">
+              {data.possessionBy
+                ? new Date(data.possessionBy).toLocaleDateString?.() || data.possessionBy
+                : "—"}
+            </p>
           </div>
         </div>
       </div>
