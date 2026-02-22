@@ -19,11 +19,8 @@ import type { PropertyRow } from "../lib/supabase";
 import { formatIndianPrice } from "../lib/formatIndianPrice";
 import type { FilterOptions } from "../components/home/PropertySearch";
 
-function getSearchParams(): URLSearchParams {
-  if (typeof window === "undefined") return new URLSearchParams();
-  const loc = window.location.pathname + window.location.search;
-  const query = loc.includes("?") ? loc.slice(loc.indexOf("?")) : "";
-  return new URLSearchParams(query);
+function getSearchParamsFromQuery(queryString: string): URLSearchParams {
+  return new URLSearchParams(queryString || "");
 }
 
 function deriveFilterOptions(properties: PropertyRow[]): FilterOptions {
@@ -66,10 +63,10 @@ export default function Properties() {
   const [detailProperty, setDetailProperty] = useState<PropertyRow | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
-  const searchKey = location.includes("?") ? location.slice(location.indexOf("?")) : "";
+  const queryString = location.includes("?") ? location.slice(location.indexOf("?")) : "";
   const filteredProperties = useMemo(
-    () => filterProperties(properties, getSearchParams()),
-    [properties, searchKey]
+    () => filterProperties(properties, getSearchParamsFromQuery(queryString)),
+    [properties, queryString]
   );
   const filterOptions = useMemo(() => deriveFilterOptions(properties), [properties]);
 
@@ -104,12 +101,12 @@ export default function Properties() {
         </div>
 
         <div className="mb-16">
-          <PropertySearch key={searchKey} filterOptions={filterOptions} />
+          <PropertySearch filterOptions={filterOptions} />
         </div>
 
         {filteredProperties.length === 0 ? (
           <p className="text-muted-foreground text-center py-12">
-            {searchKey
+            {queryString
               ? "No properties match your filters. Try adjusting location, type, or budget."
               : "No properties available."}
           </p>

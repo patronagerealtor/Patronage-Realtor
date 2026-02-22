@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Search, MapPin, DollarSign, Building2, Layers } from "lucide-react";
+import { Search, MapPin, DollarSign, Building2, Layers, X } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   Select,
@@ -23,10 +23,8 @@ const BUDGET_OPTIONS = [
   { value: "high", label: "₹1 Cr+" },
 ] as const;
 
-function getSearchParamsFromLocation(): URLSearchParams {
-  if (typeof window === "undefined") return new URLSearchParams();
-  const loc = window.location.pathname + window.location.search;
-  const query = loc.includes("?") ? loc.slice(loc.indexOf("?")) : "";
+function getSearchParamsFromLocation(location: string): URLSearchParams {
+  const query = location.includes("?") ? location.slice(location.indexOf("?")) : "";
   return new URLSearchParams(query);
 }
 
@@ -35,21 +33,22 @@ type PropertySearchProps = {
 };
 
 export function PropertySearch({ filterOptions = { statuses: [], locations: [], bhkTypes: [], propertyTypes: [] } }: PropertySearchProps) {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const [status, setStatus] = useState<string>("");
   const [locationVal, setLocationVal] = useState<string>("");
   const [bhkType, setBhkType] = useState<string>("");
   const [propertyType, setPropertyType] = useState<string>("");
   const [budget, setBudget] = useState<string>("");
 
+  // Sync filter state from URL whenever route changes (Search click, back/forward, direct link)
   useEffect(() => {
-    const params = getSearchParamsFromLocation();
+    const params = getSearchParamsFromLocation(location);
     setStatus(params.get("status") ?? "");
     setLocationVal(params.get("location") ?? "");
     setBhkType(params.get("bhk") ?? "");
     setPropertyType(params.get("type") ?? "");
     setBudget(params.get("budget") ?? "");
-  }, []);
+  }, [location]);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -61,6 +60,17 @@ export function PropertySearch({ filterOptions = { statuses: [], locations: [], 
     const qs = params.toString();
     setLocation(qs ? `/properties?${qs}` : "/properties");
   };
+
+  const handleClearFilters = () => {
+    setStatus("");
+    setLocationVal("");
+    setBhkType("");
+    setPropertyType("");
+    setBudget("");
+    setLocation("/properties");
+  };
+
+  const hasActiveFilters = !!(status || locationVal.trim() || bhkType || propertyType || budget);
 
   return (
     <section className="container mx-auto px-4 -mt-8 relative z-10 mb-20">
@@ -132,14 +142,25 @@ export function PropertySearch({ filterOptions = { statuses: [], locations: [], 
               </SelectContent>
             </Select>
           </div>
-          <Button
-            type="button"
-            className="w-full h-12 min-h-[44px] text-base sm:text-lg shadow-sm touch-manipulation"
-            data-testid="button-search-mobile"
-            onClick={handleSearch}
-          >
-            <Search className="mr-2 h-4 w-4 shrink-0" /> Search
-          </Button>
+          <div className="flex gap-3 flex-col sm:flex-row">
+            <Button
+              type="button"
+              className="w-full h-12 min-h-[44px] text-base sm:text-lg shadow-sm touch-manipulation"
+              data-testid="button-search-mobile"
+              onClick={handleSearch}
+            >
+              <Search className="mr-2 h-4 w-4 shrink-0" /> Search
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-12 min-h-[44px] text-base sm:text-lg touch-manipulation"
+              onClick={handleClearFilters}
+              disabled={!hasActiveFilters}
+            >
+              <X className="mr-2 h-4 w-4 shrink-0" /> Clear Filters
+            </Button>
+          </div>
         </div>
 
         {/* Desktop View - Horizontal */}
@@ -217,15 +238,26 @@ export function PropertySearch({ filterOptions = { statuses: [], locations: [], 
               </SelectContent>
             </Select>
           </div>
-          <div className="shrink-0 min-w-[120px] md:min-w-[140px] ml-0 md:ml-2 w-full md:w-auto">
+          <div className="shrink-0 flex gap-2 ml-0 md:ml-2 w-full md:w-auto min-w-0">
             <Button
               type="button"
               size="lg"
-              className="w-full h-12 min-h-[44px] px-6 md:px-8 shadow-sm touch-manipulation"
+              className="flex-1 md:flex-initial h-12 min-h-[44px] px-6 md:px-8 shadow-sm touch-manipulation"
               data-testid="button-search-desktop"
               onClick={handleSearch}
             >
               <Search className="h-4 w-4 mr-2 shrink-0" /> Search
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="h-12 min-h-[44px] px-4 md:px-6 touch-manipulation"
+              onClick={handleClearFilters}
+              disabled={!hasActiveFilters}
+            >
+              <X className="h-4 w-4 md:mr-1.5 shrink-0" />
+              <span className="hidden md:inline">Clear Filters</span>
             </Button>
           </div>
         </div>
