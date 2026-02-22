@@ -1,6 +1,5 @@
 import { motion } from "framer-motion"
 import { Button } from "../ui/button"
-import { PlaceholderImage } from "../shared/PlaceholderImage"
 import { Link } from "wouter"
 
 export function AboutPreview() {
@@ -63,14 +62,22 @@ export function AboutPreview() {
             transition={{ type: "spring", stiffness: 300 }}
             className="mt-8"
           >
-            <PlaceholderImage height="h-64" text="Team" />
+            <img
+              src="/interiors/AboutPreviewImg_1.jpg"
+              alt="Team"
+              className="h-64 w-full rounded-lg object-cover"
+            />
           </motion.div>
 
           <motion.div
             whileHover={{ scale: 1.05, rotate: -2 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <PlaceholderImage height="h-64" text="Office" />
+            <img
+              src="/interiors/AboutPreviewImg_2.jpg"
+              alt="Office"
+              className="h-64 w-full rounded-lg object-cover"
+            />
           </motion.div>
         </motion.div>
 
