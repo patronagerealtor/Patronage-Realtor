@@ -1,5 +1,6 @@
 import { LayoutGrid } from "lucide-react";
 import { AmenityIcon } from "@/components/shared/AmenityIcon";
+import { ALLOWED_AMENITY_NAMES } from "@/lib/allowedAmenities";
 import type { PropertyDetailData } from "@/types/propertyDetail";
 
 type AmenitiesSectionProps = {
@@ -7,11 +8,13 @@ type AmenitiesSectionProps = {
   sectionRef: (el: HTMLElement | null) => void;
 };
 
+const ALLOWED_SET = new Set<string>(ALLOWED_AMENITY_NAMES);
+
 export function AmenitiesSection({
   data,
   sectionRef,
 }: AmenitiesSectionProps) {
-  const amenities = data.amenities?.length ? data.amenities : [];
+  const amenities = (data.amenities ?? []).filter((a) => ALLOWED_SET.has(a.name));
 
   if (!amenities.length) {
     return (
@@ -49,7 +52,7 @@ export function AmenitiesSection({
         </h2>
 
         <div className="mt-8 grid grid-cols-2 gap-10 text-center sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {data.amenities?.map((amenity) => (
+          {amenities.map((amenity) => (
             <div
               key={amenity.id}
               className="group flex flex-col items-center gap-3 transition-transform duration-200 hover:scale-105"
