@@ -13,6 +13,7 @@ import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
 import type { Property, PropertyStatus } from "../../lib/propertyStore";
 import { supabase } from "../../lib/supabase";
+import { ALLOWED_AMENITY_NAMES } from "../../lib/allowedAmenities";
 import { AmenityIcon } from "../shared/AmenityIcon";
 
 const STATUS_OPTIONS: PropertyStatus[] = [
@@ -107,8 +108,11 @@ export type PropertyFormPayload = {
   city: string;
   bhk_type: string;
   possession_by: string;
+  /** Kept for backward compatibility; not shown in form. */
   latitude: string;
+  /** Kept for backward compatibility; not shown in form. */
   longitude: string;
+  google_map_link: string;
   price_value: string;
   slug: string;
   rera_applicable: boolean;
@@ -151,8 +155,7 @@ export function PropertyForm({
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [developer, setDeveloper] = useState("");
   const [propertyType, setPropertyType] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
+  const [googleMapLink, setGoogleMapLink] = useState("");
   const [slug, setSlug] = useState("");
   const [reraApplicable, setReraApplicable] = useState(false);
   const [reraNumber, setReraNumber] = useState("");
@@ -172,8 +175,7 @@ export function PropertyForm({
     setSelectedAmenities((p.amenities ?? []).map((a) => String(a.id).toLowerCase()));
     setDeveloper(p.developer ?? "");
     setPropertyType(p.property_type ?? "");
-    setLatitude(p.latitude != null ? String(p.latitude) : "");
-    setLongitude(p.longitude != null ? String(p.longitude) : "");
+    setGoogleMapLink(p.google_map_link ?? "");
     setSlug(p.slug ?? "");
     setReraApplicable(p.rera_applicable ?? false);
     setReraNumber(p.rera_number ?? "");
@@ -194,8 +196,7 @@ export function PropertyForm({
     setSelectedAmenities([]);
     setDeveloper("");
     setPropertyType("");
-    setLatitude("");
-    setLongitude("");
+    setGoogleMapLink("");
     setSlug("");
     setReraApplicable(false);
     setReraNumber("");
@@ -219,8 +220,6 @@ export function PropertyForm({
       setSelectedAmenities([]);
       setDeveloper("");
       setPropertyType("");
-      setLatitude("");
-      setLongitude("");
       setSlug("");
       setReraApplicable(false);
       setReraNumber("");
@@ -245,12 +244,15 @@ export function PropertyForm({
       .select("*")
       .then(({ data }) => {
         if (Array.isArray(data)) {
+          const allowedSet = new Set<string>(ALLOWED_AMENITY_NAMES);
           setAmenitiesList(
-            data.map((r: { id: string; name: string; icon: string }) => ({
-              id: String(r.id).toLowerCase(),
-              name: r.name ?? "",
-              icon: r.icon ?? "",
-            }))
+            data
+              .map((r: { id: string; name: string; icon: string }) => ({
+                id: String(r.id).toLowerCase(),
+                name: r.name ?? "",
+                icon: r.icon ?? "",
+              }))
+              .filter((a) => allowedSet.has(a.name))
           );
         }
       });
@@ -285,8 +287,9 @@ export function PropertyForm({
         city: "",
         bhk_type: bhkType.trim(),
         possession_by: possessionBy.trim(),
-        latitude: latitude.trim(),
-        longitude: longitude.trim(),
+        latitude: editingProperty?.latitude != null ? String(editingProperty.latitude) : "",
+        longitude: editingProperty?.longitude != null ? String(editingProperty.longitude) : "",
+        google_map_link: googleMapLink.trim(),
         price_value: "",
         slug: slug.trim(),
         rera_applicable: reraApplicable,
@@ -511,28 +514,22 @@ export function PropertyForm({
         </div>
       </Card>
 
-      {/* Section 3b: Coordinates */}
+      {/* Section 3b: Map embed */}
       <Card className="p-6">
-        <h3 className={sectionHeading}>Coordinates</h3>
-        <div className="mt-4 grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Latitude</Label>
-            <Input
-              value={latitude}
-              onChange={(e) => setLatitude(e.target.value.replace(/[a-zA-Z]/g, ""))}
-              placeholder="e.g. 34.0522"
-              inputMode="decimal"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Longitude</Label>
-            <Input
-              value={longitude}
-              onChange={(e) => setLongitude(e.target.value.replace(/[a-zA-Z]/g, ""))}
-              placeholder="e.g. -118.2437"
-              inputMode="decimal"
-            />
-          </div>
+        <h3 className={sectionHeading}>Location Map</h3>
+        <div className="mt-4 space-y-2">
+          <Label htmlFor="google_map_link">Google Maps Embed Link</Label>
+          <Input
+            id="google_map_link"
+            name="google_map_link"
+            type="text"
+            value={googleMapLink}
+            onChange={(e) => setGoogleMapLink(e.target.value)}
+            placeholder="Paste Google Maps Embed Link"
+          />
+          <p className="text-xs text-muted-foreground">
+            Optional. Use Share → Embed a map in Google Maps and paste the iframe src URL.
+          </p>
         </div>
       </Card>
 

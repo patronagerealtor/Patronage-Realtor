@@ -52,6 +52,7 @@ function toProperty(row: PropertyRow): Property {
     possession_by: row.possession_by ?? undefined,
     latitude: row.latitude,
     longitude: row.longitude,
+    google_map_link: row.google_map_link ?? undefined,
     price_value: row.price_value,
     slug: undefined,
     rera_applicable: row.rera_applicable ?? false,
@@ -313,6 +314,7 @@ export function useDataEntryProperties() {
         description: partial.description ?? null,
         latitude: partial.latitude ?? null,
         longitude: partial.longitude ?? null,
+        google_map_link: partial.google_map_link ?? null,
         rera_applicable: partial.rera_applicable ?? false,
         rera_number: partial.rera_number ?? null,
       };
@@ -369,6 +371,7 @@ export function useDataEntryProperties() {
         description: p.description ?? null,
         latitude: null,
         longitude: null,
+        google_map_link: null,
         rera_applicable: false,
         rera_number: null,
       };

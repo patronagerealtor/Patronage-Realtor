@@ -27,6 +27,7 @@ export type Property = {
   possession_by?: string;
   latitude?: number | null;
   longitude?: number | null;
+  google_map_link?: string | null;
   price_value?: number | null;
   slug?: string;
   rera_applicable?: boolean;

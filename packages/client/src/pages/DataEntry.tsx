@@ -67,6 +67,7 @@ export default function DataEntry() {
     possession_by: string;
     latitude: string;
     longitude: string;
+    google_map_link: string;
     price_value: string;
     slug: string;
     rera_applicable: boolean;
@@ -89,6 +90,7 @@ export default function DataEntry() {
       possession_by: payload.possession_by.trim() || undefined,
       latitude: payload.latitude ? Number(payload.latitude) : null,
       longitude: payload.longitude ? Number(payload.longitude) : null,
+      google_map_link: payload.google_map_link?.trim() || null,
       price_value: payload.price_value ? Number(payload.price_value) : null,
       slug: payload.slug.trim(),
       rera_applicable: payload.rera_applicable,

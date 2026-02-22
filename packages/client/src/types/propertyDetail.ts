@@ -23,6 +23,7 @@ export type PropertyDetailData = {
   }[];
   latitude?: number | null;
   longitude?: number | null;
+  google_map_link?: string | null;
   reraApplicable?: boolean;
   reraNumber?: string | null;
 }
