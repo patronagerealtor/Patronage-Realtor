@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card } from "../components/ui/card";
+import { useState, useEffect, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardFooter } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
 import { Footer } from "../components/layout/Footer";
 import { Header } from "../components/layout/Header";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
@@ -22,7 +24,15 @@ import {
   TrendingUp,
   ChevronDown,
   BookOpen,
+  MapPin,
+  Building2,
+  Home,
 } from "lucide-react";
+import { useProperties } from "../hooks/use-properties";
+import type { PropertyRow } from "../lib/supabase";
+import { formatIndianPrice } from "../lib/formatIndianPrice";
+import { PlaceholderImage } from "../components/shared/PlaceholderImage";
+import { PropertyDetailDialog } from "../components/property-detail/PropertyDetailDialog";
 import {
   Accordion,
   AccordionContent,
@@ -51,8 +61,38 @@ const COLORS = {
   chart: ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"],
 };
 
+const RELATED_PROPERTY_MARGIN_RUPEE = 500000; // ±5 Lakh (in rupees)
+
+/** Get property price in lakhs for comparison. Uses price_value; fallback: parse price string (e.g. "₹ 1 Cr", "₹ 50 Lakh"). */
+function getPriceInLakhs(p: PropertyRow): number | null {
+  const pv = p.price_value != null ? Number(p.price_value) : null;
+  if (pv != null && !Number.isNaN(pv)) {
+    if (pv >= 100000) return pv / 1e5;
+    if (pv >= 100) return pv;
+    if (pv >= 1) return pv * 100; // crore
+    return pv;
+  }
+  const str = (p.price ?? "").replace(/,/g, "");
+  const crMatch = str.match(/(\d+(?:\.\d+)?)\s*cr(?:ore)?/i);
+  if (crMatch) return parseFloat(crMatch[1]) * 100;
+  const lakhMatch = str.match(/(\d+(?:\.\d+)?)\s*lakh/i);
+  if (lakhMatch) return parseFloat(lakhMatch[1]);
+  const numMatch = str.match(/[\d.]+/);
+  if (numMatch) {
+    const n = parseFloat(numMatch[0]);
+    if (n >= 100000) return n / 1e5;
+    if (n >= 100) return n;
+    if (n >= 1) return n * 100;
+    return n;
+  }
+  return null;
+}
+
 export default function Calculators() {
   const [activeTab, setActiveTab] = useState("smart-emi");
+  const { properties } = useProperties();
+  const [detailProperty, setDetailProperty] = useState<PropertyRow | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   // --- 1. Loan Eligibility State ---
   const [eligIncome, setEligIncome] = useState(100000);
@@ -107,6 +147,7 @@ export default function Calculators() {
 
   // --- 4. Smart EMI State ---
   const [smartLoanAmount, setSmartLoanAmount] = useState(5000000);
+  const [smartDownPayment, setSmartDownPayment] = useState(0);
   const [smartInterestRate, setSmartInterestRate] = useState(8.5);
   const [smartTenure, setSmartTenure] = useState(20);
   const [smartIncome, setSmartIncome] = useState(100000);
@@ -352,12 +393,27 @@ export default function Calculators() {
     calculateSmartEmi();
   }, [
     smartLoanAmount,
+    smartDownPayment,
     smartInterestRate,
     smartTenure,
     smartIncome,
     smartExistingEmi,
     smartPrepayment,
   ]);
+
+  // Related properties: price within (Loan + Down Payment) ± 5 Lakh
+  const totalBudgetRupees = smartLoanAmount + smartDownPayment;
+  const totalBudgetLakhs = totalBudgetRupees / 1e5;
+  const relatedProperties = useMemo(() => {
+    if (totalBudgetRupees <= 0) return [];
+    const minL = Math.max(0, totalBudgetLakhs - 5);
+    const maxL = totalBudgetLakhs + 5;
+    return properties.filter((p): p is PropertyRow => {
+      const valueInLakhs = getPriceInLakhs(p);
+      if (valueInLakhs == null || Number.isNaN(valueInLakhs)) return false;
+      return valueInLakhs >= minL && valueInLakhs <= maxL;
+    });
+  }, [properties, totalBudgetRupees, totalBudgetLakhs]);
 
   // Run when Rent vs Buy / Eligibility / Ownership inputs change — do NOT overwrite RVB
   useEffect(() => {
@@ -448,6 +504,23 @@ export default function Calculators() {
                         handleCurrencyInput(e.target.value, setSmartLoanAmount)
                       }
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Down Payment (₹)</Label>
+                    <Input
+                      type="text"
+                      value={
+                        smartDownPayment === 0
+                          ? ""
+                          : smartDownPayment.toLocaleString("en-IN")
+                      }
+                      onChange={(e) =>
+                        handleCurrencyInput(e.target.value, setSmartDownPayment)
+                      }
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      One-time payment reducing your loan amount
+                    </p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -633,6 +706,104 @@ export default function Calculators() {
                 </Card>
               </div>
             </div>
+
+            {/* Related Properties: price within Loan + Down Payment ± 5 Lakh */}
+            {totalBudgetRupees > 0 && (
+              <Card className="mt-8 border rounded-lg bg-card p-6 md:p-8">
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  Related Properties
+                </h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Properties within ₹5 Lakh of your budget (Loan + Down Payment: {formatCurrency(totalBudgetRupees)})
+                  {totalBudgetLakhs > 0 && (
+                    <span className="block mt-1">Budget range: ₹{Math.max(0, totalBudgetLakhs - 5).toFixed(1)} – ₹{(totalBudgetLakhs + 5).toFixed(1)} Lakh</span>
+                  )}
+                </p>
+                {relatedProperties.length === 0 ? (
+                  <p className="text-muted-foreground text-sm py-6 text-center">
+                    No properties in this budget range. Try adjusting Loan Amount or Down Payment, or browse all properties.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {relatedProperties.slice(0, 6).map((property) => {
+                      const lakhs = getPriceInLakhs(property);
+                      const priceForDisplay = lakhs != null ? lakhs * 1e5 : null;
+                      return (
+                        <Card
+                          key={property.id}
+                          className="overflow-hidden group border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                          onClick={() => {
+                            setDetailProperty(property);
+                            setDetailOpen(true);
+                          }}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setDetailProperty(property);
+                              setDetailOpen(true);
+                            }
+                          }}
+                        >
+                          <CardHeader className="p-0 relative">
+                            <Badge className="absolute top-2 left-2 z-10 bg-background/90 text-foreground text-xs">
+                              {property.status}
+                            </Badge>
+                            <div className="overflow-hidden h-44">
+                              {property.images && property.images.length > 0 ? (
+                                <img
+                                  src={property.images[0]}
+                                  alt={property.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : property.image_url ? (
+                                <img
+                                  src={property.image_url}
+                                  alt={property.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <PlaceholderImage
+                                  height="h-full"
+                                  text="Property"
+                                  className="group-hover:scale-105 transition-transform duration-300"
+                                />
+                              )}
+                            </div>
+                          </CardHeader>
+                          <CardContent className="p-4">
+                            <h4 className="font-heading font-semibold text-base line-clamp-1">
+                              {property.title}
+                            </h4>
+                            <p className="font-semibold text-primary text-sm mt-1">
+                              {formatIndianPrice(priceForDisplay ?? property.price)}
+                            </p>
+                            {property.location && (
+                              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                                <MapPin className="h-3 w-3 shrink-0" />
+                                <span className="line-clamp-1">{property.location}</span>
+                              </p>
+                            )}
+                            {property.bhk_type && (
+                              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Home className="h-3 w-3 shrink-0" />
+                                {property.bhk_type}
+                              </p>
+                            )}
+                          </CardContent>
+                          <CardFooter className="p-4 pt-0">
+                            <Button variant="outline" size="sm" className="w-full">
+                              View Details
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </Card>
+            )}
 
             <Card className="mt-8 border rounded-lg bg-card p-6 md:p-8">
               <div className="flex items-center gap-2 text-primary font-semibold mb-6">
@@ -1621,6 +1792,15 @@ export default function Calculators() {
         </Tabs>
       </main>
       <Footer />
+      <PropertyDetailDialog
+        property={detailProperty}
+        open={detailOpen}
+        onOpenChange={(open) => {
+          setDetailOpen(open);
+          if (!open) setDetailProperty(null);
+        }}
+        similarProperties={relatedProperties.filter((p) => p.id !== detailProperty?.id).slice(0, 4)}
+      />
     </div>
   );
 }
