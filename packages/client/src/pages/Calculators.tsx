@@ -7,6 +7,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
+import { Link } from "wouter";
 import { Footer } from "../components/layout/Footer";
 import { Header } from "../components/layout/Header";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
@@ -439,6 +440,21 @@ export default function Calculators() {
     rvbHorizon,
   ]);
 
+  // SEO: title and meta description for this page (Vite SPA, no Next.js)
+  if (typeof document !== "undefined") {
+    document.title = "Home Loan & Property Calculators India 2026";
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.setAttribute("name", "description");
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute(
+      "content",
+      "Calculate EMI, loan eligibility, rent vs buy & ownership cost instantly. Smart real estate financial tools for Indian property buyers in 2026."
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Header />
@@ -446,7 +462,7 @@ export default function Calculators() {
       <main className="container mx-auto px-4 py-8 flex-grow">
         <div className="max-w-4xl mx-auto text-center mb-8">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-2">
-            Financial Planning Suite
+            Home Loan & Property Calculators for Smart Buyers in India (2026)
           </h1>
           <p className="text-xl text-muted-foreground">
             Tools to make smarter home buying decisions
@@ -613,7 +629,7 @@ export default function Calculators() {
                   </h3>
                   <div className="h-[200px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
+                      <PieChart margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
                         <Pie
                           data={[
                             { name: "Principal", value: smartLoanAmount },
@@ -624,9 +640,12 @@ export default function Calculators() {
                           ]}
                           cx="50%"
                           cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
-                          paddingAngle={5}
+                          innerRadius={52}
+                          outerRadius={82}
+                          paddingAngle={2}
+                          cornerRadius={8}
+                          stroke="white"
+                          strokeWidth={2}
                           dataKey="value"
                         >
                           <Cell fill={COLORS.chart[0]} />
@@ -665,7 +684,10 @@ export default function Calculators() {
                       {formatCurrency(smartResults.monthlyEmi)}
                     </p>
 
-                    <div className="flex items-center gap-2 mt-4">
+                    <p className="text-sm text-muted-foreground uppercase tracking-wider mt-4">
+                      Risk Level
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
                       <span
                         className={`text-xs font-bold px-2 py-1 rounded-full ${
                           smartResults.riskLevel === "Safe"
@@ -1790,6 +1812,299 @@ export default function Calculators() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <Card className="mt-8 border rounded-lg bg-card shadow p-6 md:p-8 max-w-6xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">
+            Complete Real Estate Financial Calculator Suite – India 2026
+          </h2>
+
+          <div className="space-y-6 text-muted-foreground leading-relaxed text-sm md:text-base">
+            <p>
+              Buying property in India is one of the biggest financial decisions you will ever make. Whether you are a first-time homebuyer or a seasoned real estate investor, understanding your numbers before committing is critical.
+            </p>
+
+            <p>
+              Our <strong>Home Loan & Property Calculator Suite (2026 edition)</strong> helps you make confident, data-driven decisions using four powerful tools:
+            </p>
+
+            <ul className="list-disc pl-6 space-y-1">
+              <li>Smart EMI Calculator</li>
+              <li>Loan Eligibility Calculator</li>
+              <li>Rent vs Buy Calculator</li>
+              <li>Ownership Cost Calculator</li>
+            </ul>
+
+            <p>
+              Each tool is designed specifically for the Indian real estate market, using practical financial logic aligned with how banks and property transactions actually work.
+            </p>
+
+            <h3 className="text-lg font-semibold text-foreground mt-8">
+              Smart EMI Calculator – Plan Your Loan Intelligently
+            </h3>
+
+            <p>
+              The Smart EMI Calculator helps you calculate your monthly EMI, total interest payable, total repayment amount, EMI-to-income ratio, and even potential interest savings through prepayment.
+            </p>
+
+            <p>
+              It uses the standard EMI formula:
+            </p>
+
+            <p className="font-mono bg-muted/20 p-3 rounded-md text-sm">
+              EMI = [P × R × (1 + R)^N] / [(1 + R)^N – 1]
+            </p>
+
+            <ul className="list-disc pl-6 space-y-1">
+              <li>P = Loan amount</li>
+              <li>R = Monthly interest rate</li>
+              <li>N = Loan tenure in months</li>
+            </ul>
+
+            <p>
+              In 2026, with fluctuating{" "}
+              <Link href="/home-loan-interest-rate-trends-2026" className="text-primary underline underline-offset-4">
+                home loan interest rate trends
+              </Link>{" "}
+              in India, choosing the wrong tenure or loan size can lead to financial stress. This calculator ensures your EMI stays within the recommended 40% income safety limit and helps you evaluate risk before applying for a loan. For more context, see our{" "}
+              <Link href="/home-loan-guide-2026" className="text-primary underline underline-offset-4">
+                Home Loan Guide 2026
+              </Link>
+              .
+            </p>
+
+            <h3 className="text-lg font-semibold text-foreground mt-8">
+              Loan Eligibility Calculator – Know Your Borrowing Power
+            </h3>
+
+            <p>
+              This calculator estimates how much home loan you can safely take based on your income, existing EMIs, interest rate, and tenure.
+            </p>
+
+            <p className="font-semibold">
+              Disposable Income = Monthly Income – Existing EMIs
+            </p>
+
+            <ul className="list-disc pl-6 space-y-1">
+              <li>40% of disposable income = Safe EMI limit</li>
+              <li>50% of disposable income = Maximum EMI limit</li>
+            </ul>
+
+            <p>
+              Using reverse EMI calculations, it determines the maximum loan amount you qualify for. Use the calculator above to{" "}
+              <Link href="/calculators#eligibility" className="text-primary underline underline-offset-4">
+                check your loan eligibility
+              </Link>{" "}
+              before house hunting to prevent loan rejection, budget misalignment, and financial overcommitment.
+            </p>
+
+            <h3 className="text-lg font-semibold text-foreground mt-8">
+              Rent vs Buy Calculator – Make the Right Decision
+            </h3>
+
+            <p>
+              This tool compares total rent paid, total EMI paid, projected property appreciation, and break-even year over your selected time horizon.
+            </p>
+
+            <ul className="list-disc pl-6 space-y-1">
+              <li>Rent assumed to increase annually (10%)</li>
+              <li>Property value assumed to appreciate annually (7%)</li>
+            </ul>
+
+            <p>
+              With rising urban property prices across India in 2026, this calculator helps you make a logical decision instead of an emotional one. For a deeper analysis, read our{" "}
+              <Link href="/blog/rent-vs-buy-india-2026" className="text-primary underline underline-offset-4">
+                Rent vs Buy in India – 2026 Analysis
+              </Link>
+              . You can also{" "}
+              <Link href="/properties/pune" className="text-primary underline underline-offset-4">
+                compare rent vs buy in Pune
+              </Link>{" "}
+              and other cities using our property listings.
+            </p>
+
+            <h3 className="text-lg font-semibold text-foreground mt-8">
+              Ownership Cost Calculator – Know the True Cost
+            </h3>
+
+            <p>
+              Property price is only part of the total investment. This calculator includes:
+            </p>
+
+            <ul className="list-disc pl-6 space-y-1">
+              <li>Stamp Duty (6% or 7%)</li>
+              <li>GST (5% for under-construction)</li>
+              <li>TDS (1%)</li>
+              <li>Maintenance cost</li>
+              <li>Registration cost</li>
+              <li>Advocate charges</li>
+            </ul>
+
+            <p>
+              Many buyers underestimate additional property charges. For state-wise breakdowns, see our{" "}
+              <Link href="/stamp-duty-guide-india" className="text-primary underline underline-offset-4">
+                Stamp Duty Guide
+              </Link>
+              . This tool provides complete clarity so you can budget accurately and avoid last-minute financial surprises.
+            </p>
+
+            <h3 className="text-lg font-semibold text-foreground mt-8">
+              Why This Calculator Suite Is Essential in 2026
+            </h3>
+
+            <ul className="list-disc pl-6 space-y-1">
+              <li>Interest rates are dynamic</li>
+              <li>Property prices are volatile</li>
+              <li>Buyers demand transparency</li>
+              <li>Investors seek ROI clarity</li>
+            </ul>
+
+            <p>
+              Using these tools together helps you plan responsibly, compare renting versus buying logically, calculate full ownership cost before booking, and negotiate confidently with banks and builders.
+            </p>
+
+            <p className="font-medium text-foreground">
+              Whether you are buying your first home or investing in real estate, these calculators help you make smarter property decisions in India.
+            </p>
+          </div>
+        </Card>
+
+        <Card className="mt-8 border rounded-lg bg-card shadow p-6 md:p-8 max-w-6xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold mb-6">
+            Frequently Asked Questions – Home Loan & Property Calculators (2026)
+          </h2>
+
+          <p className="text-muted-foreground mb-6">
+            Here are answers to common questions property buyers and investors in India have when using our financial planning calculators.
+          </p>
+
+          <Accordion type="single" collapsible className="space-y-2">
+            <AccordionItem value="seo-faq-1" className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20">
+              <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                <span className="text-left font-bold text-foreground pr-4">
+                  How accurate is this home loan calculator for India in 2026?
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                It uses the standard EMI formula used by Indian banks. While final approval depends on credit score and lender policy, results provide a reliable financial estimate.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="seo-faq-2" className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20">
+              <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                <span className="text-left font-bold text-foreground pr-4">
+                  What is a safe EMI-to-income ratio?
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                Financial experts recommend keeping total EMIs below 40% of monthly income for financial stability.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="seo-faq-3" className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20">
+              <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                <span className="text-left font-bold text-foreground pr-4">
+                  Does the Rent vs Buy calculator consider property appreciation?
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                Yes. It assumes annual property growth to estimate future asset value for long-term comparison.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="seo-faq-4" className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20">
+              <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                <span className="text-left font-bold text-foreground pr-4">
+                  Is GST applicable on ready-to-move properties?
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                No. GST is typically applicable only on under-construction properties.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="seo-faq-5" className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20">
+              <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                <span className="text-left font-bold text-foreground pr-4">
+                  Why should I calculate ownership cost before booking?
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                Additional charges like stamp duty and TDS significantly increase total cost beyond the listed property price. Calculating ownership cost helps you budget accurately.
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="seo-faq-6" className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20">
+              <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
+                <span className="text-left font-bold text-foreground pr-4">
+                  Can investors use these calculators?
+                </span>
+              </AccordionTrigger>
+              <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
+                Yes. Investors can evaluate leverage, ROI potential, and long-term asset growth before committing capital.
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </Card>
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "How accurate is this home loan calculator for India in 2026?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "It uses the standard EMI formula used by Indian banks. While final approval depends on credit score and lender policy, results provide a reliable estimate."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "What is a safe EMI-to-income ratio?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Financial experts recommend keeping total EMIs below 40% of monthly income for financial stability."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Does the Rent vs Buy calculator consider property appreciation?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, it estimates future property value growth to compare long-term renting versus buying."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Is GST applicable on ready-to-move properties?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No, GST is generally applicable only on under-construction properties."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Why should I calculate ownership cost before booking?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Because stamp duty, TDS, and other charges significantly increase the total cost beyond the property price."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can investors use these calculators?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, investors can use these tools to evaluate affordability, leverage, and long-term return potential."
+                  }
+                }
+              ]
+            })
+          }}
+        />
       </main>
       <Footer />
       <PropertyDetailDialog
