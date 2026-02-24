@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, memo, Fragment } from "react";
 import { useLocation } from "wouter";
 import { Search, MapPin, DollarSign, Building2, Layers, X } from "lucide-react";
 import { Button } from "../ui/button";
@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Separator } from "../ui/separator";
+
 export type FilterOptions = {
   statuses: string[];
   locations: string[];
@@ -23,34 +24,89 @@ const BUDGET_OPTIONS = [
   { value: "high", label: "₹1 Cr+" },
 ] as const;
 
+const DEFAULT_FILTER_OPTIONS: FilterOptions = {
+  statuses: [],
+  locations: [],
+  bhkTypes: [],
+  propertyTypes: [],
+};
+
 function getSearchParamsFromLocation(location: string): URLSearchParams {
   const query = location.includes("?") ? location.slice(location.indexOf("?")) : "";
   return new URLSearchParams(query);
 }
 
+type FilterFieldKey = "status" | "locationVal" | "bhkType" | "propertyType";
+const FILTER_FIELDS: Array<{
+  key: FilterFieldKey;
+  paramKey: string;
+  label: string;
+  placeholder: string;
+  optionsKey: keyof FilterOptions;
+  Icon: typeof MapPin | null;
+  desktopWidth: string;
+}> = [
+  { key: "status", paramKey: "status", label: "Status", placeholder: "Any Status", optionsKey: "statuses", Icon: null, desktopWidth: "w-[140px]" },
+  { key: "locationVal", paramKey: "location", label: "Location", placeholder: "Any Location", optionsKey: "locations", Icon: MapPin, desktopWidth: "w-[180px]" },
+  { key: "bhkType", paramKey: "bhk", label: "BHK Type", placeholder: "Any BHK", optionsKey: "bhkTypes", Icon: Layers, desktopWidth: "w-[140px]" },
+  { key: "propertyType", paramKey: "type", label: "Property Type", placeholder: "Any Type", optionsKey: "propertyTypes", Icon: Building2, desktopWidth: "w-[160px]" },
+];
+
 type PropertySearchProps = {
   filterOptions?: FilterOptions;
+  onFilterChange?: (hasActiveFilters: boolean) => void;
+  /** Called after URL is updated (e.g. so parent can re-read window.location.search). */
+  onSearchComplete?: () => void;
+  /** Current URL search string (e.g. from parent) so dropdowns stay in sync with URL. */
+  urlSearch?: string;
 };
 
-export function PropertySearch({ filterOptions = { statuses: [], locations: [], bhkTypes: [], propertyTypes: [] } }: PropertySearchProps) {
+function PropertySearchInner({
+  filterOptions = DEFAULT_FILTER_OPTIONS,
+  onFilterChange,
+  onSearchComplete,
+  urlSearch,
+}: PropertySearchProps) {
   const [location, setLocation] = useLocation();
-  const [status, setStatus] = useState<string>("");
-  const [locationVal, setLocationVal] = useState<string>("");
-  const [bhkType, setBhkType] = useState<string>("");
-  const [propertyType, setPropertyType] = useState<string>("");
-  const [budget, setBudget] = useState<string>("");
+  const [status, setStatus] = useState("");
+  const [locationVal, setLocationVal] = useState("");
+  const [bhkType, setBhkType] = useState("");
+  const [propertyType, setPropertyType] = useState("");
+  const [budget, setBudget] = useState("");
 
-  // Sync filter state from URL whenever route changes (Search click, back/forward, direct link)
+  const values = useMemo(
+    () => ({ status, locationVal, bhkType, propertyType }),
+    [status, locationVal, bhkType, propertyType]
+  );
+  const setters = useMemo(
+    () => ({ status: setStatus, locationVal: setLocationVal, bhkType: setBhkType, propertyType: setPropertyType }),
+    []
+  );
+
+  const statusesKey = filterOptions.statuses.join(",");
+  const locationsKey = filterOptions.locations.join(",");
+  const bhkTypesKey = filterOptions.bhkTypes.join(",");
+  const propertyTypesKey = filterOptions.propertyTypes.join(",");
+
+  const searchToSync = urlSearch ?? (typeof window !== "undefined" ? window.location.search : "");
   useEffect(() => {
-    const params = getSearchParamsFromLocation(location);
+    const params = new URLSearchParams(searchToSync || "");
     setStatus(params.get("status") ?? "");
     setLocationVal(params.get("location") ?? "");
     setBhkType(params.get("bhk") ?? "");
     setPropertyType(params.get("type") ?? "");
     setBudget(params.get("budget") ?? "");
-  }, [location]);
+  }, [searchToSync]);
 
-  const handleSearch = () => {
+  useEffect(() => {
+    const opts = filterOptions;
+    setStatus((s) => (s && opts.statuses.length > 0 && !opts.statuses.includes(s) ? "" : s));
+    setLocationVal((l) => (l && opts.locations.length > 0 && !opts.locations.includes(l) ? "" : l));
+    setBhkType((b) => (b && opts.bhkTypes.length > 0 && !opts.bhkTypes.includes(b) ? "" : b));
+    setPropertyType((t) => (t && opts.propertyTypes.length > 0 && !opts.propertyTypes.includes(t) ? "" : t));
+  }, [statusesKey, locationsKey, bhkTypesKey, propertyTypesKey]);
+
+  const handleSearch = useCallback(() => {
     const params = new URLSearchParams();
     if (status) params.set("status", status);
     if (locationVal.trim()) params.set("location", locationVal.trim());
@@ -59,78 +115,90 @@ export function PropertySearch({ filterOptions = { statuses: [], locations: [], 
     if (budget) params.set("budget", budget);
     const qs = params.toString();
     setLocation(qs ? `/properties?${qs}` : "/properties");
-  };
+    onSearchComplete?.();
+  }, [status, locationVal, bhkType, propertyType, budget, setLocation, onSearchComplete]);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     setStatus("");
     setLocationVal("");
     setBhkType("");
     setPropertyType("");
     setBudget("");
     setLocation("/properties");
-  };
+    onSearchComplete?.();
+  }, [setLocation, onSearchComplete]);
 
   const hasActiveFilters = !!(status || locationVal.trim() || bhkType || propertyType || budget);
+
+  useEffect(() => {
+    onFilterChange?.(hasActiveFilters);
+  }, [hasActiveFilters, onFilterChange]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") handleSearch();
+    },
+    [handleSearch]
+  );
+
+  const renderFilterSelect = (
+    field: (typeof FILTER_FIELDS)[number],
+    value: string,
+    onChange: (v: string) => void,
+    options: string[],
+    variant: "mobile" | "desktop"
+  ) => {
+    const disabled = options.length === 0;
+    const Icon = field.Icon;
+    return (
+      <Select value={value || undefined} onValueChange={onChange} disabled={disabled}>
+        <SelectTrigger
+          className={
+            variant === "desktop"
+              ? "h-12 border-transparent bg-secondary/30 hover:bg-secondary/50 focus:bg-background transition-colors disabled:opacity-50"
+              : "h-12"
+          }
+        >
+          {variant === "desktop" && Icon ? <Icon className="h-4 w-4 text-muted-foreground shrink-0" /> : null}
+          <SelectValue placeholder={field.placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((opt) => (
+            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    );
+  };
 
   return (
     <section className="container mx-auto px-4 -mt-8 relative z-10 mb-20">
       <div className="bg-card shadow-xl border border-border rounded-xl p-4 md:p-6 lg:p-8 max-w-5xl mx-auto">
-        {/* Mobile View - Stacked */}
+        {/* Mobile */}
         <div className="md:hidden space-y-4">
+          {FILTER_FIELDS.map((field) => (
+            <div key={field.key} className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                {field.Icon ? <field.Icon className="h-4 w-4" /> : null}
+                <span>{field.label}</span>
+                {filterOptions[field.optionsKey].length === 0 && (
+                  <span className="text-xs text-muted-foreground">(No options)</span>
+                )}
+              </label>
+              {renderFilterSelect(
+                field,
+                values[field.key],
+                setters[field.key],
+                filterOptions[field.optionsKey],
+                "mobile"
+              )}
+            </div>
+          ))}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Status</label>
-            <Select value={status || undefined} onValueChange={setStatus}>
-              <SelectTrigger className="h-12">
-                <SelectValue placeholder="Any Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {filterOptions.statuses.map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Location</label>
-            <Select value={locationVal || undefined} onValueChange={setLocationVal}>
-              <SelectTrigger className="h-12">
-                <SelectValue placeholder="Any Location" />
-              </SelectTrigger>
-              <SelectContent>
-                {filterOptions.locations.map((loc) => (
-                  <SelectItem key={loc} value={loc}>{loc}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">BHK Type</label>
-            <Select value={bhkType || undefined} onValueChange={setBhkType}>
-              <SelectTrigger className="h-12">
-                <SelectValue placeholder="Any BHK" />
-              </SelectTrigger>
-              <SelectContent>
-                {filterOptions.bhkTypes.map((b) => (
-                  <SelectItem key={b} value={b}>{b}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Property Type</label>
-            <Select value={propertyType || undefined} onValueChange={setPropertyType}>
-              <SelectTrigger className="h-12">
-                <SelectValue placeholder="Any Type" />
-              </SelectTrigger>
-              <SelectContent>
-                {filterOptions.propertyTypes.map((t) => (
-                  <SelectItem key={t} value={t}>{t}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground">Budget</label>
+            <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              <span>Budget</span>
+            </label>
             <Select value={budget || undefined} onValueChange={setBudget}>
               <SelectTrigger className="h-12">
                 <SelectValue placeholder="Any Price" />
@@ -163,66 +231,28 @@ export function PropertySearch({ filterOptions = { statuses: [], locations: [], 
           </div>
         </div>
 
-        {/* Desktop View - Horizontal */}
+        {/* Desktop */}
         <div className="hidden md:flex flex-wrap items-end gap-3">
-          <div className="w-[140px] space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">Status</label>
-            <Select value={status || undefined} onValueChange={setStatus}>
-              <SelectTrigger className="h-12 border-transparent bg-secondary/30 hover:bg-secondary/50 focus:bg-background transition-colors">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {filterOptions.statuses.map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Separator orientation="vertical" className="h-12 w-[1px] bg-border hidden lg:block" />
-          <div className="w-[180px] space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">Location</label>
-            <Select value={locationVal || undefined} onValueChange={setLocationVal}>
-              <SelectTrigger className="h-12 border-transparent bg-secondary/30 hover:bg-secondary/50 focus:bg-background transition-colors">
-                <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-                <SelectValue placeholder="Location" />
-              </SelectTrigger>
-              <SelectContent>
-                {filterOptions.locations.map((loc) => (
-                  <SelectItem key={loc} value={loc}>{loc}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Separator orientation="vertical" className="h-12 w-[1px] bg-border hidden lg:block" />
-          <div className="w-[140px] space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">BHK Type</label>
-            <Select value={bhkType || undefined} onValueChange={setBhkType}>
-              <SelectTrigger className="h-12 border-transparent bg-secondary/30 hover:bg-secondary/50 focus:bg-background transition-colors">
-                <Layers className="h-4 w-4 text-muted-foreground shrink-0" />
-                <SelectValue placeholder="BHK" />
-              </SelectTrigger>
-              <SelectContent>
-                {filterOptions.bhkTypes.map((b) => (
-                  <SelectItem key={b} value={b}>{b}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <Separator orientation="vertical" className="h-12 w-[1px] bg-border hidden lg:block" />
-          <div className="w-[160px] space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">Property Type</label>
-            <Select value={propertyType || undefined} onValueChange={setPropertyType}>
-              <SelectTrigger className="h-12 border-transparent bg-secondary/30 hover:bg-secondary/50 focus:bg-background transition-colors">
-                <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                {filterOptions.propertyTypes.map((t) => (
-                  <SelectItem key={t} value={t}>{t}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {FILTER_FIELDS.map((field, idx) => (
+            <Fragment key={field.key}>
+              {idx > 0 && <Separator orientation="vertical" className="h-12 w-[1px] bg-border hidden lg:block" />}
+              <div className={`${field.desktopWidth} space-y-1.5`}>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1 flex items-center gap-1">
+                  {field.label}
+                  {filterOptions[field.optionsKey].length === 0 && (
+                    <span className="text-[10px] font-normal">(—)</span>
+                  )}
+                </label>
+                {renderFilterSelect(
+                  field,
+                  values[field.key],
+                  setters[field.key],
+                  filterOptions[field.optionsKey],
+                  "desktop"
+                )}
+              </div>
+            </Fragment>
+          ))}
           <Separator orientation="vertical" className="h-12 w-[1px] bg-border hidden lg:block" />
           <div className="w-[160px] space-y-1.5">
             <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-1">Budget</label>
@@ -245,6 +275,7 @@ export function PropertySearch({ filterOptions = { statuses: [], locations: [], 
               className="flex-1 md:flex-initial h-12 min-h-[44px] px-6 md:px-8 shadow-sm touch-manipulation"
               data-testid="button-search-desktop"
               onClick={handleSearch}
+              onKeyDown={handleKeyDown}
             >
               <Search className="h-4 w-4 mr-2 shrink-0" /> Search
             </Button>
@@ -265,3 +296,5 @@ export function PropertySearch({ filterOptions = { statuses: [], locations: [], 
     </section>
   );
 }
+
+export const PropertySearch = memo(PropertySearchInner);
