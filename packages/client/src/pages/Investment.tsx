@@ -3,12 +3,6 @@ import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 
 const tabs = ["Overview", "Commercial", "Land Acquisition"];
-const stats = [
-  { label: "Assets Under Management", value: "$2.4B+" },
-  { label: "Active Projects", value: "140+" },
-  { label: "Avg. Annual ROI", value: "18.6%" },
-  { label: "Years of Experience", value: "25+" },
-];
 
 const commercialProperties = [
   {
@@ -190,19 +184,7 @@ export default function InvestmentPage() {
             Strategic commercial assets and land acquisitions curated for maximum returns and long-term portfolio growth.
           </p>
           <div className="fade-up-3" style={{ display: "flex", gap: 16, marginTop: 40, flexWrap: "wrap" }}>
-            <a href="#what-we-offer" className="cta-btn inline-block no-underline" onClick={(e) => { e.preventDefault(); document.getElementById("what-we-offer")?.scrollIntoView({ behavior: "smooth" }); }}>Explore Opportunities</a>
-            <button className="outline-btn">Download Prospectus</button>
           </div>
-        </div>
-        </div>
-        <div className="container mx-auto px-4 mt-12 pt-0">
-        <div style={{ display: "flex", gap: 1, marginTop: 48, borderTop: "1px solid hsl(var(--border))" }} className="rounded-b-lg overflow-hidden">
-          {stats.map((s) => (
-            <div key={s.label} className="bg-muted/50" style={{ flex: 1, padding: "24px 20px", minWidth: 0 }}>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(1.5rem, 3vw, 36px)", fontWeight: 600, letterSpacing: "-0.02em" }}>{s.value}</div>
-              <div className="text-muted-foreground text-[11px] uppercase tracking-widest mt-1">{s.label}</div>
-            </div>
-          ))}
         </div>
         </div>
       </header>
@@ -223,7 +205,7 @@ export default function InvestmentPage() {
         {activeTab === "Overview" && (
           <div>
             {/* Two pillars */}
-            <section id="what-we-offer" className="py-12 md:py-20 scroll-mt-20">
+            <section id="two-pillars" className="pt-0 pb-0 md:pt-0 md:pb-8">
               <div className="mb-12 text-center">
                 <span style={S.eyebrow}>WHAT WE OFFER</span>
                 <h2 style={S.sectionTitle}>Two Pillars of Investment</h2>
@@ -306,14 +288,14 @@ export default function InvestmentPage() {
         {/* COMMERCIAL */}
         {activeTab === "Commercial" && (
           <div>
-            <section className="py-16 md:py-20">
+            <section className="pt-0 pb-0 md:pt-0 md:pb-8">
               <div className="mb-12 text-center">
                 <span style={S.eyebrow}>COMMERCIAL PORTFOLIO</span>
                 <h2 style={S.sectionTitle}>Income-Generating Assets</h2>
                 <p style={{ fontSize: 15, color: "#888", marginTop: 16, maxWidth: 560, margin: "16px auto 0" }}>Diversify with office, retail, and industrial properties — professionally managed for optimal yield.</p>
               </div>
               <div style={{ display: "flex", gap: 8, marginBottom: 40 }}>
-                {["All", "Office", "Retail", "Industrial", "Mixed-Use"].map((f, i) => (
+                {["All", "Office Spaces", "Shop", "Show Room"].map((f, i) => (
                   <button key={f} className={`tab-btn ${i === 0 ? "active" : ""}`} style={{ fontSize: 12, padding: "8px 20px" }}>{f}</button>
                 ))}
               </div>
@@ -367,14 +349,14 @@ export default function InvestmentPage() {
         {/* LAND ACQUISITION */}
         {activeTab === "Land Acquisition" && (
           <div>
-            <section className="py-16 md:py-20">
+            <section className="pt-0 pb-0 md:pt-0 md:pb-8">
               <div className="mb-12 text-center">
                 <span style={S.eyebrow}>LAND PORTFOLIO</span>
                 <h2 style={S.sectionTitle}>Strategic Land Parcels</h2>
                 <p style={{ fontSize: 15, color: "#888", marginTop: 16, maxWidth: 560, margin: "16px auto 0" }}>Raw land in high-growth corridors — acquire today, develop tomorrow.</p>
               </div>
               <div style={{ display: "flex", gap: 8, marginBottom: 40 }}>
-                {["All Zones", "Residential", "Commercial", "Industrial", "Mixed-Use"].map((f, i) => (
+                {["All Zones", "Plot", "Land Parcel"].map((f, i) => (
                   <button key={f} className={`tab-btn ${i === 0 ? "active" : ""}`} style={{ fontSize: 12, padding: "8px 20px" }}>{f}</button>
                 ))}
               </div>
@@ -439,10 +421,10 @@ export default function InvestmentPage() {
           <div className="max-w-xl mx-auto text-center">
             <span style={{ ...S.eyebrow, color: "#B8860B" }}>READY TO INVEST?</span>
             <h2 className="font-heading text-3xl md:text-4xl font-normal mt-3 mb-4">Speak with an Investment Advisor</h2>
-            <p className="text-muted-foreground text-sm md:text-base leading-relaxed mb-8">Schedule a free 30-minute consultation to explore how we can build your real estate portfolio.</p>
+            <p className="text-muted-foreground text-sm md:text-base leading-relaxed mb-8">Schedule a free consultation to explore how we can build your real estate portfolio.</p>
             <div className="flex gap-4 justify-center flex-wrap">
               <button className="cta-btn">Schedule a Call</button>
-              <button className="outline-btn bg-white text-foreground">Download Brochure</button>
+              <button className="cta-btn inline-block no-underline">Download Brochure</button>
             </div>
           </div>
         </section>
