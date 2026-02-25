@@ -109,9 +109,23 @@ const tagBg: Record<string, string> = {
   "Retail Tour": "#3A2A40",
 };
 
+const COMMERCIAL_CATEGORIES = ["All", "Office Spaces", "Shop", "Show Room"] as const;
+const LAND_CATEGORIES = ["All Zones", "Plot", "Land Parcel"] as const;
+const DEAL_OPTIONS = ["Outright", "Lease", "Share"] as const;
+const DEAL_OPTIONS_NO_SHARE = ["Outright", "Lease"] as const;
+
 export default function InvestmentPage() {
   const [activeTab, setActiveTab] = useState("Overview");
+  const [commercialCategory, setCommercialCategory] = useState<(typeof COMMERCIAL_CATEGORIES)[number]>("All");
+  const [commercialDealType, setCommercialDealType] = useState<string>("");
+  const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const [landCategory, setLandCategory] = useState<(typeof LAND_CATEGORIES)[number]>("All Zones");
+  const [landDealType, setLandDealType] = useState<string>("");
+  const [hoveredLandCategory, setHoveredLandCategory] = useState<string | null>(null);
   const reelScrollRef = useRef<HTMLDivElement>(null);
+
+  const getDealOptionsFor = (cat: string) =>
+    cat === "Show Room" ? DEAL_OPTIONS_NO_SHARE : DEAL_OPTIONS;
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
@@ -190,10 +204,16 @@ export default function InvestmentPage() {
       </header>
 
       {/* TABS */}
-      <div className="bg-card border-b border-border">
-        <div className="container mx-auto px-4 flex gap-1 py-3">
+      <div id="investment-tabs" className="bg-card border-b border-border scroll-mt-20">
+        <div
+          className="container mx-auto px-4 flex gap-1 py-3"
+          role="button"
+          tabIndex={0}
+          onClick={() => document.getElementById("investment-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          onKeyDown={(e) => e.key === "Enter" && document.getElementById("investment-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+        >
           {tabs.map((t) => (
-            <button key={t} className={`tab-btn ${activeTab === t ? "active" : ""}`} onClick={() => setActiveTab(t)}>{t}</button>
+            <button key={t} type="button" className={`tab-btn ${activeTab === t ? "active" : ""}`} onClick={(e) => { e.stopPropagation(); setActiveTab(t); document.getElementById("investment-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>{t}</button>
           ))}
         </div>
       </div>
@@ -294,9 +314,70 @@ export default function InvestmentPage() {
                 <h2 style={S.sectionTitle}>Income-Generating Assets</h2>
                 <p style={{ fontSize: 15, color: "#888", marginTop: 16, maxWidth: 560, margin: "16px auto 0" }}>Diversify with office, retail, and industrial properties — professionally managed for optimal yield.</p>
               </div>
-              <div style={{ display: "flex", gap: 8, marginBottom: 40 }}>
-                {["All", "Office Spaces", "Shop", "Show Room"].map((f, i) => (
-                  <button key={f} className={`tab-btn ${i === 0 ? "active" : ""}`} style={{ fontSize: 12, padding: "8px 20px" }}>{f}</button>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 40, alignItems: "center" }}>
+                {COMMERCIAL_CATEGORIES.map((f) => (
+                  <div
+                    key={f}
+                    style={{ position: "relative" }}
+                    onMouseEnter={() => f !== "All" && setHoveredCategory(f)}
+                    onMouseLeave={() => setHoveredCategory(null)}
+                  >
+                    <button
+                      type="button"
+                      className={`tab-btn ${commercialCategory === f ? "active" : ""}`}
+                      style={{ fontSize: 12, padding: "8px 20px" }}
+                      onClick={() => {
+                        setCommercialCategory(f);
+                        if (f === "All") setCommercialDealType("");
+                        else if (f === "Show Room" && commercialDealType === "Share") setCommercialDealType("");
+                      }}
+                    >
+                      {f}
+                    </button>
+                    {f !== "All" && hoveredCategory === f && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "100%",
+                          left: 0,
+                          marginTop: 4,
+                          minWidth: "100%",
+                          background: "hsl(var(--card))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: 6,
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                          zIndex: 10,
+                          padding: 4,
+                        }}
+                      >
+                        {getDealOptionsFor(f).map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            style={{
+                              display: "block",
+                              width: "100%",
+                              padding: "8px 16px",
+                              fontSize: 12,
+                              textAlign: "left",
+                              border: "none",
+                              background: commercialDealType === opt ? "hsl(var(--primary) / 0.15)" : "transparent",
+                              color: commercialDealType === opt ? "hsl(var(--primary))" : "inherit",
+                              cursor: "pointer",
+                              borderRadius: 4,
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCommercialDealType(opt);
+                              setCommercialCategory(f);
+                            }}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -355,9 +436,69 @@ export default function InvestmentPage() {
                 <h2 style={S.sectionTitle}>Strategic Land Parcels</h2>
                 <p style={{ fontSize: 15, color: "#888", marginTop: 16, maxWidth: 560, margin: "16px auto 0" }}>Raw land in high-growth corridors — acquire today, develop tomorrow.</p>
               </div>
-              <div style={{ display: "flex", gap: 8, marginBottom: 40 }}>
-                {["All Zones", "Plot", "Land Parcel"].map((f, i) => (
-                  <button key={f} className={`tab-btn ${i === 0 ? "active" : ""}`} style={{ fontSize: 12, padding: "8px 20px" }}>{f}</button>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 40, alignItems: "center" }}>
+                {LAND_CATEGORIES.map((f) => (
+                  <div
+                    key={f}
+                    style={{ position: "relative" }}
+                    onMouseEnter={() => f !== "All Zones" && setHoveredLandCategory(f)}
+                    onMouseLeave={() => setHoveredLandCategory(null)}
+                  >
+                    <button
+                      type="button"
+                      className={`tab-btn ${landCategory === f ? "active" : ""}`}
+                      style={{ fontSize: 12, padding: "8px 20px" }}
+                      onClick={() => {
+                        setLandCategory(f);
+                        if (f === "All Zones") setLandDealType("");
+                      }}
+                    >
+                      {f}
+                    </button>
+                    {f !== "All Zones" && hoveredLandCategory === f && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "100%",
+                          left: 0,
+                          marginTop: 4,
+                          minWidth: "100%",
+                          background: "hsl(var(--card))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: 6,
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                          zIndex: 10,
+                          padding: 4,
+                        }}
+                      >
+                        {DEAL_OPTIONS_NO_SHARE.map((opt) => (
+                          <button
+                            key={opt}
+                            type="button"
+                            style={{
+                              display: "block",
+                              width: "100%",
+                              padding: "8px 16px",
+                              fontSize: 12,
+                              textAlign: "left",
+                              border: "none",
+                              background: landDealType === opt ? "hsl(var(--primary) / 0.15)" : "transparent",
+                              color: landDealType === opt ? "hsl(var(--primary))" : "inherit",
+                              cursor: "pointer",
+                              borderRadius: 4,
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setLandDealType(opt);
+                              setLandCategory(f);
+                            }}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
