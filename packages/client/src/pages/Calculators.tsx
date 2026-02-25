@@ -481,7 +481,14 @@ export default function Calculators() {
           className="max-w-6xl mx-auto w-full"
           onValueChange={setActiveTab}
         >
-          <div className="flex justify-center mb-8">
+          <div
+            id="calculators-tabs"
+            role="button"
+            tabIndex={0}
+            className="flex justify-center mb-8 scroll-mt-24 cursor-pointer"
+            onClick={() => document.getElementById("calculators-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            onKeyDown={(e) => e.key === "Enter" && document.getElementById("calculators-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          >
             <TabsList className="bg-muted p-1 grid grid-cols-2 md:grid-cols-4 w-full md:w-auto h-auto md:h-15 overflow-visible">
               <TabsTrigger
                 value="smart-emi"
