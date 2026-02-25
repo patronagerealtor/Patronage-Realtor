@@ -64,7 +64,7 @@ const COLORS = {
 
 const RELATED_PROPERTY_MARGIN_RUPEE = 500000; // ±5 Lakh (in rupees)
 
-/** Get property price in lakhs for comparison. Uses price_value; fallback: parse price string (e.g. "₹ 1 Cr", "₹ 50 Lakh"). */
+/** Get property price in lakhs for comparison. Uses price_value; then price_min/price_max; fallback: parse price string. */
 function getPriceInLakhs(p: PropertyRow): number | null {
   const pv = p.price_value != null ? Number(p.price_value) : null;
   if (pv != null && !Number.isNaN(pv)) {
@@ -72,6 +72,13 @@ function getPriceInLakhs(p: PropertyRow): number | null {
     if (pv >= 100) return pv;
     if (pv >= 1) return pv * 100; // crore
     return pv;
+  }
+  if (p.price_min != null && p.price_max != null) {
+    const mid = (Number(p.price_min) + Number(p.price_max)) / 2;
+    if (!Number.isNaN(mid) && mid >= 100000) return mid / 1e5;
+    if (!Number.isNaN(mid) && mid >= 100) return mid;
+    if (!Number.isNaN(mid) && mid >= 1) return mid * 100;
+    if (!Number.isNaN(mid)) return mid;
   }
   const str = (p.price ?? "").replace(/,/g, "");
   const crMatch = str.match(/(\d+(?:\.\d+)?)\s*cr(?:ore)?/i);

@@ -1,6 +1,5 @@
 /**
  * Format numeric price for Indian display (₹ Lakh / ₹ Cr).
- * Uses price_value; fallback to price_display in UI where needed.
  * Accepts number | string | null | undefined; converts string to number safely.
  */
 export function formatIndianPrice(value?: number | string | null): string {
