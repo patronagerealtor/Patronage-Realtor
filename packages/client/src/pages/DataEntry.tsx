@@ -288,6 +288,7 @@ export default function DataEntry() {
         onOpenChange={(o) => !o && setPreviewId(null)}
         property={selectedForPreview}
         onEdit={handleEditFromDialog}
+        onSimilarPropertySelect={(prop) => setPreviewId(String(prop.id))}
       />
     </div>
   );

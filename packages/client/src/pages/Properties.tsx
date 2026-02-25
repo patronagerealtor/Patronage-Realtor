@@ -318,6 +318,7 @@ export default function Properties() {
           if (!open) closeDetail();
         }}
         similarProperties={similarProperties}
+        onSimilarPropertySelect={setDetailProperty}
       />
 
       <Footer />
