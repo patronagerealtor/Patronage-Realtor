@@ -15,7 +15,7 @@ import { PropertyDetailDialog } from "../components/shared/PropertyDetailDialog"
 import { MapPin, Building2, Home, CalendarDays, Ruler } from "lucide-react";
 import { useProperties } from "../hooks/use-properties";
 import type { PropertyRow } from "../lib/supabase";
-import { formatIndianPrice } from "../lib/formatIndianPrice";
+import { getDisplayPrice } from "../lib/formatIndianPrice";
 import type { FilterOptions } from "../components/home/PropertySearch";
 
 function getSearchParamsFromQuery(queryString: string): URLSearchParams {
@@ -254,7 +254,7 @@ export default function Properties() {
                         {property.title}
                       </h3>
                       <span className="font-bold text-lg text-primary shrink-0">
-                        {formatIndianPrice(property.price_value ?? property.price)}
+                        {getDisplayPrice(property)}
                       </span>
                     </div>
                     {property.developer ? (

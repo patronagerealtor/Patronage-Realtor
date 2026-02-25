@@ -14,3 +14,19 @@ export function formatIndianPrice(value?: number | string | null): string {
   const formatted = (num / 10_000_000).toFixed(2).replace(/\.00$/, "");
   return `₹ ${formatted} Cr`;
 }
+
+type PriceSource = {
+  price_value?: number | null;
+  price_min?: number | null;
+  price_max?: number | null;
+};
+
+export function getDisplayPrice(property: PriceSource): string {
+  if (property.price_min != null && property.price_max != null) {
+    return `${formatIndianPrice(property.price_min)} - ${formatIndianPrice(property.price_max)}`;
+  }
+  if (property.price_value != null) {
+    return formatIndianPrice(property.price_value);
+  }
+  return "Price on request";
+}

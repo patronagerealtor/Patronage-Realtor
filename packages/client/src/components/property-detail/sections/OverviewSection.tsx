@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { MapPin, LayoutGrid, Image as ImageIcon, Home, Ruler, Banknote } from "lucide-react";
 import type { PropertyDetailData } from "@/types/propertyDetail";
-import { formatIndianPrice } from "@/lib/formatIndianPrice";
+import { getDisplayPrice } from "@/lib/formatIndianPrice";
 
 type OverviewSectionProps = {
   data: PropertyDetailData;
@@ -105,7 +105,7 @@ export function OverviewSection({ data, sectionRef }: OverviewSectionProps) {
         </div>
         <div className="flex flex-col items-end shrink-0 text-right">
           <p className="text-xl font-bold text-primary md:text-2xl">
-            {formatIndianPrice(data.price_value ?? data.price)}
+            {getDisplayPrice(data)}
           </p>
           {data.reraApplicable && data.reraNumber && (
             <p className="mt-1 text-sm text-muted-foreground">
@@ -157,7 +157,7 @@ export function OverviewSection({ data, sectionRef }: OverviewSectionProps) {
               Avg. Price
             </p>
             <p className="text-lg font-semibold tracking-tight text-black">
-              {formatIndianPrice(data.price_value ?? data.price)}
+              {getDisplayPrice(data)}
             </p>
           </div>
         </div>

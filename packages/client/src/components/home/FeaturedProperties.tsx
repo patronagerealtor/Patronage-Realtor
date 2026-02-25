@@ -10,7 +10,7 @@ import { cn } from "../../lib/utils";
 import { MapPin, ArrowRight, Building2, Home, CalendarDays, Ruler } from "lucide-react";
 import { useProperties } from "../../hooks/use-properties";
 import type { PropertyRow } from "../../lib/supabase";
-import { formatIndianPrice } from "../../lib/formatIndianPrice";
+import { getDisplayPrice } from "../../lib/formatIndianPrice";
 
 export function FeaturedProperties() {
   const { properties } = useProperties();
@@ -131,7 +131,7 @@ export function FeaturedProperties() {
                     {property.title}
                   </h3>
                   <span className="font-bold text-lg text-primary">
-                    {formatIndianPrice(property.price_value ?? property.price)}
+                    {getDisplayPrice(property)}
                   </span>
                 </div>
 
