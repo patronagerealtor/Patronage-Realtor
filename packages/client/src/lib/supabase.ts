@@ -116,7 +116,6 @@ type PropertiesTableRow = {
   address?: string | null;
   developer?: string | null;
   property_type?: string | null;
-  price_display?: string | null;
   beds?: number | null;
   baths?: number | null;
   sqft?: string | null;
@@ -157,7 +156,12 @@ function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
     address: row.address ?? "",
     developer: row.developer ?? undefined,
     property_type: row.property_type ?? undefined,
-    price: row.price_display ?? (row as { price?: string | null }).price ?? "Price on request",
+    price:
+      row.price_min != null && row.price_max != null
+        ? `${row.price_min} - ${row.price_max}`
+        : row.price_value != null
+          ? String(row.price_value)
+          : "",
     beds: Number(row.beds ?? 0),
     baths: Number(row.baths ?? 0),
     sqft: row.sqft ?? "",
