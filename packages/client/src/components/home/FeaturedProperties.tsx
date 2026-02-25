@@ -200,6 +200,7 @@ export function FeaturedProperties() {
         similarProperties={properties
           .filter((p) => p.id !== detailProperty?.id)
           .slice(0, 4)}
+        onSimilarPropertySelect={setDetailProperty}
       />
 
       <div className="mt-8 md:hidden">

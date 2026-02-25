@@ -33,6 +33,8 @@ export type PropertyDetailDialogProps = {
   onOpenChange: (open: boolean) => void;
   onEdit?: (id: string) => void;
   similarProperties?: PropertyRow[];
+  /** When user clicks a similar property card, call with that property so parent can show it (e.g. update selected property). */
+  onSimilarPropertySelect?: (property: PropertyRow | Property) => void;
 };
 
 export function PropertyDetailDialog({
@@ -41,6 +43,7 @@ export function PropertyDetailDialog({
   onOpenChange,
   onEdit,
   similarProperties = [],
+  onSimilarPropertySelect,
 }: PropertyDetailDialogProps) {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("Overview");
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -140,33 +143,46 @@ export function PropertyDetailDialog({
         </nav>
       </header>
 
-      <div className="flex flex-1 min-h-0 flex-col lg:flex-row">
+      <div className="flex flex-1 min-h-0 flex-col">
         <div ref={scrollRef} className="flex-1 overflow-y-auto min-w-0">
           <div className="px-4 py-6 md:px-6">
-            <main className="min-w-0 max-w-4xl space-y-12 pb-8">
-              <OverviewSection data={data} sectionRef={setSectionRef("Overview")} />
-              <DetailsSection data={data} sectionRef={setSectionRef("Details")} />
-              <AboutSection data={data} sectionRef={setSectionRef("About")} />
-              <FloorPlanSection data={data} sectionRef={setSectionRef("Floor Plan")} />
-              <AmenitiesSection data={data} sectionRef={setSectionRef("Amenities")} />
-              <GallerySection data={data} sectionRef={setSectionRef("Gallery")} />
+            {/* Two-column layout so Contact sticks only until this block scrolls away (before Map) */}
+            <div className="space-y-12">
+              <div className="flex gap-8">
+                <main className="min-w-0 max-w-4xl flex-1 space-y-12 pb-8">
+                  <OverviewSection data={data} sectionRef={setSectionRef("Overview")} />
+                  <DetailsSection data={data} sectionRef={setSectionRef("Details")} />
+                  <AboutSection data={data} sectionRef={setSectionRef("About")} />
+                  <FloorPlanSection data={data} sectionRef={setSectionRef("Floor Plan")} />
+                  <AmenitiesSection data={data} sectionRef={setSectionRef("Amenities")} />
+                  <GallerySection data={data} sectionRef={setSectionRef("Gallery")} />
+                </main>
+                <aside className="hidden lg:block w-80 shrink-0 border-l border-border pl-6">
+                  <div className="sticky top-24">
+                    <ContactCard />
+                  </div>
+                </aside>
+              </div>
               <MapSection data={data} sectionRef={setSectionRef("Map")} />
               <SimilarSection
                 data={data}
                 sectionRef={setSectionRef("Similar Properties")}
                 similarProperties={similarList}
+                onCardClick={
+                  onSimilarPropertySelect
+                    ? (id) => {
+                        const p = similarProperties.find((x) => String(x.id) === String(id));
+                        if (p) onSimilarPropertySelect(p);
+                      }
+                    : undefined
+                }
               />
-            </main>
+            </div>
             <aside className="mt-8 lg:hidden">
               <ContactCard />
             </aside>
           </div>
         </div>
-        <aside className="hidden shrink-0 border-l border-border bg-background lg:block lg:w-80 lg:overflow-y-auto lg:px-4 lg:py-6">
-          <div className="sticky top-24">
-            <ContactCard />
-          </div>
-        </aside>
       </div>
     </div>
   );

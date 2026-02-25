@@ -5,48 +5,38 @@ type ContactCardProps = {
 
 export function ContactCard(_props: ContactCardProps) {
   return (
-    <div className="rounded-lg border border-border bg-background p-6">
-      <h3 className="font-heading text-lg font-semibold">
+    <div className="rounded-lg border border-border bg-background p-3 md:p-4">
+      <h3 className="font-heading text-sm font-semibold">
         Contact Us
       </h3>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Get in touch for site visits and pricing details.
+      <p className="mt-1 text-xs text-muted-foreground">
+        Site visits & pricing.
       </p>
       <form
-        className="mt-6 space-y-4"
+        className="mt-3 space-y-2.5"
         onSubmit={(e) => e.preventDefault()}
       >
         <div>
-          <label
-            htmlFor="contact-name"
-            className="mb-1.5 block text-sm font-medium text-foreground"
-          >
-            Name
-          </label>
+          <label htmlFor="contact-name" className="sr-only">Name</label>
           <input
             id="contact-name"
             type="text"
-            placeholder="Your name"
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+            placeholder="Name"
+            className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
         <div>
-          <label
-            htmlFor="contact-mobile"
-            className="mb-1.5 block text-sm font-medium text-foreground"
-          >
-            Mobile
-          </label>
+          <label htmlFor="contact-mobile" className="sr-only">Mobile</label>
           <input
             id="contact-mobile"
             type="tel"
-            placeholder="Your number"
-            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+            placeholder="Mobile"
+            className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
         <button
           type="submit"
-          className="w-full rounded-md border border-primary bg-primary py-2.5 text-sm font-medium text-primary-foreground hover:opacity-90"
+          className="w-full rounded-md border border-primary bg-primary py-2 text-xs font-medium text-primary-foreground hover:opacity-90"
         >
           Submit
         </button>
