@@ -1,6 +1,6 @@
 import { LayoutGrid, MapPin } from "lucide-react";
 import type { PropertyDetailData } from "@/types/propertyDetail";
-import { formatIndianPrice } from "@/lib/formatIndianPrice";
+import { getDisplayPrice } from "@/lib/formatIndianPrice";
 
 export type SimilarPropertyItem = {
   id: number | string;
@@ -9,6 +9,8 @@ export type SimilarPropertyItem = {
   location?: string;
   price: string;
   price_value?: number | null;
+  price_min?: number | null;
+  price_max?: number | null;
   image_url?: string | null;
 };
 
@@ -55,7 +57,7 @@ function SimilarCard({ p }: { p: SimilarPropertyItem }) {
         )}
 
         <p className="text-sm font-semibold text-primary">
-          {formatIndianPrice(p.price_value ?? p.price)}
+          {getDisplayPrice(p)}
         </p>
       </div>
     </div>

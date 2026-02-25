@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { useProperties } from "../hooks/use-properties";
 import type { PropertyRow } from "../lib/supabase";
-import { formatIndianPrice } from "../lib/formatIndianPrice";
+import { formatIndianPrice, getDisplayPrice } from "../lib/formatIndianPrice";
 import { PlaceholderImage } from "../components/shared/PlaceholderImage";
 import { PropertyDetailDialog } from "../components/property-detail/PropertyDetailDialog";
 import {
@@ -754,10 +754,7 @@ export default function Calculators() {
                   </p>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {relatedProperties.slice(0, 6).map((property) => {
-                      const lakhs = getPriceInLakhs(property);
-                      const priceForDisplay = lakhs != null ? lakhs * 1e5 : null;
-                      return (
+                    {relatedProperties.slice(0, 6).map((property) => (
                         <Card
                           key={property.id}
                           className="overflow-hidden group border-border shadow-sm hover:shadow-md transition-shadow cursor-pointer"
@@ -806,7 +803,7 @@ export default function Calculators() {
                               {property.title}
                             </h4>
                             <p className="font-semibold text-primary text-sm mt-1">
-                              {formatIndianPrice(priceForDisplay ?? property.price)}
+                              {getDisplayPrice(property)}
                             </p>
                             {property.location && (
                               <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
@@ -827,8 +824,7 @@ export default function Calculators() {
                             </Button>
                           </CardFooter>
                         </Card>
-                      );
-                    })}
+                    ))}
                   </div>
                 )}
               </Card>

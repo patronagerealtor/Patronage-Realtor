@@ -56,6 +56,8 @@ export function PropertyDetailDialog({
     location: p.location,
     price: p.price,
     price_value: p.price_value,
+    price_min: p.price_min,
+    price_max: p.price_max,
     image_url: p.image_url,
   }));
 
@@ -138,27 +140,33 @@ export function PropertyDetailDialog({
         </nav>
       </header>
 
-      <div ref={scrollRef} className="flex flex-1 overflow-y-auto">
-        <div className="flex-1 px-4 py-6 md:px-6 lg:flex lg:gap-8">
-          <main className="min-w-0 flex-1 space-y-12 pb-8">
-            <OverviewSection data={data} sectionRef={setSectionRef("Overview")} />
-            <DetailsSection data={data} sectionRef={setSectionRef("Details")} />
-            <AboutSection data={data} sectionRef={setSectionRef("About")} />
-            <FloorPlanSection data={data} sectionRef={setSectionRef("Floor Plan")} />
-            <AmenitiesSection data={data} sectionRef={setSectionRef("Amenities")} />
-            <GallerySection data={data} sectionRef={setSectionRef("Gallery")} />
-            <MapSection data={data} sectionRef={setSectionRef("Map")} />
-            <SimilarSection
-              data={data}
-              sectionRef={setSectionRef("Similar Properties")}
-              similarProperties={similarList}
-            />
-          </main>
-
-          <aside className="mt-8 lg:mt-0 lg:w-80 lg:shrink-0">
-            <ContactCard />
-          </aside>
+      <div className="flex flex-1 min-h-0 flex-col lg:flex-row">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto min-w-0">
+          <div className="px-4 py-6 md:px-6">
+            <main className="min-w-0 max-w-4xl space-y-12 pb-8">
+              <OverviewSection data={data} sectionRef={setSectionRef("Overview")} />
+              <DetailsSection data={data} sectionRef={setSectionRef("Details")} />
+              <AboutSection data={data} sectionRef={setSectionRef("About")} />
+              <FloorPlanSection data={data} sectionRef={setSectionRef("Floor Plan")} />
+              <AmenitiesSection data={data} sectionRef={setSectionRef("Amenities")} />
+              <GallerySection data={data} sectionRef={setSectionRef("Gallery")} />
+              <MapSection data={data} sectionRef={setSectionRef("Map")} />
+              <SimilarSection
+                data={data}
+                sectionRef={setSectionRef("Similar Properties")}
+                similarProperties={similarList}
+              />
+            </main>
+            <aside className="mt-8 lg:hidden">
+              <ContactCard />
+            </aside>
+          </div>
         </div>
+        <aside className="hidden shrink-0 border-l border-border bg-background lg:block lg:w-80 lg:overflow-y-auto lg:px-4 lg:py-6">
+          <div className="sticky top-24">
+            <ContactCard />
+          </div>
+        </aside>
       </div>
     </div>
   );
