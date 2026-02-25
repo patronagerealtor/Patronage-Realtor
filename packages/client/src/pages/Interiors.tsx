@@ -1,3 +1,5 @@
+{/* Interiors.tsx */}
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Scene } from "../components/ui/hero-section";
 import { Header } from "../components/layout/Header";

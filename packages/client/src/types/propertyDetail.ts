@@ -6,6 +6,8 @@ export type PropertyDetailData = {
   address?: string;
   price?: string;
   price_value?: number | null;
+  price_min?: number | null;
+  price_max?: number | null;
   beds?: number;
   sqft?: string;
   status?: string;

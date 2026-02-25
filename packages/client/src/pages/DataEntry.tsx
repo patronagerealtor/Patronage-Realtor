@@ -73,10 +73,43 @@ export default function DataEntry() {
     rera_applicable: boolean;
     rera_number: string | null;
   }) => {
+    const rawPrice = payload.price?.toString().trim() || "";
+
+    let price_value: number | null = null;
+    let price_min: number | null = null;
+    let price_max: number | null = null;
+
+    if (rawPrice.includes("-")) {
+      const parts = rawPrice.split("-").map((p) => p.trim());
+      if (parts.length === 2) {
+        const min = Number(parts[0]);
+        const max = Number(parts[1]);
+        if (!Number.isNaN(min) && !Number.isNaN(max)) {
+          price_min = Math.min(min, max);
+          price_max = Math.max(min, max);
+          price_value = null;
+        }
+      }
+    } else {
+      const single = Number(rawPrice);
+      if (!Number.isNaN(single)) {
+        price_value = single;
+        price_min = null;
+        price_max = null;
+      }
+    }
+
+    const isCreating = !effectiveEditId;
+    let safeSlug = payload.slug.trim();
+    if (isCreating) {
+      const randomSuffix = Math.random().toString(36).substring(2, 6);
+      safeSlug = `${safeSlug}-${randomSuffix}`;
+    }
+
     const basePayload = {
       title: payload.title,
       status: payload.status as "Pre-Launch" | "Under Construction" | "Near Possession" | "Ready to Move" | "Resale",
-      price: payload.price,
+      price_display: payload.price,
       location: payload.location,
       address: payload.address,
       sqft: payload.sqft,
@@ -91,8 +124,10 @@ export default function DataEntry() {
       latitude: payload.latitude ? Number(payload.latitude) : null,
       longitude: payload.longitude ? Number(payload.longitude) : null,
       google_map_link: payload.google_map_link?.trim() || null,
-      price_value: payload.price_value ? Number(payload.price_value) : null,
-      slug: payload.slug.trim(),
+      price_value,
+      price_min,
+      price_max,
+      slug: safeSlug,
       rera_applicable: payload.rera_applicable,
       rera_number: payload.rera_number,
     };
