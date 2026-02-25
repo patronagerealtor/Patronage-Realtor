@@ -56,6 +56,8 @@ export function toPropertyDetailData(
     address: "address" in property ? property.address ?? undefined : undefined,
     price: property.price,
     price_value: "price_value" in property ? property.price_value : undefined,
+    price_min: "price_min" in property ? property.price_min : undefined,
+    price_max: "price_max" in property ? property.price_max : undefined,
     beds: property.beds,
     sqft: property.sqft,
     status: property.status,

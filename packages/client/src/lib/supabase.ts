@@ -100,6 +100,8 @@ export type PropertyRow = {
     icon: string;
   }[];
   price_value?: number | null;
+  price_min?: number | null;
+  price_max?: number | null;
   slug?: string;
   rera_applicable?: boolean;
   rera_number?: string | null;
@@ -128,6 +130,8 @@ type PropertiesTableRow = {
   longitude?: number | null;
   google_map_link?: string | null;
   price_value?: number | null;
+  price_min?: number | null;
+  price_max?: number | null;
   slug?: string | null;
   description?: string | null;
   rera_applicable?: boolean | null;
@@ -153,7 +157,7 @@ function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
     address: row.address ?? "",
     developer: row.developer ?? undefined,
     property_type: row.property_type ?? undefined,
-    price: row.price_display ?? "Price on request",
+    price: row.price_display ?? (row as { price?: string | null }).price ?? "Price on request",
     beds: Number(row.beds ?? 0),
     baths: Number(row.baths ?? 0),
     sqft: row.sqft ?? "",
@@ -175,6 +179,8 @@ function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
       );
     })(),
     price_value: row.price_value != null ? Number(row.price_value) : null,
+    price_min: row.price_min != null ? Number(row.price_min) : null,
+    price_max: row.price_max != null ? Number(row.price_max) : null,
     slug: row.slug ?? undefined,
     rera_applicable: row.rera_applicable ?? false,
     rera_number: row.rera_number ?? undefined,

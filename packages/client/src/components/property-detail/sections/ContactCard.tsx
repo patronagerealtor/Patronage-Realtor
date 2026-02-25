@@ -5,7 +5,7 @@ type ContactCardProps = {
 
 export function ContactCard(_props: ContactCardProps) {
   return (
-    <div className="sticky top-24 rounded-lg border border-border bg-background p-6">
+    <div className="rounded-lg border border-border bg-background p-6">
       <h3 className="font-heading text-lg font-semibold">
         Contact Us
       </h3>
