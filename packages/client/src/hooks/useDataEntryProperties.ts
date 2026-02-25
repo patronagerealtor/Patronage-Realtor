@@ -30,12 +30,18 @@ function getStoragePathsFromImageUrls(urls: { image_url: string }[]): string[] {
 
 /** Map PropertyRow (from Supabase) to Property (used by DataEntry/UI) */
 function toProperty(row: PropertyRow): Property {
+  const priceStr =
+    row.price_min != null && row.price_max != null
+      ? `${row.price_min} - ${row.price_max}`
+      : row.price_value != null
+        ? String(row.price_value)
+        : "";
   return {
     id: String(row.id),
     title: row.title,
     location: row.location ?? "",
     address: row.address ?? "",
-    price: row.price ?? "",
+    price: priceStr,
     beds: Number(row.beds ?? 0),
     baths: Number(row.baths ?? 0),
     sqft: String(row.sqft ?? ""),
@@ -301,7 +307,6 @@ export function useDataEntryProperties() {
         location: partial.location,
         address: partial.address ?? null,
         city: partial.city ?? null,
-        price_display: null,
         price_value: partial.price_value ?? null,
         price_min: (partial as { price_min?: number | null }).price_min ?? null,
         price_max: (partial as { price_max?: number | null }).price_max ?? null,
@@ -362,8 +367,9 @@ export function useDataEntryProperties() {
         location: p.location,
         address: null,
         city: null,
-        price_display: p.price,
-        price_value: null,
+        price_value: p.price_value ?? null,
+        price_min: null,
+        price_max: null,
         beds: p.beds,
         baths: p.baths,
         sqft: p.sqft,
