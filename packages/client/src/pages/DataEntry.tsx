@@ -109,7 +109,6 @@ export default function DataEntry() {
     const basePayload = {
       title: payload.title,
       status: payload.status as "Pre-Launch" | "Under Construction" | "Near Possession" | "Ready to Move" | "Resale",
-      price_display: payload.price,
       location: payload.location,
       address: payload.address,
       sqft: payload.sqft,

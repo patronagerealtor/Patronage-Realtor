@@ -54,7 +54,12 @@ export function toPropertyDetailData(
     developer: "developer" in property ? property.developer ?? "Developer" : undefined,
     location: property.location || "Location",
     address: "address" in property ? property.address ?? undefined : undefined,
-    price: property.price,
+    price:
+      "price_min" in property && property.price_min != null && "price_max" in property && property.price_max != null
+        ? `${property.price_min} - ${property.price_max}`
+        : "price_value" in property && property.price_value != null
+          ? String(property.price_value)
+          : undefined,
     price_value: "price_value" in property ? property.price_value : undefined,
     price_min: "price_min" in property ? property.price_min : undefined,
     price_max: "price_max" in property ? property.price_max : undefined,
