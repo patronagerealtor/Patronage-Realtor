@@ -2118,6 +2118,7 @@ export default function Calculators() {
           if (!open) setDetailProperty(null);
         }}
         similarProperties={relatedProperties.filter((p) => p.id !== detailProperty?.id).slice(0, 4)}
+        onSimilarPropertySelect={setDetailProperty}
       />
     </div>
   );
