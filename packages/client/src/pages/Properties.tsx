@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useParams, useLocation } from "wouter";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { PropertySearch } from "../components/home/PropertySearch";
@@ -103,25 +104,49 @@ function useQueryString(): [string, () => void] {
 
 export default function Properties() {
   const [queryString, refreshQueryString] = useQueryString();
+  const params = useParams<{ slug?: string }>();
+  const slug = params?.slug ?? undefined;
+  const [, setLocation] = useLocation();
   const { properties, isLoading, error } = useProperties();
   const [detailProperty, setDetailProperty] = useState<PropertyRow | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [hasActiveFilters, setHasActiveFilters] = useState(false);
+
+  // Open detail when URL has a slug (dedicated property URL)
+  const propertyBySlug = useMemo(
+    () => (slug && properties.length ? properties.find((p) => (p.slug ?? "").trim() === slug) ?? null : null),
+    [slug, properties]
+  );
+  useEffect(() => {
+    if (!slug) return;
+    if (propertyBySlug) {
+      setDetailProperty(propertyBySlug);
+      setDetailOpen(true);
+    } else {
+      setDetailOpen(false);
+      setDetailProperty(null);
+    }
+  }, [slug, propertyBySlug?.id]);
 
   const { filteredProperties, filterOptions } = useMemo(() => {
     const params = getSearchParamsFromQuery(queryString);
     return filterAndDeriveOptions(properties, params);
   }, [properties, queryString]);
 
-  const openDetail = useCallback((property: PropertyRow) => {
-    setDetailProperty(property);
-    setDetailOpen(true);
-  }, []);
+  const openDetail = useCallback(
+    (property: PropertyRow) => {
+      setDetailProperty(property);
+      setDetailOpen(true);
+      if (property.slug?.trim()) setLocation(`/properties/${encodeURIComponent(property.slug.trim())}`);
+    },
+    [setLocation]
+  );
 
   const closeDetail = useCallback(() => {
     setDetailOpen(false);
     setDetailProperty(null);
-  }, []);
+    if (slug) setLocation("/properties");
+  }, [slug, setLocation]);
 
   // Scroll to top on route change
   useEffect(() => {
@@ -318,7 +343,11 @@ export default function Properties() {
           if (!open) closeDetail();
         }}
         similarProperties={similarProperties}
-        onSimilarPropertySelect={setDetailProperty}
+        onSimilarPropertySelect={(p) => {
+          setDetailProperty(p);
+          const nextSlug = "slug" in p ? p.slug : undefined;
+          if (nextSlug?.trim()) setLocation(`/properties/${encodeURIComponent(nextSlug.trim())}`);
+        }}
       />
 
       <Footer />
