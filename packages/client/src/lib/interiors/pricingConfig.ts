@@ -1,26 +1,26 @@
-export type PackageTier = "silver" | "gold" | "platinum" | "ultra";
+export type PackageTier = "essence" | "signature" | "elite" | "bespoke";
 export type BHK = "1bhk" | "2bhk" | "3bhk";
 
 export const PRICE_RANGES: Record<
   PackageTier,
   Record<BHK, { min: number; max?: number }>
 > = {
-  silver: {
+  essence: {
     "1bhk": { min: 3, max: 5 },
     "2bhk": { min: 6, max: 8 },
-    "3bhk": { min: 8, max: 10 }
+    "3bhk": { min: 10, max: 12 }
   },
-  gold: {
+  signature: {
     "1bhk": { min: 5, max: 7 },
     "2bhk": { min: 8, max: 11 },
-    "3bhk": { min: 10, max: 14 }
+    "3bhk": { min: 12, max: 14 }
   },
-  platinum: {
+  elite: {
     "1bhk": { min: 7, max: 11 },
     "2bhk": { min: 11, max: 15 },
-    "3bhk": { min: 14, max: 20 }
+    "3bhk": { min: 16, max: 20 }
   },
-  ultra: {
+  bespoke: {
     "1bhk": { min: 20 },
     "2bhk": { min: 40 },
     "3bhk": { min: 60 }
