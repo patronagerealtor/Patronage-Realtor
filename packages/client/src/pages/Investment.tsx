@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { useInvestmentProperties } from "../hooks/useInvestmentProperties";
@@ -117,14 +117,8 @@ const DEAL_OPTIONS_NO_SHARE = ["Outright", "Lease"] as const;
 
 export default function InvestmentPage() {
   const { commercial: storedCommercial, land: storedLand } = useInvestmentProperties();
-  const commercialProperties = useMemo(
-    () => (storedCommercial.length > 0 ? storedCommercial : commercialPropertiesDefault),
-    [storedCommercial]
-  );
-  const landListings = useMemo(
-    () => (storedLand.length > 0 ? storedLand : landListingsDefault),
-    [storedLand]
-  );
+  const commercialProperties = storedCommercial.length > 0 ? storedCommercial : commercialPropertiesDefault;
+  const landListings = storedLand.length > 0 ? storedLand : landListingsDefault;
 
   const [activeTab, setActiveTab] = useState("Overview");
   const [commercialCategory, setCommercialCategory] = useState<(typeof COMMERCIAL_CATEGORIES)[number]>("All");
