@@ -32,8 +32,8 @@ import {
   
   // Non-linear curve for premium tiers
   function tierCurve(p: number, tier: PackageTier) {
-    if (tier === "platinum") return Math.pow(p, 1.15);
-    if (tier === "ultra") return Math.pow(p, 1.25);
+    if (tier === "elite") return Math.pow(p, 1.15);
+    if (tier === "bespoke") return Math.pow(p, 1.25);
     return p; // silver & gold stay linear
   }
   
