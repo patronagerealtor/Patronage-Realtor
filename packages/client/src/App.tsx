@@ -13,6 +13,7 @@ import NotFound from "./pages/not-found";
 import DataEntry from "./pages/DataEntry";
 import Blogs from "./pages/Blogs";
 import Investment from "./pages/Investment";
+import InvestmentInsert from "./pages/InvestmentInsert";
 
 import { Webinar } from "./pages/Webinar";
 
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/properties/:slug" component={Properties} />
       <Route path="/properties" component={Properties} />
+      <Route path="/investment/insert" component={InvestmentInsert} />
       <Route path="/investment" component={Investment} />
 
       {/* ✅ FIX 2: Change path to plural '/webinars' to match Header */}
