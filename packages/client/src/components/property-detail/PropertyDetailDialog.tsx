@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { ArrowLeft, Pencil, Share2 } from "lucide-react";
 import type { PropertyRow } from "@/lib/supabase";
 import type { Property } from "@/lib/propertyStore";
 import { toPropertyDetailData } from "./propertyDetailUtils";
@@ -13,7 +13,8 @@ import { GallerySection } from "./sections/GallerySection";
 import { MapSection } from "./sections/MapSection";
 import { SimilarSection, type SimilarPropertyItem } from "./sections/SimilarSection";
 import { ContactCard } from "./sections/ContactCard";
-import { supabase } from "@/lib/supabase";
+import { Button } from "../ui/button";
+import { useToast } from "../../hooks/use-toast";
 
 
 const TABS = [
@@ -48,8 +49,46 @@ export function PropertyDetailDialog({
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("Overview");
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const data = toPropertyDetailData(property);
+
+  const shareUrl =
+    typeof window !== "undefined" && property
+      ? (() => {
+          const base = window.location.origin;
+          const slug = "slug" in property ? property.slug : undefined;
+          if (slug?.trim()) return `${base}/properties/${encodeURIComponent(slug.trim())}`;
+          return `${base}/properties?property=${encodeURIComponent(String(property.id))}`;
+        })()
+      : "";
+  const shareTitle = data?.title ?? "Property";
+  const shareText = [data?.price, data?.location].filter(Boolean).join(" · ") || shareTitle;
+
+  const handleShare = async () => {
+    if (!property) return;
+    try {
+      if (typeof navigator !== "undefined" && navigator.share) {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        toast({ title: "Shared", description: "Property link shared." });
+      } else {
+        await navigator.clipboard?.writeText(shareUrl);
+        toast({ title: "Link copied", description: "Property link copied to clipboard." });
+      }
+    } catch (err) {
+      if ((err as Error).name === "AbortError") return;
+      try {
+        await navigator.clipboard?.writeText(shareUrl);
+        toast({ title: "Link copied", description: "Property link copied to clipboard." });
+      } catch {
+        toast({ title: "Share failed", description: "Could not share or copy link.", variant: "destructive" });
+      }
+    }
+  };
  
 
   const similarList: SimilarPropertyItem[] = similarProperties.map((p) => ({
@@ -115,6 +154,19 @@ export function PropertyDetailDialog({
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
+        {property && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-9 shrink-0 gap-2"
+            onClick={handleShare}
+            aria-label="Share property"
+          >
+            <Share2 className="h-4 w-4" />
+            Share
+          </Button>
+        )}
         {onEdit && property && (
           <button
             type="button"
