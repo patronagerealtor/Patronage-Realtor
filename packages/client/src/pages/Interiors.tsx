@@ -21,6 +21,7 @@ import {
   DialogTitle,
 } from "../components/ui/dialog";
 import { Badge } from "../components/ui/badge";
+import { InteriorPriceCalculator } from "../components/interiors/InteriorPriceCalculator";
 import {
   Sparkles,
   ArrowRight,
@@ -75,59 +76,68 @@ interface WhyChooseItem {
 
 const packages: Package[] = [
   {
-    id: "silver",
-    name: "Silver",
-    tagline: "Perfect for small spaces",
+    id: "essence",
+    name: "Essence",
+    tagline: "Budget Friendly Package",
     highlights: [
       "Basic 3D Design",
-      "Up to 2 Rooms",
+      "3D Design Revisable upto 2 times",
+      "1 Room Ceiling",
       "Standard Materials",
-      "Email Support",
+      "24/7 Support",
+      "", // blank for delivery time alignment
     ],
-    deliveryTime: "30 Days",
+    deliveryTime: "45 - 60 Days",
     image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=400&fit=crop",
     color: "from-gray-400 to-gray-600",
   },
   {
-    id: "gold",
-    name: "Gold",
-    tagline: "Ideal for medium homes",
+    id: "signature",
+    name: "Signature",
+    tagline: "Mid Budget Package",
     highlights: [
       "Advanced 3D Design",
-      "Up to 4 Rooms",
+      "3D Design Revisable upto 4 times",
+      "Up to 3 Room's Ceiling",
       "Premium Materials",
-      "Priority Support",
-    ],
-    deliveryTime: "45 Days",
+      "24/7 Support",
+      "",
+      ],
+    
+    deliveryTime: "60 - 75 Days",
     image: "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&h=400&fit=crop",
     popular: true,
     color: "from-yellow-400 to-yellow-600",
   },
   {
-    id: "platinum",
-    name: "Platinum",
-    tagline: "Complete home makeover",
+    id: "elite",
+    name: "Elite",
+    tagline: "Premium Package",
     highlights: [
       "Premium 3D Design",
-      "Up to 6 Rooms",
+      "3D Design Revisable upto 6 times",
+      "All Room's Ceiling",
       "Luxury Materials",
       "24/7 Support",
+      "", // blank for delivery time alignment
     ],
-    deliveryTime: "60 Days",
+    deliveryTime: "75 - 90 Days",
     image: "https://images.unsplash.com/photo-1556912173-3bb406ef7e77?w=800&h=400&fit=crop",
     color: "from-slate-400 to-slate-600",
   },
   {
-    id: "luxury",
-    name: "Luxury",
+    id: "bespoke",
+    name: "Bespoke",
     tagline: "Ultimate luxury experience",
     highlights: [
       "Ultra Premium 3D Design",
+      "3D Design Revisable upto 8 times",
       "Unlimited Rooms",
       "Exclusive Materials",
       "Dedicated Manager",
+      "24/7 Support",
     ],
-    deliveryTime: "90 Days",
+    deliveryTime: "According to Project Specs.",
     image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800&h=400&fit=crop",
     color: "from-purple-400 to-purple-600",
   },
@@ -140,59 +150,80 @@ const bhkOptions = [
 ] as const;
 
 type Bhk = 1 | 2 | 3;
-const packageByBhk: Record<string, Record<Bhk, { included: string[]; notIncluded: string[] }>> = {
-  silver: {
-    1: {
-      included: [
-        "Modular kitchen (basic laminate finish)",
-        "Bed + wardrobe + TV unit",
-        "False ceiling in key areas",
-        "Painting & basic electrical work",
-        "Basic lighting & storage solutions",
-      ],
-      notIncluded: [
-        "Premium hardware/veneer",
-        "Imported materials or high-end counters",
-        "Smart home/automation",
-        "Luxury decor items",
-      ],
+
+type BhkConfig = {
+  included: string[];
+  notIncluded: string[];
+};
+
+type PackageConfig = {
+  bhk: Record<Bhk, BhkConfig>;
+  postInstallation?: string[];
+};
+const packageByBhk: Record<string, PackageConfig> = {
+  essence: {
+    bhk: {
+      1: {
+        included: [
+          "Modular kitchen (Standard laminate finish)",
+          "Wardrobe + TV unit + Loft",
+          "False ceiling in 1 Room",
+          "Painting & basic electrical work",
+          "Standard lighting & storage solutions",
+        ],
+        notIncluded: [
+          "Bed + Mattress",
+          "Premium hardware/veneer",
+          "Imported materials or high-end counters",
+          "Smart home/automation",
+          "Luxury decor items",
+        ],
+      },
+      2: {
+        included: [
+          "Modular kitchen (Standard laminate finish)",
+          "Wardrobes in bedrooms",
+          "TV unit + Loft",
+          "False ceiling for 1 Room",
+          "Painting + lighting + electrical setup",
+        ],
+        notIncluded: [
+          "Premium materials/veneer finishes",
+          "Branded appliances or automation",
+          "Luxury lighting/decor",
+        ],
+      },
+      3: {
+        included: [
+          "Modular kitchen (Standard laminate finish)",
+          "Wardrobes + loft + living room setup",
+          "False ceiling in 1 Room",
+          "Painting & basic lighting",
+          "Standard Fittings",
+        ],
+        notIncluded: [
+          "Designer finishes/premium hardware",
+          "Imported stones/rich textures",
+          "Smart home systems",
+        ],
+      },
     },
-    2: {
-      included: [
-        "Modular kitchen (standard laminate)",
-        "Wardrobes in bedrooms",
-        "TV unit + simple furniture pieces",
-        "False ceiling (select rooms)",
-        "Painting + lighting + electrical setup",
-      ],
-      notIncluded: [
-        "Premium materials/veneer finishes",
-        "Branded appliances or automation",
-        "Luxury lighting/decor",
-      ],
-    },
-    3: {
-      included: [
-        "Modular kitchen (entry laminate)",
-        "Wardrobes + beds + living room setup",
-        "False ceiling (partial)",
-        "Painting & basic lighting",
-        "Utility area setup",
-      ],
-      notIncluded: [
-        "Designer finishes/premium hardware",
-        "Imported stones/rich textures",
-        "Smart home systems",
-      ],
-    },
+    postInstallation: [
+      "6 Months Maintenance",
+      "6 Months Support",
+      "Gift Dinner Set",
+    ],
   },
-  gold: {
-    1: {
+  signature: {
+    bhk: {
+      1: {
       included: [
-        "Enhanced kitchen with better laminates/handles",
+        "Everything you get in Essence package",
+        "Enhanced kitchen with professional laminates/handles",
         "Premium wardrobes & storage",
         "Designer TV unit + quality lighting",
-        "Detailed false ceilings",
+        "Side, Dressing and Study Tables",
+        "Detailed false ceilings for 3 Rooms",
         "Feature walls, textured paint",
       ],
       notIncluded: [
@@ -203,11 +234,13 @@ const packageByBhk: Record<string, Record<Bhk, { included: string[]; notIncluded
     },
     2: {
       included: [
-        "Mid-grade modular kitchen + countertop",
-        "Bedroom wardrobes & beds",
-        "Layered false ceilings + premium lighting",
-        "Decor pieces & good furniture",
-        "Electrical + civil work",
+        "Everything you get in Essence package",
+        "Enhanced kitchen with professional laminates/handles",
+        "Premium wardrobes & storage",
+        "Designer TV unit + quality lighting",
+        "Side, Dressing and Study Tables",
+        "Detailed false ceilings for 3 Rooms",
+        "Feature walls, textured paint",
       ],
       notIncluded: [
         "High-end smart home tech beyond basic control",
@@ -216,26 +249,36 @@ const packageByBhk: Record<string, Record<Bhk, { included: string[]; notIncluded
     },
     3: {
       included: [
-        "Quality modular kitchen (better hardware)",
-        "Bedrooms + guest room cabinetry",
-        "Living room with feature walls + décor",
-        "Better lighting scheme + detail design",
-        "Branded hardware & decent counters",
+        "Enhanced kitchen with professional laminates/handles",
+        "Premium wardrobes & storage",
+        "Designer TV unit + quality lighting",
+        "Side, Dressing and Study Tables",
+        "Detailed false ceilings for 3 Rooms",
+        "Feature walls, textured paint",
       ],
       notIncluded: [
         "Top-tier imported stone/marble",
         "Fully integrated home automation",
       ],
     },
+    },
+    postInstallation: [
+      "9 Months Maintenance",
+      "9 Months Support",
+      "Kitchen Appliances (Client Choice: Mixer-Grinder/Water Purifier)",
+    ],
   },
-  platinum: {
-    1: {
+  elite: {
+    bhk: {
+      1: {
       included: [
-        "High-end modular kitchen (quartz/granite options)",
+        "Complete house Interior Design",
+        "High-end modular kitchen (quartz/granite options) and Hardware",
         "Premium wardrobes + designer furniture",
         "Feature lighting & designer ceilings",
         "Accent walls with special finishes",
         "Better décor & upholstery",
+        "Basic to Advanced Fittings",
       ],
       notIncluded: [
         "Full smart home technology",
@@ -244,11 +287,13 @@ const packageByBhk: Record<string, Record<Bhk, { included: string[]; notIncluded
     },
     2: {
       included: [
-        "Luxury kitchen with premium countertops",
-        "Custom wardrobe & storage systems",
-        "Rich décor + custom lighting plan",
-        "High-end hardware (Hettich/Blum etc.)",
-        "Premium upholstery & furniture pieces",
+        "Complete house Interior Design",
+        "High-end modular kitchen (quartz/granite options) and Hardware",
+        "Premium wardrobes + designer furniture",
+        "Feature lighting & designer ceilings",
+        "Accent walls with special finishes",
+        "Better décor & upholstery",
+        "Basic to Advanced Fittings",
       ],
       notIncluded: [
         "Top-tier home automation beyond basics",
@@ -257,20 +302,29 @@ const packageByBhk: Record<string, Record<Bhk, { included: string[]; notIncluded
     },
     3: {
       included: [
-        "Premium kitchen with luxury fittings",
-        "Bespoke furniture throughout",
-        "Designer lighting & layered ceilings",
-        "Accent stone/veneer walls",
-        "High quality décor, upholstery, finishes",
+        "Complete house Interior Design",
+        "High-end modular kitchen (quartz/granite options) and Hardware",
+        "Premium wardrobes + designer furniture",
+        "Feature lighting & designer ceilings",
+        "Accent walls with special finishes",
+        "Better décor & upholstery",
+        "Basic to Advanced Fittings",
       ],
       notIncluded: [
         "Full automation systems",
         "Collector art & imported designer fixtures",
       ],
     },
+    },
+    postInstallation: [
+      "12 Months Maintenance",
+      "12 Months Support",
+      "Kitchen Appliances (Client Choice: Microwave/Chimney)",
+    ],
   },
-  luxury: {
-    1: {
+  bespoke: {
+    bhk: {
+      1: {
       included: [
         "Bespoke metal/wood finishes",
         "Imported stone/quartz & designer cabinetry",
@@ -302,6 +356,12 @@ const packageByBhk: Record<string, Record<Bhk, { included: string[]; notIncluded
         "Appliances/standalone equipments (client supply)",
       ],
     },
+    },
+    postInstallation: [
+      "18 Months Maintenance",
+      "18 Months Support",
+      "Surprise Gift",
+    ],
   },
 };
 
@@ -545,9 +605,15 @@ export default function Interiors() {
                 <CardContent className="flex-1">
                   <ul className="space-y-3">
                     {pkg.highlights.map((highlight, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{highlight}</span>
+                      <li key={idx} className={`flex items-start gap-2 ${!highlight.trim() ? "list-none" : ""}`}>
+                        {highlight.trim() ? (
+                          <>
+                            <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                            <span className="text-sm">{highlight}</span>
+                          </>
+                        ) : (
+                          <span className="text-sm invisible select-none" aria-hidden="true">&nbsp;</span>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -627,7 +693,7 @@ export default function Interiors() {
                         What&apos;s Included
                       </p>
                       <ul className="space-y-2.5">
-                        {packageByBhk[selectedPackage.id][selectedBhk].included.map((item, j) => (
+                        {packageByBhk[selectedPackage.id].bhk[selectedBhk].included.map((item, j) => (
                           <li key={j} className="flex items-start gap-3 text-sm">
                             <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
                             <span>{item}</span>
@@ -643,7 +709,7 @@ export default function Interiors() {
                         Not Included
                       </p>
                       <ul className="space-y-2.5 text-muted-foreground">
-                        {packageByBhk[selectedPackage.id][selectedBhk].notIncluded.map((item, i) => (
+                        {packageByBhk[selectedPackage.id].bhk[selectedBhk].notIncluded.map((item, i) => (
                           <li key={i} className="flex items-start gap-3 text-sm">
                             <Minus className="w-4 h-4 flex-shrink-0 mt-0.5 opacity-70" />
                             <span>{item}</span>
@@ -652,6 +718,25 @@ export default function Interiors() {
                       </ul>
                     </div>
                   </div>
+                  {packageByBhk[selectedPackage.id].postInstallation &&
+                    packageByBhk[selectedPackage.id].postInstallation!.length > 0 && (
+                      <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6">
+                        <p className="text-sm font-bold text-primary mb-4 flex items-center gap-2">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20">
+                            <Shield className="w-4 h-4" />
+                          </span>
+                          Post-Installation
+                        </p>
+                        <ul className="space-y-2.5">
+                          {packageByBhk[selectedPackage.id].postInstallation!.map((item, k) => (
+                            <li key={k} className="flex items-start gap-3 text-sm">
+                              <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   <Button className="w-full rounded-2xl py-6 text-base font-semibold" size="lg" asChild>
                     <a href={CONTACT_FORM_URL} target="_blank" rel="noopener noreferrer">
                       Request Detailed Estimate
@@ -664,6 +749,9 @@ export default function Interiors() {
           </DialogContent>
         </Dialog>
       </section>
+
+      {/* Calculate your Interior */}
+      <InteriorPriceCalculator />
 
       {/* Types of Interiors */}
       <section id="types" className="py-20">
