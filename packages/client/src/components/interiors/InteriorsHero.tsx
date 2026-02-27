@@ -65,6 +65,11 @@ export function InteriorsHero({ onScrollToSection }: InteriorsHeroProps) {
           <br />
           <span className="text-amber-300">Interior</span>
         </h1>
+        <p className="text-2xl md:text-3xl font-semibold text-white/95 mb-4 max-w-2xl mx-auto">
+          <a href="#" className="hover:text-amber-300 transition-colors underline underline-offset-4 decoration-amber-300/50 hover:decoration-amber-300">Patronage</a>
+          {" × "}
+          <a href="#" className="hover:text-amber-300 transition-colors underline underline-offset-4 decoration-amber-300/50 hover:decoration-amber-300">SoulSpace</a>
+        </p>
         <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
           Where creativity meets functionality. Let us bring your vision to
           life with stunning interior designs.
