@@ -12,7 +12,15 @@ import {
 } from "../components/ui/dialog";
 import { useToast } from "../hooks/use-toast";
 import { useDataEntryPropertiesOrLocal } from "../hooks/useDataEntryProperties";
-import { uploadPropertyImages, fetchContactLeads, deleteMultipleContactLeads, type ContactLeadRow } from "../lib/supabase";
+import {
+  uploadPropertyImages,
+  fetchContactLeads,
+  deleteMultipleContactLeads,
+  fetchNewsletterSubscribers,
+  deleteMultipleNewsletterSubscribers,
+  type ContactLeadRow,
+  type NewsletterSubscriberRow,
+} from "../lib/supabase";
 import type { Property } from "../lib/propertyStore";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -51,13 +59,24 @@ export default function DataEntry() {
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const selectAllRef = useRef<HTMLInputElement | null>(null);
 
+  const [activeSection, setActiveSection] = useState<"leads" | "subscribers">("leads");
+  const [subscribers, setSubscribers] = useState<NewsletterSubscriberRow[]>([]);
+  const [selectedSubscribers, setSelectedSubscribers] = useState<string[]>([]);
+  const selectAllSubscribersRef = useRef<HTMLInputElement | null>(null);
+
   async function fetchLeads() {
     const list = await fetchContactLeads();
     setLeads(list);
   }
 
+  async function fetchSubscribers() {
+    const list = await fetchNewsletterSubscribers();
+    setSubscribers(list);
+  }
+
   useEffect(() => {
     fetchLeads();
+    fetchSubscribers();
   }, []);
 
   useEffect(() => {
@@ -65,6 +84,68 @@ export default function DataEntry() {
     if (!el) return;
     el.indeterminate = selectedLeads.length > 0 && selectedLeads.length < leads.length;
   }, [selectedLeads.length, leads.length]);
+
+  useEffect(() => {
+    const el = selectAllSubscribersRef.current;
+    if (!el) return;
+    el.indeterminate = selectedSubscribers.length > 0 && selectedSubscribers.length < subscribers.length;
+  }, [selectedSubscribers.length, subscribers.length]);
+
+  const handleSelectSubscriber = (id: string) => {
+    setSelectedSubscribers((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllSubscribers = () => {
+    if (subscribers.length === 0) return;
+    if (selectedSubscribers.length === subscribers.length) {
+      setSelectedSubscribers([]);
+    } else {
+      setSelectedSubscribers(subscribers.map((s) => s.id));
+    }
+  };
+
+  const handleDeleteSelectedSubscribers = async () => {
+    if (selectedSubscribers.length === 0) return;
+    const ok = window.confirm(
+      `Delete ${selectedSubscribers.length} selected subscriber(s)? This cannot be undone.`
+    );
+    if (!ok) return;
+    try {
+      await deleteMultipleNewsletterSubscribers(selectedSubscribers);
+      await fetchSubscribers();
+      setSelectedSubscribers([]);
+      toast({ title: "Deleted", description: "Selected subscribers removed." });
+    } catch (err) {
+      toast({
+        title: "Delete failed",
+        description: err instanceof Error ? err.message : "Failed to delete subscribers.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExportSubscribers = () => {
+    const headers = ["Email", "Subscribed Date"];
+    const rows = subscribers.map((s) => [
+      s.email,
+      new Date(s.created_at).toLocaleString(),
+    ]);
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+      ),
+    ].join("\n");
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `newsletter-subscribers-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const effectiveEditId = editId ?? editingId;
   const editingProperty = effectiveEditId ? (byId.get(effectiveEditId) ?? null) : null;
@@ -345,13 +426,34 @@ export default function DataEntry() {
               variant="outline"
               size="sm"
               className="gap-2 shrink-0"
-              onClick={() => setLeadsDialogOpen(true)}
+              onClick={() => {
+                setActiveSection("leads");
+                setLeadsDialogOpen(true);
+              }}
             >
               <Users className="h-4 w-4" />
               Property Leads
               {leads.length > 0 && (
                 <span className="ml-1 rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
                   {leads.length}
+                </span>
+              )}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2 shrink-0"
+              onClick={() => {
+                setActiveSection("subscribers");
+                setLeadsDialogOpen(true);
+              }}
+            >
+              <Users className="h-4 w-4" />
+              Newsletter Subscribers
+              {subscribers.length > 0 && (
+                <span className="ml-1 rounded-full bg-primary/20 px-2 py-0.5 text-xs font-medium text-primary">
+                  {subscribers.length}
                 </span>
               )}
             </Button>
@@ -384,35 +486,141 @@ export default function DataEntry() {
 
         <Dialog open={leadsDialogOpen} onOpenChange={setLeadsDialogOpen}>
           <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col p-0">
-            <DialogHeader className="p-4 pb-2 pr-12 border-b border-border flex flex-row items-center justify-between gap-4">
-              <DialogTitle className="font-heading">Property Leads</DialogTitle>
+            <DialogHeader className="p-4 pb-2 pr-12 border-b border-border flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-2">
+                <DialogTitle className="font-heading">
+                  {activeSection === "leads" ? "Property Leads" : "Newsletter Subscribers"}
+                </DialogTitle>
+                <div className="flex rounded-md border border-border p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setActiveSection("leads")}
+                    className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
+                      activeSection === "leads"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Property Leads
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveSection("subscribers")}
+                    className={`rounded px-3 py-1.5 text-sm font-medium transition-colors ${
+                      activeSection === "subscribers"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Newsletter Subscribers
+                  </button>
+                </div>
+              </div>
               <div className="flex items-center gap-2 shrink-0">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={handleDeleteSelected}
-                  disabled={selectedLeads.length === 0}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete Selected
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  className="gap-2 bg-black text-white hover:bg-black/90"
-                  onClick={handleExportLeads}
-                  disabled={leads.length === 0}
-                >
-                  <Download className="h-4 w-4" />
-                  Export
-                </Button>
+                {activeSection === "leads" ? (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      onClick={handleDeleteSelected}
+                      disabled={selectedLeads.length === 0}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete Selected
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="gap-2 bg-black text-white hover:bg-black/90"
+                      onClick={handleExportLeads}
+                      disabled={leads.length === 0}
+                    >
+                      <Download className="h-4 w-4" />
+                      Export
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      onClick={handleDeleteSelectedSubscribers}
+                      disabled={selectedSubscribers.length === 0}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete Selected
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="gap-2 bg-black text-white hover:bg-black/90"
+                      onClick={handleExportSubscribers}
+                      disabled={subscribers.length === 0}
+                    >
+                      <Download className="h-4 w-4" />
+                      Export CSV
+                    </Button>
+                  </>
+                )}
               </div>
             </DialogHeader>
             <div className="flex-1 overflow-auto p-4">
-              {leads.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No leads yet.</p>
+              {activeSection === "leads" ? (
+                leads.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No leads yet.</p>
+                ) : (
+                  <div className="overflow-x-auto rounded-lg border border-border bg-muted/10 dark:bg-muted/15">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border bg-muted/20">
+                          <th className="w-10 p-3">
+                            <input
+                              ref={selectAllRef}
+                              type="checkbox"
+                              checked={leads.length > 0 && selectedLeads.length === leads.length}
+                              onChange={handleSelectAll}
+                              className="h-4 w-4 rounded border-border"
+                              aria-label="Select all"
+                            />
+                          </th>
+                          <th className="text-left p-3 font-medium">Property Title</th>
+                          <th className="text-left p-3 font-medium">Name</th>
+                          <th className="text-left p-3 font-medium">Email</th>
+                          <th className="text-left p-3 font-medium">Phone</th>
+                          <th className="text-left p-3 font-medium">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {leads.map((lead) => (
+                          <tr key={lead.id} className="border-b border-border last:border-0 hover:bg-muted/10">
+                            <td className="w-10 p-3">
+                              <input
+                                type="checkbox"
+                                checked={selectedLeads.includes(lead.id)}
+                                onChange={() => handleSelectOne(lead.id)}
+                                className="h-4 w-4 rounded border-border"
+                                aria-label={`Select ${lead.name}`}
+                              />
+                            </td>
+                            <td className="p-3">{lead.property_title}</td>
+                            <td className="p-3">{lead.name}</td>
+                            <td className="p-3">{lead.email}</td>
+                            <td className="p-3">{lead.phone}</td>
+                            <td className="p-3 text-muted-foreground">
+                              {new Date(lead.created_at).toLocaleString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
+              ) : subscribers.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No subscribers yet.</p>
               ) : (
                 <div className="overflow-x-auto rounded-lg border border-border bg-muted/10 dark:bg-muted/15">
                   <table className="w-full text-sm">
@@ -420,39 +628,33 @@ export default function DataEntry() {
                       <tr className="border-b border-border bg-muted/20">
                         <th className="w-10 p-3">
                           <input
-                            ref={selectAllRef}
+                            ref={selectAllSubscribersRef}
                             type="checkbox"
-                            checked={leads.length > 0 && selectedLeads.length === leads.length}
-                            onChange={handleSelectAll}
+                            checked={subscribers.length > 0 && selectedSubscribers.length === subscribers.length}
+                            onChange={handleSelectAllSubscribers}
                             className="h-4 w-4 rounded border-border"
-                            aria-label="Select all"
+                            aria-label="Select all subscribers"
                           />
                         </th>
-                        <th className="text-left p-3 font-medium">Property Title</th>
-                        <th className="text-left p-3 font-medium">Name</th>
                         <th className="text-left p-3 font-medium">Email</th>
-                        <th className="text-left p-3 font-medium">Phone</th>
-                        <th className="text-left p-3 font-medium">Date</th>
+                        <th className="text-left p-3 font-medium">Subscribed Date</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {leads.map((lead) => (
-                        <tr key={lead.id} className="border-b border-border last:border-0 hover:bg-muted/10">
+                      {subscribers.map((sub) => (
+                        <tr key={sub.id} className="border-b border-border last:border-0 hover:bg-muted/10">
                           <td className="w-10 p-3">
                             <input
                               type="checkbox"
-                              checked={selectedLeads.includes(lead.id)}
-                              onChange={() => handleSelectOne(lead.id)}
+                              checked={selectedSubscribers.includes(sub.id)}
+                              onChange={() => handleSelectSubscriber(sub.id)}
                               className="h-4 w-4 rounded border-border"
-                              aria-label={`Select ${lead.name}`}
+                              aria-label={`Select ${sub.email}`}
                             />
                           </td>
-                          <td className="p-3">{lead.property_title}</td>
-                          <td className="p-3">{lead.name}</td>
-                          <td className="p-3">{lead.email}</td>
-                          <td className="p-3">{lead.phone}</td>
+                          <td className="p-3">{sub.email}</td>
                           <td className="p-3 text-muted-foreground">
-                            {new Date(lead.created_at).toLocaleString()}
+                            {new Date(sub.created_at).toLocaleString()}
                           </td>
                         </tr>
                       ))}

@@ -23,11 +23,18 @@ function getSearchParamsFromQuery(queryString: string): URLSearchParams {
   return new URLSearchParams(queryString || "");
 }
 
-const BUDGET_RANGES: Record<string, [number, number]> = {
-  low: [0, 50],
-  med: [51, 100],
-  high: [101, Infinity],
-};
+const DEFAULT_MIN_PRICE = 0;
+const DEFAULT_MAX_PRICE = 500; // Lakhs (slider max default)
+
+function parsePriceParam(value: string | null, fallback: number): number {
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+
+/** Convert price to Lakhs. Values >= 10000 are treated as Rupees (÷100000); else already Lakhs. */
+function toLakhs(v: number): number {
+  return v >= 10_000 ? v / 100_000 : v;
+}
 
 type FilterResult = { filteredProperties: PropertyRow[]; filterOptions: FilterOptions };
 
@@ -39,14 +46,15 @@ function filterAndDeriveOptions(
   const statusQ = params.get("status")?.trim();
   const locationQ = params.get("location")?.trim().toLowerCase();
   const bhkQ = params.get("bhk")?.trim();
-  const typeQ = params.get("type")?.trim();
-  const budgetQ = params.get("budget")?.trim();
-  const budgetRange = budgetQ ? BUDGET_RANGES[budgetQ] : null;
+  const hasMinPrice = params.has("minPrice");
+  const hasMaxPrice = params.has("maxPrice");
+  const filterByBudget = hasMinPrice || hasMaxPrice;
+  const minPrice = hasMinPrice ? parsePriceParam(params.get("minPrice"), DEFAULT_MIN_PRICE) : DEFAULT_MIN_PRICE;
+  const maxPrice = hasMaxPrice ? parsePriceParam(params.get("maxPrice"), DEFAULT_MAX_PRICE) : DEFAULT_MAX_PRICE;
 
   const statusSet = new Set<string>();
   const locationSet = new Set<string>();
   const bhkSet = new Set<string>();
-  const typeSet = new Set<string>();
   const filtered: PropertyRow[] = [];
 
   const sortStr = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
@@ -57,11 +65,29 @@ function filterAndDeriveOptions(
     if (statusQ && (p.status ?? "") !== statusQ) continue;
     if (locationQ && !(p.location ?? "").toLowerCase().includes(locationQ)) continue;
     if (bhkQ && (p.bhk_type ?? "") !== bhkQ) continue;
-    if (typeQ && (p.property_type ?? "") !== typeQ) continue;
-    if (budgetRange) {
-      const v = p.price_value;
-      if (v == null) continue;
-      if (v < budgetRange[0] || v > budgetRange[1]) continue;
+    if (filterByBudget) {
+      const pMinRaw = p.price_min;
+      const pMaxRaw = p.price_max;
+      const pValRaw = p.price_value;
+      const hasRange = pMinRaw != null && pMaxRaw != null;
+
+      if (hasRange) {
+        const pMin = toLakhs(pMinRaw);
+        const pMax = toLakhs(pMaxRaw);
+        // Range: include if property range overlaps slider range (both in Lakhs)
+        if (pMin > maxPrice || pMax < minPrice) continue;
+      } else if (pMinRaw != null) {
+        const pMin = toLakhs(pMinRaw);
+        if (pMin < minPrice || pMin > maxPrice) continue;
+      } else if (pMaxRaw != null) {
+        const pMax = toLakhs(pMaxRaw);
+        if (pMax < minPrice || pMax > maxPrice) continue;
+      } else if (pValRaw != null) {
+        const pVal = toLakhs(pValRaw);
+        if (pVal < minPrice || pVal > maxPrice) continue;
+      } else {
+        continue; // No price data
+      }
     }
 
     filtered.push(p);
@@ -71,8 +97,6 @@ function filterAndDeriveOptions(
     if (loc) locationSet.add(loc);
     const bhk = (p.bhk_type ?? "").trim();
     if (bhk) bhkSet.add(bhk);
-    const typ = (p.property_type ?? "").trim();
-    if (typ) typeSet.add(typ);
   }
 
   return {
@@ -81,7 +105,6 @@ function filterAndDeriveOptions(
       statuses: [...statusSet].sort(sortStr),
       locations: [...locationSet].sort(sortStr),
       bhkTypes: [...bhkSet].sort(sortStr),
-      propertyTypes: [...typeSet].sort(sortStr),
     },
   };
 }
@@ -162,6 +185,15 @@ export default function Properties() {
     [filteredProperties, detailProperty?.id]
   );
 
+  const priceRangeMax = useMemo(() => {
+    const toLakhs = (v: number) => (v >= 10_000 ? v / 100_000 : v);
+    const values = properties
+      .map((p) => [p.price_value, p.price_min, p.price_max].filter((v): v is number => v != null && Number.isFinite(v)))
+      .flat()
+      .map(toLakhs);
+    return values.length ? Math.max(DEFAULT_MAX_PRICE, ...values) : DEFAULT_MAX_PRICE;
+  }, [properties]);
+
   if (error) {
     return (
       <div className="min-h-screen bg-background flex flex-col font-sans">
@@ -203,6 +235,7 @@ export default function Properties() {
             onFilterChange={setHasActiveFilters}
             onSearchComplete={refreshQueryString}
             urlSearch={queryString}
+            priceRangeMax={priceRangeMax}
           />
         </div>
 
@@ -214,7 +247,7 @@ export default function Properties() {
           <div className="text-center py-12">
             <p className="text-muted-foreground">
               {queryString
-                ? "No properties match your filters. Try adjusting location, type, or budget."
+                ? "No properties match your filters. Try adjusting status, location, or budget."
                 : "No properties available."}
             </p>
           </div>
@@ -344,7 +377,7 @@ export default function Properties() {
         }}
         similarProperties={similarProperties}
         onSimilarPropertySelect={(p) => {
-          setDetailProperty(p);
+          setDetailProperty(p as PropertyRow);
           const nextSlug = "slug" in p ? p.slug : undefined;
           if (nextSlug?.trim()) setLocation(`/properties/${encodeURIComponent(nextSlug.trim())}`);
         }}

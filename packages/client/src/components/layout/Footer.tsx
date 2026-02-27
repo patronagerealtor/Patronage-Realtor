@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   MapPin,
   Phone,
@@ -9,8 +10,41 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { useToast } from "../../hooks/use-toast";
+import { insertNewsletterSubscriber } from "../../lib/supabase";
+
+function isValidEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
 
 export function Footer() {
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleNewsletterSubmit = async () => {
+    const email = newsletterEmail.trim();
+    if (!email) {
+      toast({ title: "Invalid email", description: "Please enter your email.", variant: "destructive" });
+      return;
+    }
+    if (!isValidEmail(email)) {
+      toast({ title: "Invalid email", description: "Please enter a valid email address.", variant: "destructive" });
+      return;
+    }
+    setNewsletterLoading(true);
+    const result = await insertNewsletterSubscriber(email);
+    setNewsletterLoading(false);
+    if (result.success) {
+      toast({ title: "Subscribed", description: "You're on the list. We'll keep you updated." });
+      setNewsletterEmail("");
+    } else if (result.code === "duplicate") {
+      toast({ title: "Already subscribed", description: result.message });
+    } else {
+      toast({ title: "Subscription failed", description: result.message, variant: "destructive" });
+    }
+  };
+
   return (
     <footer className="bg-muted text-foreground border-t border-border pt-16 pb-8">
       <div className="container mx-auto px-4">
@@ -156,8 +190,18 @@ export function Footer() {
               Subscribe to get the latest property news.
             </p>
             <div className="flex gap-2">
-              <Input placeholder="Enter your email" className="bg-background" />
-              <Button>Subscribe</Button>
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                className="bg-background"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleNewsletterSubmit()}
+                disabled={newsletterLoading}
+              />
+              <Button onClick={handleNewsletterSubmit} disabled={newsletterLoading}>
+                {newsletterLoading ? "..." : "Subscribe"}
+              </Button>
             </div>
             <div className="flex gap-4 mt-6">
               <a
