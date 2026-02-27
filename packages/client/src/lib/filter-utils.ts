@@ -23,7 +23,6 @@ export function buildFilterUrl(filters: {
   status?: string;
   location?: string;
   bhk?: string;
-  type?: string;
   budget?: string;
 }): string {
   const params = new URLSearchParams();
@@ -31,7 +30,6 @@ export function buildFilterUrl(filters: {
   if (filters.status?.trim()) params.set("status", filters.status.trim());
   if (filters.location?.trim()) params.set("location", filters.location.trim());
   if (filters.bhk?.trim()) params.set("bhk", filters.bhk.trim());
-  if (filters.type?.trim()) params.set("type", filters.type.trim());
   if (filters.budget?.trim()) params.set("budget", filters.budget.trim());
 
   const qs = params.toString();
@@ -82,16 +80,14 @@ export function deriveFilterOptions(
     status?: string;
     location?: string;
     bhk?: string;
-    type?: string;
     budget?: string;
   }
 ): FilterOptions {
-  // First pass: filter by status, location, bhk, type (excluding budget for now)
+  // First pass: filter by status, location, bhk (excluding budget for now)
   const filtered = properties.filter((p) => {
     if (currentFilters.status && (p.status ?? "") !== currentFilters.status) return false;
     if (currentFilters.location && !(p.location ?? "").toLowerCase().includes(currentFilters.location.toLowerCase())) return false;
     if (currentFilters.bhk && (p.bhk_type ?? "") !== currentFilters.bhk) return false;
-    if (currentFilters.type && (p.property_type ?? "") !== currentFilters.type) return false;
     return true;
   });
 
@@ -120,15 +116,7 @@ export function deriveFilterOptions(
     ),
   ].sort();
 
-  const propertyTypes = [
-    ...new Set(
-      filtered
-        .map((p) => p.property_type)
-        .filter((v): v is string => v != null && v !== "")
-    ),
-  ].sort();
-
-  return { statuses, locations, bhkTypes, propertyTypes };
+  return { statuses, locations, bhkTypes };
 }
 
 /**
@@ -140,14 +128,12 @@ export function filterProperties(
     status?: string;
     location?: string;
     bhk?: string;
-    type?: string;
     budget?: string;
   }
 ): PropertyRow[] {
   const statusQ = currentFilters.status?.trim();
   const locationQ = currentFilters.location?.trim().toLowerCase();
   const bhkQ = currentFilters.bhk?.trim();
-  const typeQ = currentFilters.type?.trim();
   const budgetQ = currentFilters.budget?.trim();
 
   return properties.filter((p) => {
@@ -161,9 +147,6 @@ export function filterProperties(
 
     // BHK Type filter
     if (bhkQ && (p.bhk_type ?? "") !== bhkQ) return false;
-
-    // Property Type filter
-    if (typeQ && (p.property_type ?? "") !== typeQ) return false;
 
     // Budget filter
     if (budgetQ) {
@@ -180,7 +163,7 @@ export function filterProperties(
  */
 export function getFilterCounts(
   properties: PropertyRow[],
-  filterType: "status" | "location" | "bhk" | "type" | "budget",
+  filterType: "status" | "location" | "bhk" | "budget",
   currentFilters: Record<string, string>
 ): Record<string, number> {
   const counts: Record<string, number> = {};
@@ -197,9 +180,6 @@ export function getFilterCounts(
         break;
       case "bhk":
         key = p.bhk_type ?? undefined;
-        break;
-      case "type":
-        key = p.property_type ?? undefined;
         break;
       case "budget":
         if (p.price_value == null) return;
@@ -250,14 +230,12 @@ export function clearAllFilters(): {
   status: "";
   location: "";
   bhk: "";
-  type: "";
   budget: "";
 } {
   return {
     status: "",
     location: "",
     bhk: "",
-    type: "",
     budget: "",
   };
 }
@@ -276,9 +254,6 @@ export function getFilterSummary(filters: Record<string, string | undefined>): s
   }
   if (filters.bhk?.trim()) {
     parts.push(`BHK: ${filters.bhk}`);
-  }
-  if (filters.type?.trim()) {
-    parts.push(`Type: ${filters.type}`);
   }
   if (filters.budget?.trim()) {
     parts.push(`Budget: ${formatFilterValue(filters.budget, "budget")}`);
