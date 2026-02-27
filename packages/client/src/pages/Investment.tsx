@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "wouter";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { useInvestmentProperties } from "../hooks/useInvestmentProperties";
@@ -403,7 +404,9 @@ export default function InvestmentPage() {
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 2, background: p.status === "Available" ? "#E8F5EE" : "#E8EDF5", color: p.status === "Available" ? "#1A7A4A" : "#2A5A9A" }}>{p.status}</span>
-                        <button className="cta-btn" style={{ padding: "10px 20px", fontSize: 12 }}>View Details</button>
+                        <Link href={`/investment/commercial/${p.id}`}>
+                          <button type="button" className="cta-btn" style={{ padding: "10px 20px", fontSize: 12 }}>View Details</button>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -524,7 +527,9 @@ export default function InvestmentPage() {
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 2, background: "#E8F5EE", color: "#1A7A4A" }}>Available</span>
-                        <button className="cta-btn" style={{ padding: "10px 20px", fontSize: 12 }}>View Details</button>
+                        <Link href={`/investment/land/${p.id}`}>
+                          <button type="button" className="cta-btn" style={{ padding: "10px 20px", fontSize: 12 }}>View Details</button>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -561,6 +566,19 @@ export default function InvestmentPage() {
             </section>
           </div>
         )}
+
+        {/* List My Property */}
+        <section className="border border-border rounded-xl my-12 md:my-16 py-14 md:py-16 px-6 bg-card">
+          <div className="max-w-2xl mx-auto text-center">
+            <span style={S.eyebrow}>LIST YOUR PROPERTY</span>
+            <h2 style={{ ...S.sectionTitle, marginTop: 12, marginBottom: 14 }}>Have Commercial or Land to Sell?</h2>
+            <p style={{ fontSize: 15, color: "#666", lineHeight: 1.7, marginBottom: 28 }}>List your asset with our investment division. We connect serious sellers with qualified buyers and provide end-to-end support for commercial and land transactions.</p>
+            <div className="flex gap-4 justify-center flex-wrap">
+              <a href="https://forms.gle/zU7YFtxo2EZNx71DA" target="_blank" rel="noopener noreferrer" className="cta-btn inline-block no-underline">List My Property</a>
+              <Link href="/investment" className="outline-btn inline-block no-underline">View Listings</Link>
+            </div>
+          </div>
+        </section>
 
         {/* CTA */}
         <section className="bg-foreground text-background rounded-xl my-12 md:my-16 py-16 md:py-20 px-6">

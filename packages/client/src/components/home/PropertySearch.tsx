@@ -68,6 +68,8 @@ function PropertySearchInner({
   urlSearch,
 }: PropertySearchProps) {
   const [location, setLocation] = useLocation();
+  const pathname = location.split("?")[0];
+  const isOnHome = pathname === "/";
   const [status, setStatus] = useState("");
   const [locationVal, setLocationVal] = useState("");
   const [bhkType, setBhkType] = useState("");
@@ -124,9 +126,9 @@ function PropertySearchInner({
     setBhkType("");
     setPropertyType("");
     setBudget("");
-    setLocation("/properties");
+    setLocation(isOnHome ? "/" : "/properties");
     onSearchComplete?.();
-  }, [setLocation, onSearchComplete]);
+  }, [setLocation, onSearchComplete, isOnHome]);
 
   const hasActiveFilters = !!(status || locationVal.trim() || bhkType || propertyType || budget);
 

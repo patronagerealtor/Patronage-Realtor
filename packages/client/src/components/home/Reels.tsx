@@ -74,7 +74,7 @@ export function Reels() {
   /* init arrays */
   useEffect(() => {
     setProgress(new Array(REELS.length).fill(0));
-    setIsPlaying(new Array(REELS.length).fill(true));
+    setIsPlaying(new Array(REELS.length).fill(false));
   }, []);
 
   /* center active card */
@@ -102,14 +102,17 @@ export function Reels() {
     return () => clearInterval(id);
   }, [paused]);
 
-  /* ensure only active video plays */
+  /* pause non-active reels when switching; active reel stays paused until user taps play */
   useEffect(() => {
     videoRefs.current.forEach((video, i) => {
       if (!video) return;
-      if (i === activeIndex) {
-        video.play();
-      } else {
+      if (i !== activeIndex) {
         video.pause();
+        setIsPlaying((s) => {
+          const n = [...s];
+          n[i] = false;
+          return n;
+        });
       }
     });
   }, [activeIndex]);
@@ -242,12 +245,23 @@ export function Reels() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={next}
+          onClick={prev}
           className="shrink-0 border-0 shadow-md hover:shadow-lg h-[533px] md:h-[604px] w-12 rounded-xl bg-background"
-          aria-label="Next reel"
+          aria-label="Previous reel"
         >
-          <ChevronRight className="size-6" />
+          <ChevronLeft className="size-6" />
         </Button>
+       
+        <Button
+         variant="ghost"
+         size="icon"
+         onClick={next}
+         aria-label="Next reel"
+         className=" absolute right-0 top-1/2 -translate-y-1/2 shrink-0 border-0 shadow-md hover:shadow-lg h-[533px] md:h-[604px] w-12 rounded-l-xl bg-background"
+        >
+           <ChevronRight className="size-6" />
+        </Button>
+
         <div
           ref={containerRef}
           className="flex flex-1 min-w-0 gap-6 px-[50%] overflow-x-hidden py-10 select-none"
@@ -284,11 +298,19 @@ export function Reels() {
                     }}
                     src={videoSrc}
                     preload="metadata"
-                    autoPlay={isCenter}
+                    playsInline
+                    controls
+                    controlsList="nofullscreen"
                     muted={muted}
                     loop
-                    playsInline
-                    onClick={() => togglePlay(index)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      togglePlay(index);
+                    }}
+                    onDoubleClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
                     onTimeUpdate={() => handleTimeUpdate(index)}
                     className="w-full h-full object-cover"
                   />
@@ -395,11 +417,11 @@ export function Reels() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={prev}
+          onClick={next}
           className="shrink-0 border-0 shadow-md hover:shadow-lg h-[533px] md:h-[604px] w-12 rounded-xl bg-background"
-          aria-label="Previous reel"
+          aria-label="Next reel"
         >
-          <ChevronLeft className="size-6" />
+          <ChevronRight className="size-6" />
         </Button>
       </div>
     </section>
