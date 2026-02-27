@@ -5,7 +5,6 @@ server/public
 vite.config.ts.*
 *.tar.gz
 .env
-# Replit / local state (DO NOT COMMIT)
+# Local state (DO NOT COMMIT)
 .local/
 *.bin
-.repl*

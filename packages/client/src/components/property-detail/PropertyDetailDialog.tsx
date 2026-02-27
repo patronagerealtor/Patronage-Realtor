@@ -144,10 +144,11 @@ export function PropertyDetailDialog({
     sectionRefs.current[key] = el;
   };
 
+  const propertyId = property ? String(property.id) : "";
+  const propertyTitle = (data?.title ?? (property && "title" in property ? (property as { title?: string }).title : "") ?? "").trim() || "Property";
+
   const handleContactSubmit = async (payload: { name: string; email: string; phone: string }) => {
     if (!property) return;
-    const propertyId = String(property.id);
-    const propertyTitle = (data?.title ?? (property && "title" in property ? (property as { title?: string }).title : "") ?? "").trim() || "Property";
     const result = await insertContactLead({
       name: payload.name,
       email: payload.email,
@@ -160,6 +161,23 @@ export function PropertyDetailDialog({
     } else {
       toast({ title: "Failed to submit", description: result.error, variant: "destructive" });
     }
+  };
+
+  const handleFloorPlanRequest = async (payload: { name: string; email: string; whatsapp: string }) => {
+    if (!property) return false;
+    const result = await insertContactLead({
+      name: payload.name,
+      email: payload.email,
+      phone: payload.whatsapp,
+      property_id: propertyId,
+      property_title: `${propertyTitle} (Floor Plan Request)`,
+    });
+    if (result.success) {
+      toast({ title: "Request sent", description: "We'll get back to you soon." });
+      return true;
+    }
+    toast({ title: "Failed to send", description: result.error, variant: "destructive" });
+    return false;
   };
 
   if (!open) return null;
@@ -225,7 +243,7 @@ export function PropertyDetailDialog({
                   <OverviewSection data={data} sectionRef={setSectionRef("Overview")} />
                   <DetailsSection data={data} sectionRef={setSectionRef("Details")} />
                   <AboutSection data={data} sectionRef={setSectionRef("About")} />
-                  <FloorPlanSection data={data} sectionRef={setSectionRef("Floor Plan")} />
+                  <FloorPlanSection data={data} sectionRef={setSectionRef("Floor Plan")} onFloorPlanRequest={property ? handleFloorPlanRequest : undefined} />
                   <AmenitiesSection data={data} sectionRef={setSectionRef("Amenities")} />
                   <GallerySection data={data} sectionRef={setSectionRef("Gallery")} />
                 </main>
