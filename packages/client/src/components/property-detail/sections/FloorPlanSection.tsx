@@ -1,10 +1,27 @@
 import { useEffect, useState } from "react";
 import { LayoutGrid } from "lucide-react";
 import type { PropertyDetailData } from "@/types/propertyDetail";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+export type FloorPlanRequestPayload = {
+  name: string;
+  email: string;
+  whatsapp: string;
+};
 
 type FloorPlanSectionProps = {
   data: PropertyDetailData;
   sectionRef: (el: HTMLElement | null) => void;
+  /** When provided, "Request a Floor Plan" opens a form and submits here. On success (resolved true), section shows "We'll Get Back to You <Name>". */
+  onFloorPlanRequest?: (payload: FloorPlanRequestPayload) => Promise<boolean>;
 };
 
 function DetailItem({
@@ -27,15 +44,62 @@ function DetailItem({
 export function FloorPlanSection({
   data,
   sectionRef,
+  onFloorPlanRequest,
 }: FloorPlanSectionProps) {
   const plans = data.floorPlans ?? [];
 
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [submittedName, setSubmittedName] = useState<string | null>(null);
+  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [formValues, setFormValues] = useState({ name: "", email: "", whatsapp: "" });
 
   // Reset selected index if plans change
   useEffect(() => {
     setSelectedIndex(0);
   }, [plans.length]);
+
+  const handleOpenRequest = () => {
+    if (submittedName) return;
+    setFormError(null);
+    setFormValues({ name: "", email: "", whatsapp: "" });
+    setDialogOpen(true);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    const name = formValues.name.trim();
+    const email = formValues.email.trim();
+    const whatsapp = formValues.whatsapp.trim();
+    if (!name || !email || !whatsapp) {
+      setFormError("Name, WhatsApp No. and Email are required.");
+      return;
+    }
+    if (!onFloorPlanRequest) {
+      setFormError("Floor plan request is not available.");
+      return;
+    }
+    setFormSubmitting(true);
+    try {
+      const success = await onFloorPlanRequest({ name, email, whatsapp });
+      if (success) {
+        setSubmittedName(name);
+        setDialogOpen(false);
+      } else {
+        setFormError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setFormError("Something went wrong. Please try again.");
+    } finally {
+      setFormSubmitting(false);
+    }
+  };
+
+  const requestCtaContent = submittedName
+    ? `We'll Get Back to You ${submittedName}`
+    : "Request a Floor Plan";
 
   if (!plans.length) {
     return (
@@ -59,13 +123,66 @@ export function FloorPlanSection({
             <div className="absolute inset-0 flex items-center justify-center bg-black/30">
               <button
                 type="button"
-                className="rounded-md bg-primary px-6 py-3 font-medium text-primary-foreground shadow-lg transition-transform duration-200 hover:scale-105"
+                onClick={onFloorPlanRequest ? handleOpenRequest : undefined}
+                disabled={!!submittedName}
+                className="rounded-md bg-primary px-6 py-3 font-medium text-primary-foreground shadow-lg transition-transform duration-200 hover:scale-105 disabled:cursor-default disabled:opacity-90"
               >
-                Request a Floor Plan
+                {requestCtaContent}
               </button>
             </div>
           </div>
         </div>
+
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Request a Floor Plan</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleFormSubmit} className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <Label htmlFor="fp-name">Name <span className="text-destructive">*</span></Label>
+                <Input
+                  id="fp-name"
+                  value={formValues.name}
+                  onChange={(e) => setFormValues((p) => ({ ...p, name: e.target.value }))}
+                  placeholder="Your name"
+                  required
+                  autoComplete="name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fp-whatsapp">WhatsApp No. <span className="text-destructive">*</span></Label>
+                <Input
+                  id="fp-whatsapp"
+                  type="tel"
+                  value={formValues.whatsapp}
+                  onChange={(e) => setFormValues((p) => ({ ...p, whatsapp: e.target.value }))}
+                  placeholder="e.g. 9876543210"
+                  required
+                  autoComplete="tel"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fp-email">Email <span className="text-destructive">*</span></Label>
+                <Input
+                  id="fp-email"
+                  type="email"
+                  value={formValues.email}
+                  onChange={(e) => setFormValues((p) => ({ ...p, email: e.target.value }))}
+                  placeholder="you@example.com"
+                  required
+                  autoComplete="email"
+                />
+              </div>
+              {formError && (
+                <p className="text-sm text-destructive">{formError}</p>
+              )}
+              <Button type="submit" className="w-full" disabled={formSubmitting}>
+                {formSubmitting ? "Sending…" : "Submit"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </section>
     );
   }
@@ -129,6 +246,76 @@ export function FloorPlanSection({
             <DetailItem label="Base Price" value={current.price} />
           </div>
         </div>
+
+        {onFloorPlanRequest && (
+          <div className="mt-6 pt-6 border-t border-border">
+            {submittedName ? (
+              <p className="text-center font-medium text-primary">
+                We'll Get Back to You {submittedName}
+              </p>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={handleOpenRequest}
+              >
+                {requestCtaContent}
+              </Button>
+            )}
+          </div>
+        )}
+
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Request a Floor Plan</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleFormSubmit} className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <Label htmlFor="fp-name-2">Name <span className="text-destructive">*</span></Label>
+                <Input
+                  id="fp-name-2"
+                  value={formValues.name}
+                  onChange={(e) => setFormValues((p) => ({ ...p, name: e.target.value }))}
+                  placeholder="Your name"
+                  required
+                  autoComplete="name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fp-whatsapp-2">WhatsApp No. <span className="text-destructive">*</span></Label>
+                <Input
+                  id="fp-whatsapp-2"
+                  type="tel"
+                  value={formValues.whatsapp}
+                  onChange={(e) => setFormValues((p) => ({ ...p, whatsapp: e.target.value }))}
+                  placeholder="e.g. 9876543210"
+                  required
+                  autoComplete="tel"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fp-email-2">Email <span className="text-destructive">*</span></Label>
+                <Input
+                  id="fp-email-2"
+                  type="email"
+                  value={formValues.email}
+                  onChange={(e) => setFormValues((p) => ({ ...p, email: e.target.value }))}
+                  placeholder="you@example.com"
+                  required
+                  autoComplete="email"
+                />
+              </div>
+              {formError && (
+                <p className="text-sm text-destructive">{formError}</p>
+              )}
+              <Button type="submit" className="w-full" disabled={formSubmitting}>
+                {formSubmitting ? "Sending…" : "Submit"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );

@@ -30,8 +30,12 @@ export function AboutPreview() {
           </h2>
 
           <p className="text-lg text-muted-foreground leading-relaxed">
-            Founded in 2015, Estate.co has grown from a small local agency to a nationwide platform.
-            We believe that finding a home should be an exciting journey, not a stressful task.
+          Founded in 2021, Patronage Realtor began as a vision to bring clarity, 
+          transparency, and trust into the real estate journey. What started as a 
+          self-funded initiative has evolved into a growing real estate solutions 
+          platform, focused on guiding individuals with informed insights and ethical 
+          practices. We believe finding the right property should be a confident and 
+          empowering experience — not a confusing or overwhelming one.
           </p>
 
           <div className="pt-4">
@@ -42,7 +46,7 @@ export function AboutPreview() {
                 className="inline-block"
               >
                 <Button variant="outline" size="lg" className="border-2 transition-transform">
-                  Read More About Us
+                  Read More About Our Journey
                 </Button>
               </motion.div>
             </Link>
