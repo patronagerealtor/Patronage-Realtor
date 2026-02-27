@@ -18,6 +18,8 @@ import { Button } from "../ui/button";
 import { useToast } from "../../hooks/use-toast";
 
 
+const EMPTY_SIMILAR_PROPERTIES: PropertyRow[] = [];
+
 const TABS = [
   "Overview",
   "Details",
@@ -44,7 +46,7 @@ export function PropertyDetailDialog({
   open,
   onOpenChange,
   onEdit,
-  similarProperties = [],
+  similarProperties = EMPTY_SIMILAR_PROPERTIES,
   onSimilarPropertySelect,
 }: PropertyDetailDialogProps) {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("Overview");
