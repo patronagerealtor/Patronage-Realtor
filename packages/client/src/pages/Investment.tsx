@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { useInvestmentProperties } from "../hooks/useInvestmentProperties";
@@ -117,14 +117,8 @@ const DEAL_OPTIONS_NO_SHARE = ["Outright", "Lease"] as const;
 
 export default function InvestmentPage() {
   const { commercial: storedCommercial, land: storedLand } = useInvestmentProperties();
-  const commercialProperties = useMemo(
-    () => (storedCommercial.length > 0 ? storedCommercial : commercialPropertiesDefault),
-    [storedCommercial]
-  );
-  const landListings = useMemo(
-    () => (storedLand.length > 0 ? storedLand : landListingsDefault),
-    [storedLand]
-  );
+  const commercialProperties = storedCommercial.length > 0 ? storedCommercial : commercialPropertiesDefault;
+  const landListings = storedLand.length > 0 ? storedLand : landListingsDefault;
 
   const [activeTab, setActiveTab] = useState("Overview");
   const [commercialCategory, setCommercialCategory] = useState<(typeof COMMERCIAL_CATEGORIES)[number]>("All");
@@ -575,7 +569,7 @@ export default function InvestmentPage() {
             <h2 className="font-heading text-3xl md:text-4xl font-normal mt-3 mb-4">Speak with an Investment Advisor</h2>
             <p className="text-muted-foreground text-sm md:text-base leading-relaxed mb-8">Schedule a free consultation to explore how we can build your real estate portfolio.</p>
             <div className="flex gap-4 justify-center flex-wrap">
-              <button className="cta-btn">Schedule a Call</button>
+              <button className="cta-btn" onClick={() => window.location.href = "https://forms.gle/6d9VTgV8EauLAQK18"}>Schedule a Call</button>
               <button className="cta-btn inline-block no-underline">Download Brochure</button>
             </div>
           </div>

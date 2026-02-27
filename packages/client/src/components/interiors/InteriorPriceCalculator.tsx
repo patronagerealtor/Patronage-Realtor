@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useReducer } from "react";
 import { calculatePrice } from "../../lib/interiors/priceCalculator";
 import { BHK, PackageTier, AREA_BANDS } from "../../lib/interiors/pricingConfig";
 import { Card, CardTitle } from "../ui/card";
@@ -14,20 +14,58 @@ import {
 } from "../ui/select";
 import { Calculator } from "lucide-react";
 
+type CustomizationLevel = "low" | "medium" | "high";
+
+type CalculatorState = {
+  bhk: BHK;
+  pkg: PackageTier;
+  renovation: boolean;
+  customization: CustomizationLevel;
+  area: number | undefined;
+};
+
+type CalculatorAction =
+  | { type: "SET_BHK"; payload: BHK }
+  | { type: "SET_PKG"; payload: PackageTier }
+  | { type: "SET_RENOVATION"; payload: boolean }
+  | { type: "SET_CUSTOMIZATION"; payload: CustomizationLevel }
+  | { type: "SET_AREA"; payload: number | undefined };
+
+const initialState: CalculatorState = {
+  bhk: "2bhk",
+  pkg: "signature",
+  renovation: false,
+  customization: "medium",
+  area: undefined,
+};
+
+function calculatorReducer(state: CalculatorState, action: CalculatorAction): CalculatorState {
+  switch (action.type) {
+    case "SET_BHK":
+      return { ...state, bhk: action.payload };
+    case "SET_PKG":
+      return { ...state, pkg: action.payload };
+    case "SET_RENOVATION":
+      return { ...state, renovation: action.payload };
+    case "SET_CUSTOMIZATION":
+      return { ...state, customization: action.payload };
+    case "SET_AREA":
+      return { ...state, area: action.payload };
+    default:
+      return state;
+  }
+}
+
 export function InteriorPriceCalculator() {
-  const [bhk, setBhk] = useState<BHK>("2bhk");
-  const [pkg, setPkg] = useState<PackageTier>("gold");
-  const [renovation, setRenovation] = useState(false);
-  const [customization, setCustomization] =
-    useState<"low" | "medium" | "high">("medium");
-  const [area, setArea] = useState<number | undefined>(undefined);
+  const [state, dispatch] = useReducer(calculatorReducer, initialState);
+  const { bhk, pkg, renovation, customization, area } = state;
 
   const price = calculatePrice({
     bhk,
     packageTier: pkg,
     carpetArea: area,
     renovation,
-    customization
+    customization,
   });
 
   const band = AREA_BANDS[bhk];
@@ -58,7 +96,7 @@ export function InteriorPriceCalculator() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="calc-bhk">BHK</Label>
-                  <Select value={bhk} onValueChange={(v: string) => setBhk(v as BHK)}>
+                  <Select value={bhk} onValueChange={(v: string) => dispatch({ type: "SET_BHK", payload: v as BHK })}>
                     <SelectTrigger id="calc-bhk" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
@@ -71,15 +109,15 @@ export function InteriorPriceCalculator() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="calc-pkg">Package</Label>
-                  <Select value={pkg} onValueChange={(v: string) => setPkg(v as PackageTier)}>
+                  <Select value={pkg} onValueChange={(v: string) => dispatch({ type: "SET_PKG", payload: v as PackageTier })}>
                     <SelectTrigger id="calc-pkg" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="silver">Silver</SelectItem>
-                      <SelectItem value="gold">Gold</SelectItem>
-                      <SelectItem value="platinum">Platinum</SelectItem>
-                      <SelectItem value="ultra">Ultra-Luxury</SelectItem>
+                      <SelectItem value="essence">Essence</SelectItem>
+                      <SelectItem value="signature">Signature</SelectItem>
+                      <SelectItem value="elite">Elite</SelectItem>
+                      <SelectItem value="bespoke">Bespoke</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -92,7 +130,7 @@ export function InteriorPriceCalculator() {
                     className="w-full"
                     value={area ?? ""}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setArea(e.target.value ? Number(e.target.value) : undefined)
+                      dispatch({ type: "SET_AREA", payload: e.target.value ? Number(e.target.value) : undefined })
                     }
                   />
                 </div>
@@ -101,20 +139,20 @@ export function InteriorPriceCalculator() {
                     id="calc-renovation"
                     type="checkbox"
                     checked={renovation}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRenovation(e.target.checked)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: "SET_RENOVATION", payload: e.target.checked })}
                     className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
                   />
                   <Label htmlFor="calc-renovation" className="cursor-pointer font-normal">
                     Renovation (existing flat)
                   </Label>
                 </div>
-                {pkg !== "ultra" ? (
+                {pkg !== "bespoke" ? (
                   <div className="space-y-2">
                     <Label htmlFor="calc-custom">Customization</Label>
                     <Select
                       value={customization}
                       onValueChange={(v: string) =>
-                        setCustomization(v as "low" | "medium" | "high")
+                        dispatch({ type: "SET_CUSTOMIZATION", payload: v as CustomizationLevel })
                       }
                     >
                       <SelectTrigger id="calc-custom" className="w-full">

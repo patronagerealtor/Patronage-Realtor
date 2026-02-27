@@ -161,19 +161,25 @@ export function Footer() {
             </div>
             <div className="flex gap-4 mt-6">
               <a
-                href="#"
+                href="https://www.facebook.com/patronagerealtor"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground"
               >
                 <Facebook className="h-5 w-5" />
               </a>
               <a
                 href="https://www.instagram.com/patronage_realtor?igsh=ejZ1YXZ5MGsxdm55&utm_source=qr"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground"
               >
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href="#"
+                href="https://www.linkedin.com/company/patronage-realtor"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground"
               >
                 <Linkedin className="h-5 w-5" />
@@ -185,13 +191,13 @@ export function Footer() {
         <div className="border-t border-border/50 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
           <p>&copy; 2026 Patronage.co. All rights reserved.</p>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-foreground">
+            <a href="/terms" className="hover:text-foreground">
               Terms
             </a>
-            <a href="#" className="hover:text-foreground">
+            <a href="/privacy" className="hover:text-foreground">
               Privacy
             </a>
-            <a href="#" className="hover:text-foreground">
+            <a href="/cookies" className="hover:text-foreground">
               Cookies
             </a>
           </div>
