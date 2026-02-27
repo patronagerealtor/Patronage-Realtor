@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster";
@@ -15,7 +15,6 @@ import DataEntry from "./pages/DataEntry";
 import Blogs from "./pages/Blogs";
 import Investment from "./pages/Investment";
 import InvestmentDetails from "./pages/InvestmentDetails";
-import InvestmentInsert from "./pages/InvestmentInsert";
 
 import { Webinar } from "./pages/Webinar";
 
@@ -25,7 +24,9 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/properties/:slug" component={Properties} />
       <Route path="/properties" component={Properties} />
-      <Route path="/investment/insert" component={InvestmentInsert} />
+      <Route path="/investment/insert">
+        {() => <Redirect to="/data-entry?mode=commercial" />}
+      </Route>
       <Route path="/investment/:type/:id" component={InvestmentDetails} />
       <Route path="/investment" component={Investment} />
 
