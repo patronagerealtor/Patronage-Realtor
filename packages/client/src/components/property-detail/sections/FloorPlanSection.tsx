@@ -22,6 +22,8 @@ type FloorPlanSectionProps = {
   sectionRef: (el: HTMLElement | null) => void;
   /** When provided, "Request a Floor Plan" opens a form and submits here. On success (resolved true), section shows "We'll Get Back to You <Name>". */
   onFloorPlanRequest?: (payload: FloorPlanRequestPayload) => Promise<boolean>;
+  /** When provided, "Request a Floor Plan" opens the floor plan request modal (e.g. FloorPlanRequestDialog). Takes precedence over inline form. */
+  onRequestFloorPlan?: () => void;
 };
 
 function DetailItem({
@@ -45,6 +47,7 @@ export function FloorPlanSection({
   data,
   sectionRef,
   onFloorPlanRequest,
+  onRequestFloorPlan,
 }: FloorPlanSectionProps) {
   const plans = data.floorPlans ?? [];
 
@@ -123,11 +126,11 @@ export function FloorPlanSection({
             <div className="absolute inset-0 flex items-center justify-center pt-20">
               <button
                 type="button"
-                onClick={onFloorPlanRequest ? handleOpenRequest : undefined}
-                disabled={!!submittedName}
-                className="rounded-md bg-primary px-6 py-3 font-medium text-primary-foreground shadow-lg transition-transform duration-200 hover:scale-105 disabled:cursor-default disabled:opacity-90"
+                onClick={onRequestFloorPlan ?? (onFloorPlanRequest ? handleOpenRequest : undefined)}
+                disabled={!onRequestFloorPlan && !!submittedName}
+                className="rounded-full bg-background/25 px-5 py-2.5 text-sm font-semibold text-white shadow-xl ring-1 ring-white/20 backdrop-blur-md transition-transform duration-200 hover:scale-105 hover:bg-background/30 disabled:cursor-default disabled:opacity-90 sm:px-7 sm:py-3 sm:text-base [text-shadow:0_1px_2px_rgba(0,0,0,0.5),0_0_1px_rgba(0,0,0,0.8)]"
               >
-                {requestCtaContent}
+                {onRequestFloorPlan ? "Request a Floor Plan" : requestCtaContent}
               </button>
             </div>
           </div>

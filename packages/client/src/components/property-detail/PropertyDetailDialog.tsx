@@ -172,7 +172,8 @@ export function PropertyDetailDialog({
       email: payload.email,
       phone: payload.whatsapp,
       property_id: propertyId,
-      property_title: `${propertyTitle} (Floor Plan Request)`,
+      property_title: propertyTitle,
+      lead_type: "floorplan_request",
     });
     if (result.success) {
       toast({ title: "Request sent", description: "We'll get back to you soon." });
@@ -246,7 +247,11 @@ export function PropertyDetailDialog({
                   <OverviewSection data={data} sectionRef={setSectionRef("Overview")} />
                   <DetailsSection data={data} sectionRef={setSectionRef("Details")} />
                   <AboutSection data={data} sectionRef={setSectionRef("About")} />
-                  <FloorPlanSection data={data} sectionRef={setSectionRef("Floor Plan")} />
+                  <FloorPlanSection
+                    data={data}
+                    sectionRef={setSectionRef("Floor Plan")}
+                    onRequestFloorPlan={() => setFloorPlanRequestOpen(true)}
+                  />
                   <AmenitiesSection data={data} sectionRef={setSectionRef("Amenities")} />
                   <GallerySection data={data} sectionRef={setSectionRef("Gallery")} />
                 </main>

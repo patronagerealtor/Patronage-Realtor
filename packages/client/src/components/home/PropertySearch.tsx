@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, memo } from "react";
 import { useLocation } from "wouter";
-import { Search, MapPin, DollarSign, Layers, X } from "lucide-react";
+import { Search, MapPin, Layers, X } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   Select,
@@ -140,11 +140,11 @@ function PropertySearchInner({
     setStatus("");
     setLocationVal("");
     setBhkType("");
-    setPropertyType("");
-    setBudget("");
+    setMinPrice(DEFAULT_MIN_PRICE);
+    setMaxPrice(sliderMax);
     setLocation("/properties");
     onSearchComplete?.();
-  }, [setLocation, onSearchComplete]);
+  }, [sliderMax, setLocation, onSearchComplete]);
 
   const hasActiveFilters = !!(
     status ||
@@ -241,8 +241,7 @@ function PropertySearchInner({
 
           <div className="space-y-3">
             <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              <span>Budget (Lakhs)</span>
+              <span>Budget</span>
             </label>
             <p className="text-sm font-medium text-foreground tabular-nums">{budgetLabel}</p>
             <Slider
@@ -299,8 +298,7 @@ function PropertySearchInner({
 
             <div className="space-y-2 lg:col-span-1">
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pl-0.5 flex items-center gap-1">
-                <DollarSign className="h-3.5 w-3.5" />
-                Budget (Lakhs)
+                Budget
               </label>
               <p className="text-sm font-medium text-foreground tabular-nums mb-1">{budgetLabel}</p>
               <Slider

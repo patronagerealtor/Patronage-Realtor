@@ -16,7 +16,7 @@ import Blogs from "./pages/Blogs";
 import Investment from "./pages/Investment";
 import InvestmentDetails from "./pages/InvestmentDetails";
 import { Webinar } from "./pages/Webinar";
-import { ProtectedRoute, LoginPage } from "./components/auth/ProtectedRoute";
+import { LoginPage } from "./components/auth/ProtectedRoute";
 
 function Router() {
   return (
@@ -39,11 +39,7 @@ function Router() {
       <Route path="/about-us" component={AboutUs} />
       <Route path="/calculators" component={Calculators} />
       <Route path="/login" component={LoginPage} />
-      <Route path="/data-entry">
-        <ProtectedRoute>
-          <DataEntry />
-        </ProtectedRoute>
-      </Route>
+      <Route path="/data-entry" component={DataEntry} />
       <Route component={NotFound} />
     </Switch>
   );
