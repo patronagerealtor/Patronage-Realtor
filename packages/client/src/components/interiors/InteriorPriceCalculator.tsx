@@ -1,9 +1,10 @@
-import { useReducer } from "react";
+import { useReducer, useState } from "react";
 import { calculatePrice } from "../../lib/interiors/priceCalculator";
 import { BHK, PackageTier, AREA_BANDS } from "../../lib/interiors/pricingConfig";
 import { Card, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import {
   Select,
@@ -60,6 +61,11 @@ export function InteriorPriceCalculator() {
   const [state, dispatch] = useReducer(calculatorReducer, initialState);
   const { bhk, pkg, renovation, customization, area } = state;
 
+  const [detailsSubmitted, setDetailsSubmitted] = useState(false);
+  const [submittedName, setSubmittedName] = useState<string | null>(null);
+  const [formValues, setFormValues] = useState({ name: "", email: "", whatsapp: "" });
+  const [formError, setFormError] = useState<string | null>(null);
+
   const price = calculatePrice({
     bhk,
     packageTier: pkg,
@@ -69,6 +75,20 @@ export function InteriorPriceCalculator() {
   });
 
   const band = AREA_BANDS[bhk];
+
+  const handleDetailsSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    const name = formValues.name.trim();
+    const email = formValues.email.trim();
+    const whatsapp = formValues.whatsapp.trim();
+    if (!name || !email || !whatsapp) {
+      setFormError("Name, WhatsApp No. and Email are required.");
+      return;
+    }
+    setSubmittedName(name);
+    setDetailsSubmitted(true);
+  };
 
   return (
     <section id="calculate-interior" className="py-20 bg-muted/30">
@@ -171,22 +191,76 @@ export function InteriorPriceCalculator() {
               </div>
             </Card>
 
-            {/* Right: Output */}
+            {/* Right: Output or contact form */}
             <div className="lg:col-span-7 flex flex-col">
               <Card className="p-6 flex flex-col justify-center min-h-full border-border shadow-lg bg-muted/20">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                  Estimated cost range
-                </h3>
-                <p className="text-3xl md:text-4xl font-bold text-primary mb-4">
-                  {price.max ? (
-                    <>₹{price.min}L – ₹{price.max}L</>
-                  ) : (
-                    <>From ₹{price.min}L+</>
-                  )}*
-                </p>
-                <p className="text-sm text-muted-foreground font-bold" >
-                  Final pricing depends on layout, material selection and site conditions.
-                </p>
+                {detailsSubmitted && submittedName ? (
+                  <>
+                    <p className="text-lg font-medium text-primary mb-4">
+                      We'll Get Back to You {submittedName}
+                    </p>
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                      Estimated cost range
+                    </h3>
+                    <p className="text-3xl md:text-4xl font-bold text-primary mb-4">
+                      {price.max ? (
+                        <>₹{price.min}L – ₹{price.max}L</>
+                      ) : (
+                        <>From ₹{price.min}L+</>
+                      )}*
+                    </p>
+                    <p className="text-sm text-muted-foreground font-bold">
+                      Final pricing depends on layout, material selection and site conditions.
+                    </p>
+                  </>
+                ) : (
+                  <form onSubmit={handleDetailsSubmit} className="space-y-4">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                      Enter your details to see estimate
+                    </h3>
+                    <div className="space-y-2">
+                      <Label htmlFor="ipc-name">Name <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="ipc-name"
+                        value={formValues.name}
+                        onChange={(e) => setFormValues((p) => ({ ...p, name: e.target.value }))}
+                        placeholder="Your name"
+                        required
+                        autoComplete="name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ipc-whatsapp">WhatsApp No. <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="ipc-whatsapp"
+                        type="tel"
+                        value={formValues.whatsapp}
+                        onChange={(e) => setFormValues((p) => ({ ...p, whatsapp: e.target.value }))}
+                        placeholder="e.g. 9876543210"
+                        required
+                        autoComplete="tel"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="ipc-email">Email <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="ipc-email"
+                        type="email"
+                        value={formValues.email}
+                        onChange={(e) => setFormValues((p) => ({ ...p, email: e.target.value }))}
+                        placeholder="you@example.com"
+                        required
+                        autoComplete="email"
+                      />
+                    </div>
+                    {formError && (
+                      <p className="text-sm text-destructive">{formError}</p>
+                    )}
+                    <Button type="submit" className="w-full">
+                      See my estimate
+                    </Button>
+                  </form>
+                )}
               </Card>
             </div>
           </div>

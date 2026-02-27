@@ -108,7 +108,8 @@ function ImageField({
   );
 }
 
-export default function InvestmentInsert() {
+/** Content-only component for use inside Data Entry (Commercial mode). */
+export function InvestmentInsertContent() {
   const { commercial, land, addCommercial, addLand, removeCommercial, removeLand } = useInvestmentProperties();
   const [activeTab, setActiveTab] = useState<"commercial" | "land">("commercial");
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -178,23 +179,8 @@ export default function InvestmentInsert() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Link href="/investment">
-            <Button variant="ghost" size="icon" className="shrink-0" aria-label="Back to Investment">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-xl font-semibold">Investment data entry</h1>
-            <p className="text-sm text-muted-foreground">Add commercial or land listings for the Investment page. Not linked from main site.</p>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8 max-w-4xl flex-grow">
-        {message && (
+    <>
+      {message && (
           <div
             className={`mb-6 rounded-lg border px-4 py-3 text-sm ${
               message.type === "success" ? "border-green-500/50 bg-green-500/10 text-green-700 dark:text-green-400" : "border-destructive/50 bg-destructive/10 text-destructive"
@@ -259,7 +245,7 @@ export default function InvestmentInsert() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="c-price">Price</Label>
-                      <Input id="c-price" value={commercialForm.price} onChange={(e) => setCommercialForm((p) => ({ ...p, price: e.target.value }))} placeholder="e.g. $42M" />
+                      <Input id="c-price" value={commercialForm.price} onChange={(e) => setCommercialForm((p) => ({ ...p, price: e.target.value }))} placeholder="e.g. ₹42 Cr" />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="c-badge">Badge</Label>
@@ -347,7 +333,7 @@ export default function InvestmentInsert() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="l-price">Price</Label>
-                      <Input id="l-price" value={landForm.price} onChange={(e) => setLandForm((p) => ({ ...p, price: e.target.value }))} placeholder="e.g. $8.4M" />
+                      <Input id="l-price" value={landForm.price} onChange={(e) => setLandForm((p) => ({ ...p, price: e.target.value }))} placeholder="e.g. ₹8.4 Cr" />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -396,6 +382,28 @@ export default function InvestmentInsert() {
             )}
           </TabsContent>
         </Tabs>
+    </>
+  );
+}
+
+export default function InvestmentInsert() {
+  return (
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+      <header className="border-b border-border bg-card">
+        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
+          <Link href="/data-entry?mode=commercial">
+            <Button variant="ghost" size="icon" className="shrink-0" aria-label="Back to Data Entry">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-xl font-semibold">Investment data entry</h1>
+            <p className="text-sm text-muted-foreground">Add commercial or land listings for the Investment page.</p>
+          </div>
+        </div>
+      </header>
+      <main className="container mx-auto px-4 py-8 max-w-4xl flex-grow">
+        <InvestmentInsertContent />
       </main>
     </div>
   );

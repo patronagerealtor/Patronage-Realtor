@@ -62,7 +62,5 @@ The frontend follows a modular component-based architecture:
 - Nodemailer (email services)
 - Passport with passport-local (authentication)
 
-### Replit-Specific
-- `@replit/vite-plugin-runtime-error-modal` for error display
-- `@replit/vite-plugin-cartographer` and `@replit/vite-plugin-dev-banner` for development
-- Custom `vite-plugin-meta-images` for OpenGraph image handling
+### Build / tooling
+- Custom `vite-plugin-meta-images` for OpenGraph image handling (uses `SITE_ORIGIN` when set)

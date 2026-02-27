@@ -381,7 +381,7 @@ export function PropertyForm({
               <Input
                 value={price}
                 onChange={(e) => setPrice(e.target.value.replace(/[a-zA-Z]/g, ""))}
-                placeholder='e.g. "$1,200,000"'
+                placeholder='e.g. "₹50 Lakh" or "₹1.2 Cr"'
               />
             </div>
           </div>

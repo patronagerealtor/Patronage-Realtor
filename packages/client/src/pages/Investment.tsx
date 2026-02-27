@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "wouter";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { useInvestmentProperties } from "../hooks/useInvestmentProperties";
@@ -14,7 +15,7 @@ const commercialPropertiesDefault = [
     size: "85,000 sq ft",
     roi: "14.2%",
     status: "Available",
-    price: "$42M",
+    price: "₹42 Cr",
     img: "https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80",
     badge: "Hot",
   },
@@ -26,7 +27,7 @@ const commercialPropertiesDefault = [
     size: "120,000 sq ft",
     roi: "11.8%",
     status: "Leased",
-    price: "$67M",
+    price: "₹67 Cr",
     img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80",
     badge: "Leased",
   },
@@ -38,7 +39,7 @@ const commercialPropertiesDefault = [
     size: "200,000 sq ft",
     roi: "16.5%",
     status: "Available",
-    price: "$89M",
+    price: "₹89 Cr",
     img: "https://images.unsplash.com/photo-1553413077-190dd305871c?w=600&q=80",
     badge: "New",
   },
@@ -52,7 +53,7 @@ const landListingsDefault = [
     acres: "48 Acres",
     zoning: "Mixed-Use",
     potential: "Residential + Retail",
-    price: "$8.4M",
+    price: "₹8.4 Cr",
     img: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=600&q=80",
     badge: "Prime",
   },
@@ -63,7 +64,7 @@ const landListingsDefault = [
     acres: "120 Acres",
     zoning: "Industrial",
     potential: "Manufacturing Hub",
-    price: "$14.2M",
+    price: "₹14.2 Cr",
     img: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=80",
     badge: "Hot",
   },
@@ -74,7 +75,7 @@ const landListingsDefault = [
     acres: "22 Acres",
     zoning: "Commercial",
     potential: "Hospitality / Resort",
-    price: "$19.7M",
+    price: "₹19.7 Cr",
     img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80",
     badge: "New",
   },
@@ -403,7 +404,9 @@ export default function InvestmentPage() {
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 2, background: p.status === "Available" ? "#E8F5EE" : "#E8EDF5", color: p.status === "Available" ? "#1A7A4A" : "#2A5A9A" }}>{p.status}</span>
-                        <button className="cta-btn" style={{ padding: "10px 20px", fontSize: 12 }}>View Details</button>
+                        <Link href={`/investment/commercial/${p.id}`}>
+                          <button type="button" className="cta-btn" style={{ padding: "10px 20px", fontSize: 12 }}>View Details</button>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -524,7 +527,9 @@ export default function InvestmentPage() {
                       </div>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <span style={{ fontSize: 11, fontWeight: 600, padding: "6px 12px", borderRadius: 2, background: "#E8F5EE", color: "#1A7A4A" }}>Available</span>
-                        <button className="cta-btn" style={{ padding: "10px 20px", fontSize: 12 }}>View Details</button>
+                        <Link href={`/investment/land/${p.id}`}>
+                          <button type="button" className="cta-btn" style={{ padding: "10px 20px", fontSize: 12 }}>View Details</button>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -561,6 +566,19 @@ export default function InvestmentPage() {
             </section>
           </div>
         )}
+
+        {/* List My Property */}
+        <section className="border border-border rounded-xl my-12 md:my-16 py-14 md:py-16 px-6 bg-card">
+          <div className="max-w-2xl mx-auto text-center">
+            <span style={S.eyebrow}>LIST YOUR PROPERTY</span>
+            <h2 style={{ ...S.sectionTitle, marginTop: 12, marginBottom: 14 }}>Have Commercial or Land to Sell?</h2>
+            <p style={{ fontSize: 15, color: "#666", lineHeight: 1.7, marginBottom: 28 }}>List your asset with our investment division. We connect serious sellers with qualified buyers and provide end-to-end support for commercial and land transactions.</p>
+            <div className="flex gap-4 justify-center flex-wrap">
+              <a href="https://forms.gle/zU7YFtxo2EZNx71DA" target="_blank" rel="noopener noreferrer" className="cta-btn inline-block no-underline">List My Property</a>
+              <Link href="/investment" className="outline-btn inline-block no-underline">View Listings</Link>
+            </div>
+          </div>
+        </section>
 
         {/* CTA */}
         <section className="bg-foreground text-background rounded-xl my-12 md:my-16 py-16 md:py-20 px-6">

@@ -7,29 +7,14 @@ import { useEffect } from "react";
 import { useLocation } from "wouter";
 
 const stats = [
-  { label: "Years Experience", value: "15+", icon: Award },
-  { label: "Properties Sold", value: "2,500+", icon: Target },
-  { label: "Happy Clients", value: "4,000+", icon: Users },
-  { label: "Cities Covered", value: "12", icon: CheckCircle2 },
+  { label: "Happy Clients", value: "1000+", icon: Users },
+  { label: "Trust", value: "100%", icon: CheckCircle2 },
+  { label: "Properties Sold", value: "500+", icon: Target },
+  { label: "Years Experience", value: "4+", icon: Award }
+
+
 ];
 
-const team = [
-  {
-    name: "Vikram Malhotra",
-    role: "Founder & CEO",
-    bio: "With over 20 years in luxury real estate, Vikram leads the vision for Patronage Realtor.",
-  },
-  {
-    name: "Ananya Sharma",
-    role: "Head of Interior Design",
-    bio: "Ananya brings artistic flair and practical functionality to every interior project.",
-  },
-  {
-    name: "Rahul Khanna",
-    role: "Director of Sales",
-    bio: "Rahul ensures that every client finds their perfect match in our property portfolio.",
-  },
-];
 
 export default function AboutUs() {
   const [, setLocation] = useLocation();
@@ -53,7 +38,7 @@ export default function AboutUs() {
             <span className="text-primary">Luxury Living</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Since 2011, Patronage Realtor has been at the forefront of the
+            Since 2021, Patronage Realtor has been at the forefront of the
             premium real estate market, connecting discerning clients with
             extraordinary homes.
           </p>
@@ -69,16 +54,12 @@ export default function AboutUs() {
                 Our Story
               </h2>
               <p className="text-lg text-muted-foreground mb-4">
-                What started as a boutique agency in New Delhi has grown into a
-                full-service real estate powerhouse. We recognized early on that
-                a home is more than just four walls; it's a sanctuary and a
-                reflection of one's aspirations.
-              </p>
-              <p className="text-lg text-muted-foreground mb-6">
-                Our approach combines deep market expertise with a personal
-                touch, ensuring that every transaction is handled with the
-                utmost integrity and professionalism.
-              </p>
+  Patronage Realtor was founded in <strong>2021</strong> with a vision to redefine how individuals experience real estate — through clarity, trust, and professional guidance. What began as a self-funded entrepreneurial initiative by <strong>Samyak Gaikwad</strong> during his college years evolved through hands-on industry learning, persistence, and a strong belief in transparent, value-driven real estate solutions. From the outset, the focus was never limited to transactions, but on helping individuals make informed and confident decisions for their future.
+</p>
+
+<p className="text-lg text-muted-foreground mb-6">
+  During the early phase, <strong>Prathmesh Mahidwar</strong> closely supported the journey, sharing a deep interest in promoting awareness and education within the real estate space. As their long-term vision aligned, he joined the organization, strengthening its strategic direction and contributing to the development of Patronage Realtor as an integrated real estate solutions platform. Today, the company offers property consulting, financial guidance, and interior solutions through trusted partner networks — ensuring clients receive comprehensive, ethical, and reliable support at every step of their journey.
+</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               {stats.map((stat) => (

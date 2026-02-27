@@ -23,6 +23,7 @@
     "npm-run-all": "^4.1.5"
   },
   "dependencies": {
-    "lightningcss-darwin-x64": "^1.30.2"
+    "@react-oauth/google": "^0.13.4",
+    "jwt-decode": "^4.0.0"
   }
 }
