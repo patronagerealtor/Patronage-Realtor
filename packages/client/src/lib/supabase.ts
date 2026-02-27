@@ -405,6 +405,81 @@ export async function uploadWebinarPaymentProof(
 }
 
 // ---------------------------------------------------------------------------
+// Newsletter subscribers (Footer). Run supabase-newsletter_subscribers.sql first.
+// ---------------------------------------------------------------------------
+
+const NEWSLETTER_SUBSCRIBERS_TABLE = "newsletter_subscribers";
+
+export type NewsletterSubscriberRow = {
+  id: string;
+  email: string;
+  created_at: string;
+};
+
+export type NewsletterSubscriberInsert = {
+  email: string;
+};
+
+export type InsertNewsletterSubscriberResult =
+  | { success: true }
+  | { success: false; code: "duplicate"; message: string }
+  | { success: false; code: "error"; message: string };
+
+const PG_UNIQUE_VIOLATION = "23505";
+
+export async function insertNewsletterSubscriber(
+  email: string
+): Promise<InsertNewsletterSubscriberResult> {
+  if (!supabase) {
+    return {
+      success: false,
+      code: "error",
+      message: "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env",
+    };
+  }
+  const trimmed = email.trim();
+  const payload: NewsletterSubscriberInsert = { email: trimmed };
+  const { error } = await supabase
+    .from(NEWSLETTER_SUBSCRIBERS_TABLE)
+    .insert(payload);
+  if (error) {
+    if (error.code === PG_UNIQUE_VIOLATION) {
+      return { success: false, code: "duplicate", message: "Already subscribed" };
+    }
+    return {
+      success: false,
+      code: "error",
+      message: error.message || "Failed to subscribe.",
+    };
+  }
+  return { success: true };
+}
+
+export async function fetchNewsletterSubscribers(): Promise<NewsletterSubscriberRow[]> {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase
+      .from(NEWSLETTER_SUBSCRIBERS_TABLE)
+      .select("id, email, created_at")
+      .order("created_at", { ascending: false });
+    if (error) return [];
+    return (data ?? []) as NewsletterSubscriberRow[];
+  } catch {
+    return [];
+  }
+}
+
+export async function deleteMultipleNewsletterSubscribers(ids: string[]): Promise<void> {
+  if (!supabase) throw new Error("Supabase is not configured.");
+  if (ids.length === 0) return;
+  const { error } = await supabase
+    .from(NEWSLETTER_SUBSCRIBERS_TABLE)
+    .delete()
+    .in("id", ids);
+  if (error) throw new Error(error.message || "Failed to delete subscribers.");
+}
+
+// ---------------------------------------------------------------------------
 // Contact leads (property inquiry form). Run supabase-contact_leads.sql first.
 // ---------------------------------------------------------------------------
 
