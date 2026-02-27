@@ -8,7 +8,6 @@ import { FeaturedProperties } from "@/components/home/FeaturedProperties";
 import { Interiors } from "@/components/home/Interiors";
 import { AboutPreview } from "@/components/home/AboutPreview";
 import { ContactCTA } from "@/components/home/ContactCTA";
-import { Chatbot } from "@/components/shared/Chatbot";
 
 export default function Home() {
   useEffect(() => {
@@ -41,7 +40,6 @@ export default function Home() {
       </main>
 
       <Footer />
-      <Chatbot />
     </div>
   );
 }
