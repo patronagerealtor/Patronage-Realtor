@@ -14,6 +14,7 @@ import { GallerySection } from "./sections/GallerySection";
 import { MapSection } from "./sections/MapSection";
 import { SimilarSection, type SimilarPropertyItem } from "./sections/SimilarSection";
 import { ContactCard } from "./sections/ContactCard";
+import { FloorPlanRequestDialog } from "./sections/FloorPlanRequestDialog";
 import { Button } from "../ui/button";
 import { useToast } from "../../hooks/use-toast";
 
@@ -50,6 +51,7 @@ export function PropertyDetailDialog({
   onSimilarPropertySelect,
 }: PropertyDetailDialogProps) {
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>("Overview");
+  const [floorPlanRequestOpen, setFloorPlanRequestOpen] = useState(false);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -165,6 +167,7 @@ export function PropertyDetailDialog({
   if (!open) return null;
 
   const content = (
+    <>
     <div className="fixed inset-0 z-50 flex flex-col bg-background text-foreground">
       <header className="sticky top-0 z-10 flex items-center gap-4 border-b border-border bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <button
@@ -225,7 +228,11 @@ export function PropertyDetailDialog({
                   <OverviewSection data={data} sectionRef={setSectionRef("Overview")} />
                   <DetailsSection data={data} sectionRef={setSectionRef("Details")} />
                   <AboutSection data={data} sectionRef={setSectionRef("About")} />
-                  <FloorPlanSection data={data} sectionRef={setSectionRef("Floor Plan")} />
+                  <FloorPlanSection
+                    data={data}
+                    sectionRef={setSectionRef("Floor Plan")}
+                    onRequestFloorPlan={() => setFloorPlanRequestOpen(true)}
+                  />
                   <AmenitiesSection data={data} sectionRef={setSectionRef("Amenities")} />
                   <GallerySection data={data} sectionRef={setSectionRef("Gallery")} />
                 </main>
@@ -257,6 +264,14 @@ export function PropertyDetailDialog({
         </div>
       </div>
     </div>
+
+    <FloorPlanRequestDialog
+      open={floorPlanRequestOpen}
+      onOpenChange={setFloorPlanRequestOpen}
+      propertyId={property ? String(property.id) : ""}
+      propertyTitle={data?.title ?? (property && "title" in property ? String((property as { title?: string }).title ?? "") : "") ?? "Property"}
+    />
+    </>
   );
 
   return createPortal(content, document.body);

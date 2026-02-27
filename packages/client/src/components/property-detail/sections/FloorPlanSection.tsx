@@ -5,6 +5,8 @@ import type { PropertyDetailData } from "@/types/propertyDetail";
 type FloorPlanSectionProps = {
   data: PropertyDetailData;
   sectionRef: (el: HTMLElement | null) => void;
+  /** Called when user clicks "Request a Floor Plan" (only when no plans). */
+  onRequestFloorPlan?: () => void;
 };
 
 function DetailItem({
@@ -27,6 +29,7 @@ function DetailItem({
 export function FloorPlanSection({
   data,
   sectionRef,
+  onRequestFloorPlan,
 }: FloorPlanSectionProps) {
   const plans = data.floorPlans ?? [];
 
@@ -49,17 +52,18 @@ export function FloorPlanSection({
             Floor Plan
           </h2>
 
-          <div className="relative mt-6 w-full overflow-hidden rounded-lg border border-border">
+          <div className="relative mt-6 w-full overflow-hidden rounded-lg border border-border min-h-[180px] sm:min-h-[240px] md:min-h-[280px]">
             <img
               src="/Hero/FloorPlan Fallback Image.png"
               alt="Floor plan fallback"
-              className="h-full w-full object-cover"
+              className="h-full min-h-[180px] w-full object-cover sm:min-h-[240px] md:min-h-[280px]"
             />
-
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+            <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" aria-hidden />
+            <div className="absolute inset-0 flex items-center justify-center pt-20">
               <button
                 type="button"
-                className="rounded-md bg-primary px-6 py-3 font-medium text-primary-foreground shadow-lg transition-transform duration-200 hover:scale-105"
+                onClick={() => onRequestFloorPlan?.()}
+                className="rounded-full bg-background/25 px-5 py-2.5 text-sm font-semibold text-white shadow-xl ring-1 ring-white/20 backdrop-blur-md transition-transform duration-200 hover:scale-105 hover:bg-background/30 sm:px-7 sm:py-3 sm:text-base [text-shadow:0_1px_2px_rgba(0,0,0,0.5),0_0_1px_rgba(0,0,0,0.8)]"
               >
                 Request a Floor Plan
               </button>

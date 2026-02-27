@@ -501,6 +501,8 @@ export type ContactLeadInsert = {
   phone: string;
   property_id: string;
   property_title: string;
+  /** Optional. Defaults to "site_visit" when omitted. Use "floorplan_request" for floor plan requests. */
+  lead_type?: string;
 };
 
 export type InsertContactLeadResult =
@@ -522,6 +524,7 @@ export async function insertContactLead(
     phone: row.phone.trim(),
     property_id: row.property_id,
     property_title: row.property_title.trim(),
+    lead_type: row.lead_type ?? "site_visit",
   };
   const { data, error } = await supabase
     .from(CONTACT_LEADS_TABLE)
