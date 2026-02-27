@@ -29,6 +29,8 @@ export type Property = {
   longitude?: number | null;
   google_map_link?: string | null;
   price_value?: number | null;
+  price_min?: number | null;
+  price_max?: number | null;
   slug?: string;
   rera_applicable?: boolean;
   rera_number?: string | null;
