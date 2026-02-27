@@ -132,7 +132,7 @@ export function Hero() {
           </motion.div>
 
           {/* Action Buttons */}
-          <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-8 md:gap-12 pt-8">
+          <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-8 md:gap-12 pt-1">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: ENTRY_OPACITY, x: 0 }}
@@ -182,7 +182,7 @@ export function Hero() {
               hidden: {},
               visible: { transition: { staggerChildren: 0.2 } },
             }}
-            className="mt-12 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-center"
+            className="mt-2 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-center"
           >
             <TagItem
               text="Dream it !"

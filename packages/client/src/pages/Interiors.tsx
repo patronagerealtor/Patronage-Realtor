@@ -1,7 +1,6 @@
 {/* Interiors.tsx */}
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Scene } from "../components/ui/hero-section";
+import React, { useCallback, useState } from "react";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { Button } from "../components/ui/button";
@@ -16,12 +15,10 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
 } from "../components/ui/dialog";
 import { Badge } from "../components/ui/badge";
 import { InteriorPriceCalculator } from "../components/interiors/InteriorPriceCalculator";
+import { InteriorsHero } from "../components/interiors/InteriorsHero";
 import {
   Sparkles,
   ArrowRight,
@@ -33,7 +30,6 @@ import {
   Award,
   Clock,
   Users,
-  ChevronDown,
   Shield,
   Check,
   X,
@@ -469,106 +465,18 @@ const whyChooseUs: WhyChooseItem[] = [
   },
 ];
 
-const HERO_SCROLL_MAX = 700;
-const SCROLL_THROTTLE_STEP = 16; // ~60fps
+// Memoized sections: only re-render when their props change (not on scroll).
 
-export default function Interiors() {
-  const [scrollY, setScrollY] = useState(0);
-  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
-  const [selectedBhk, setSelectedBhk] = useState<Bhk>(1);
-  const [galleryPopupImages, setGalleryPopupImages] = useState<DesignImage[] | null>(null);
-  const rafRef = useRef<number | null>(null);
-  const lastScrollRef = useRef(0);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (rafRef.current !== null) return;
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = null;
-        const y = Math.min(HERO_SCROLL_MAX, window.scrollY);
-        const rounded = Math.floor(y / SCROLL_THROTTLE_STEP) * SCROLL_THROTTLE_STEP;
-        if (rounded !== lastScrollRef.current) {
-          lastScrollRef.current = rounded;
-          setScrollY(rounded);
-        }
-      });
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
-
-  const scrollToSection = useCallback((sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) element.scrollIntoView({ behavior: "smooth" });
-  }, []);
-
-  const handleInteriorTypeClick = useCallback((categoryId: string) => {
-    const el = document.getElementById("gallery");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-    const images = designImages.filter((img) => img.category === categoryId);
-    const toShow = images.length > 0 ? images : designImages;
-    setTimeout(() => setGalleryPopupImages(toShow), 450);
-  }, []);
-
-  const handleImageClick = useCallback((category: string) => {
-    const images = designImages.filter((img) => img.category === category);
-    setGalleryPopupImages(images.length > 0 ? images : designImages);
-  }, []);
-
-  const heroStyle = useMemo(
-    () => ({
-      transform: `translateY(${scrollY * 0.3}px)`,
-      opacity: Math.max(0, 1 - scrollY / 500),
-      willChange: scrollY < 500 ? "transform, opacity" : "auto",
-    }),
-    [scrollY]
-  );
-
+const InteriorsPackagesSection = React.memo(function InteriorsPackagesSection(props: {
+  selectedPackage: Package | null;
+  onSelectPackage: (pkg: Package | null) => void;
+  selectedBhk: Bhk;
+  onBhkChange: (bhk: Bhk) => void;
+  onCloseDialog: () => void;
+}) {
+  const { selectedPackage, onSelectPackage, selectedBhk, onBhkChange, onCloseDialog } = props;
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-
-      {/* Hero Section */}
-      <section
-        id="hero"
-        className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-gradient-to-br from-[#000] to-[#1A2428] text-white"
-      >
-        <div className="absolute inset-0">
-          <Scene />
-        </div>
-        <div
-          className="relative z-10 container mx-auto px-4 text-center"
-          style={heroStyle}
-        >
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 font-heading">
-            Design Your Dream
-            <br />
-            <span className="text-amber-300">Interior</span>
-          </h1>
-          <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
-            Where creativity meets functionality. Let us bring your vision to
-            life with stunning interior designs.
-          </p>
-          <Button
-            size="lg"
-            className="group text-lg px-8 py-6"
-            onClick={() => scrollToSection("packages")}
-          >
-            Explore Interiors
-            <ChevronDown className="w-5 h-5 ml-2 group-hover:translate-y-1 transition-transform" />
-          </Button>
-        </div>
-      </section>
-
-      {/* Packages Section */}
-      <section id="packages" className="py-20 bg-muted/30">
+    <section id="packages" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <Badge className="mb-4" variant="outline">Our Packages</Badge>
@@ -625,7 +533,7 @@ export default function Interiors() {
                 <CardFooter>
                   <Button
                     className="w-full group"
-                    onClick={() => setSelectedPackage(pkg)}
+                    onClick={() => onSelectPackage(pkg)}
                   >
                     Learn More
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -639,10 +547,7 @@ export default function Interiors() {
         <Dialog
           open={!!selectedPackage}
           onOpenChange={(open) => {
-            if (!open) {
-              setSelectedPackage(null);
-              setSelectedBhk(1);
-            }
+            if (!open) onCloseDialog();
           }}
         >
           <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] p-0 overflow-hidden flex flex-col">
@@ -671,7 +576,7 @@ export default function Interiors() {
                       <button
                         key={opt.bhk}
                         type="button"
-                        onClick={() => setSelectedBhk(opt.bhk)}
+                        onClick={() => onBhkChange(opt.bhk)}
                         className={`flex-shrink-0 px-6 py-4 rounded-2xl text-left min-w-[130px] transition-all ${
                           selectedBhk === opt.bhk
                             ? "bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/40"
@@ -749,11 +654,14 @@ export default function Interiors() {
           </DialogContent>
         </Dialog>
       </section>
+  );
+});
 
-      {/* Calculate your Interior */}
-      <InteriorPriceCalculator />
-
-      {/* Types of Interiors */}
+const InteriorsTypesSection = React.memo(function InteriorsTypesSection(props: {
+  onInteriorTypeClick: (categoryId: string) => void;
+}) {
+  const { onInteriorTypeClick } = props;
+  return (
       <section id="types" className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -774,7 +682,7 @@ export default function Interiors() {
             <Card
                 key={type.id}
                 className="text-center transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer group border-2 hover:border-primary/50"
-                onClick={() => handleInteriorTypeClick(type.id)}
+                onClick={() => onInteriorTypeClick(type.id)}
               >
                 <CardHeader>
                   <div className="mx-auto mb-4 p-4 rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
@@ -788,8 +696,16 @@ export default function Interiors() {
           </div>
         </div>
       </section>
+  );
+});
 
-      {/* Gallery Section — popup opens from this container */}
+const InteriorsGallerySection = React.memo(function InteriorsGallerySection(props: {
+  galleryPopupImages: DesignImage[] | null;
+  onImageClick: (category: string) => void;
+  onCloseGallery: () => void;
+}) {
+  const { galleryPopupImages, onImageClick, onCloseGallery } = props;
+  return (
       <section id="gallery" className="relative py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -810,11 +726,11 @@ export default function Interiors() {
                 key={image.id}
                 role="button"
                 tabIndex={0}
-                onClick={() => handleImageClick(image.category)}
+                onClick={() => onImageClick(image.category)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    handleImageClick(image.category);
+                    onImageClick(image.category);
                   }
                 }}
                 className="group relative overflow-hidden rounded-xl aspect-[4/3] cursor-pointer border border-border hover:border-primary/50 transition-colors"
@@ -842,7 +758,7 @@ export default function Interiors() {
               <div
                 className="fixed inset-0 z-40 bg-black/30"
                 aria-hidden
-                onClick={() => setGalleryPopupImages(null)}
+                onClick={onCloseGallery}
               />
               <div
                 className="fixed inset-4 z-50 rounded-2xl bg-white shadow-2xl flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-300 md:inset-8"
@@ -857,7 +773,7 @@ export default function Interiors() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setGalleryPopupImages(null)}
+                    onClick={onCloseGallery}
                     aria-label="Close gallery"
                     className="text-gray-600 hover:text-gray-900"
                   >
@@ -888,8 +804,11 @@ export default function Interiors() {
           )}
         </div>
       </section>
+  );
+});
 
-      {/* Why Choose Us */}
+const InteriorsWhySection = React.memo(function InteriorsWhySection() {
+  return (
       <section id="why-us" className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -921,8 +840,14 @@ export default function Interiors() {
           </div>
         </div>
       </section>
+  );
+});
 
-      {/* CTA Section */}
+const InteriorsCTASection = React.memo(function InteriorsCTASection(props: {
+  onScrollToSection: (sectionId: string) => void;
+}) {
+  const { onScrollToSection } = props;
+  return (
       <section className="py-20 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
           <Sparkles className="w-16 h-16 mx-auto mb-6 animate-pulse" />
@@ -937,13 +862,73 @@ export default function Interiors() {
             size="lg"
             variant="secondary"
             className="text-lg px-8 py-6 group"
-            onClick={() => scrollToSection("packages")}
+            onClick={() => onScrollToSection("packages")}
           >
             Get Started Now
             <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
       </section>
+  );
+});
+
+export default function Interiors() {
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
+  const [selectedBhk, setSelectedBhk] = useState<Bhk>(1);
+  const [galleryPopupImages, setGalleryPopupImages] = useState<DesignImage[] | null>(null);
+
+  const scrollToSection = useCallback((sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) element.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  const handleInteriorTypeClick = useCallback((categoryId: string) => {
+    const el = document.getElementById("gallery");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+    const images = designImages.filter((img) => img.category === categoryId);
+    const toShow = images.length > 0 ? images : designImages;
+    setTimeout(() => setGalleryPopupImages(toShow), 450);
+  }, []);
+
+  const handleImageClick = useCallback((category: string) => {
+    const images = designImages.filter((img) => img.category === category);
+    setGalleryPopupImages(images.length > 0 ? images : designImages);
+  }, []);
+
+  const handleClosePackageDialog = useCallback(() => {
+    setSelectedPackage(null);
+    setSelectedBhk(1);
+  }, []);
+
+  const handleCloseGallery = useCallback(() => setGalleryPopupImages(null), []);
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <Header />
+
+      <InteriorsHero onScrollToSection={scrollToSection} />
+
+      <InteriorsPackagesSection
+        selectedPackage={selectedPackage}
+        onSelectPackage={setSelectedPackage}
+        selectedBhk={selectedBhk}
+        onBhkChange={setSelectedBhk}
+        onCloseDialog={handleClosePackageDialog}
+      />
+
+      <InteriorPriceCalculator />
+
+      <InteriorsTypesSection onInteriorTypeClick={handleInteriorTypeClick} />
+
+      <InteriorsGallerySection
+        galleryPopupImages={galleryPopupImages}
+        onImageClick={handleImageClick}
+        onCloseGallery={handleCloseGallery}
+      />
+
+      <InteriorsWhySection />
+
+      <InteriorsCTASection onScrollToSection={scrollToSection} />
 
       <Footer />
     </div>

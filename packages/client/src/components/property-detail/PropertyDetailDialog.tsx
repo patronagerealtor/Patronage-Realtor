@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, Pencil, Share2 } from "lucide-react";
 import type { PropertyRow } from "@/lib/supabase";
+import { insertContactLead } from "@/lib/supabase";
 import type { Property } from "@/lib/propertyStore";
 import { toPropertyDetailData } from "./propertyDetailUtils";
 import { OverviewSection } from "./sections/OverviewSection";
@@ -141,6 +142,24 @@ export function PropertyDetailDialog({
     sectionRefs.current[key] = el;
   };
 
+  const handleContactSubmit = async (payload: { name: string; email: string; phone: string }) => {
+    if (!property) return;
+    const propertyId = String(property.id);
+    const propertyTitle = (data?.title ?? (property && "title" in property ? (property as { title?: string }).title : "") ?? "").trim() || "Property";
+    const result = await insertContactLead({
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      property_id: propertyId,
+      property_title: propertyTitle,
+    });
+    if (result.success) {
+      toast({ title: "Submitted", description: "We'll get back to you soon." });
+    } else {
+      toast({ title: "Failed to submit", description: result.error, variant: "destructive" });
+    }
+  };
+
   if (!open) return null;
 
   const content = (
@@ -197,11 +216,10 @@ export function PropertyDetailDialog({
 
       <div className="flex flex-1 min-h-0 flex-col">
         <div ref={scrollRef} className="flex-1 overflow-y-auto min-w-0">
-          <div className="px-4 py-6 md:px-6">
-            {/* Two-column layout so Contact sticks only until this block scrolls away (before Map) */}
+          <div className="px-4 py-6 md:px-6 lg:px-8">
             <div className="space-y-12">
-              <div className="flex gap-8">
-                <main className="min-w-0 max-w-4xl flex-1 space-y-12 pb-8">
+              <div className="flex gap-8 lg:gap-10">
+                <main className="min-w-0 flex-1 space-y-12 pb-8 lg:max-w-[80rem]">
                   <OverviewSection data={data} sectionRef={setSectionRef("Overview")} />
                   <DetailsSection data={data} sectionRef={setSectionRef("Details")} />
                   <AboutSection data={data} sectionRef={setSectionRef("About")} />
@@ -209,9 +227,9 @@ export function PropertyDetailDialog({
                   <AmenitiesSection data={data} sectionRef={setSectionRef("Amenities")} />
                   <GallerySection data={data} sectionRef={setSectionRef("Gallery")} />
                 </main>
-                <aside className="hidden lg:block w-80 shrink-0 border-l border-border pl-6">
-                  <div className="sticky top-24">
-                    <ContactCard />
+                <aside className="hidden lg:block w-[22rem] shrink-0">
+                  <div className="sticky top-1">
+                    <ContactCard onSubmit={handleContactSubmit} />
                   </div>
                 </aside>
               </div>
@@ -231,7 +249,7 @@ export function PropertyDetailDialog({
               />
             </div>
             <aside className="mt-8 lg:hidden">
-              <ContactCard />
+              <ContactCard onSubmit={handleContactSubmit} />
             </aside>
           </div>
         </div>

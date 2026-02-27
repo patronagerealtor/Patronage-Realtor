@@ -23,11 +23,6 @@ const styles = `
     from { transform: scale(1.07) translateY(6px); }
     to   { transform: scale(1) translateY(0); }
   }
-  @keyframes floatBadge {
-    0%, 100% { transform: translateY(0px); }
-    50%       { transform: translateY(-6px); }
-  }
-
   .int-root {
     --parchment: #F1F3E0;
     --sage-light: #A1BC98;
@@ -263,41 +258,6 @@ const styles = `
     transform: scale(1.04);
   }
 
-  /* Floating badge */
-  .int-badge {
-    position: absolute;
-    top: 36px;
-    right: 36px;
-    z-index: 4;
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    background: var(--parchment);
-    border: 1px solid var(--sage-border);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 32px rgba(61,74,58,0.12);
-    animation: floatBadge 4s ease-in-out 1.2s infinite;
-  }
-  .int-badge-num {
-    font-family: var(--serif);
-    font-size: 1.6rem;
-    font-weight: 400;
-    color: var(--sage-dark);
-    line-height: 1;
-  }
-  .int-badge-label {
-    font-size: 8px;
-    font-weight: 500;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--sage-ink);
-    opacity: 0.6;
-    margin-top: 2px;
-  }
-
   /* Bottom caption strip */
   .int-caption-strip {
     position: absolute;
@@ -316,31 +276,6 @@ const styles = `
     font-style: italic;
     color: var(--sage-dark);
   }
-  .int-caption-stats {
-    display: flex;
-    gap: 24px;
-  }
-  .int-stat {
-    text-align: right;
-  }
-  .int-stat-val {
-    display: block;
-    font-family: var(--serif);
-    font-size: 1.2rem;
-    font-weight: 400;
-    color: var(--sage-ink);
-    line-height: 1;
-  }
-  .int-stat-lbl {
-    display: block;
-    font-size: 8.5px;
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--sage-dark);
-    opacity: 0.7;
-    margin-top: 3px;
-  }
 
   /* ── RESPONSIVE ── */
   @media (max-width: 820px) {
@@ -356,11 +291,6 @@ const styles = `
     .int-text {
       padding: 52px 28px 60px;
     }
-    .int-badge {
-      width: 72px; height: 72px;
-      top: 20px; right: 20px;
-    }
-    .int-badge-num { font-size: 1.2rem; }
   }
 `;
 
@@ -425,23 +355,8 @@ export function Interiors() {
               className="int-img"
             />
 
-            <div className="int-badge">
-              <span className="int-badge-num">200+</span>
-              <span className="int-badge-label">Projects</span>
-            </div>
-
             <div className="int-caption-strip">
               <span className="int-caption-text">Curated living spaces</span>
-              <div className="int-caption-stats">
-                <div className="int-stat">
-                  <span className="int-stat-val">98%</span>
-                  <span className="int-stat-lbl">Satisfaction</span>
-                </div>
-                <div className="int-stat">
-                  <span className="int-stat-val">12yr</span>
-                  <span className="int-stat-lbl">Experience</span>
-                </div>
-              </div>
             </div>
           </div>
 
