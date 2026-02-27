@@ -105,7 +105,7 @@ export default function Calculators() {
   // --- 1. Loan Eligibility State ---
   const [eligIncome, setEligIncome] = useState(100000);
   const [eligEmi, setEligEmi] = useState(0);
-  const [eligInterestRate, setEligInterestRate] = useState(8.5);
+  const [eligInterestRate, setEligInterestRate] = useState("8.5");
   const [eligTenure, setEligTenure] = useState(20);
   const [eligResults, setEligResults] = useState({
     loanAmount: 0,
@@ -156,7 +156,7 @@ export default function Calculators() {
   // --- 4. Smart EMI State ---
   const [smartLoanAmount, setSmartLoanAmount] = useState(5000000);
   const [smartDownPayment, setSmartDownPayment] = useState(0);
-  const [smartInterestRate, setSmartInterestRate] = useState(8.5);
+  const [smartInterestRate, setSmartInterestRate] = useState("8.5");
   const [smartTenure, setSmartTenure] = useState(20);
   const [smartIncome, setSmartIncome] = useState(100000);
   const [smartExistingEmi, setSmartExistingEmi] = useState(0);
@@ -196,10 +196,11 @@ export default function Calculators() {
   // --- Calculation Logic ---
 
   const calculateEligibility = () => {
-    if (eligInterestRate <= 0 || eligIncome <= 0 || eligTenure <= 0) return;
+    const eligRateNum = parseFloat(eligInterestRate) || 0;
+    if (eligRateNum <= 0 || eligIncome <= 0 || eligTenure <= 0) return;
 
     // Use same rate as Smart EMI (8.5% default)
-    const rate = eligInterestRate / 12 / 100;
+    const rate = eligRateNum / 12 / 100;
     const months = eligTenure * 12;
 
     const disposableIncome = Math.max(0, eligIncome - eligEmi);
@@ -291,16 +292,20 @@ export default function Calculators() {
 
       // Capture results strictly at the selected horizon year
       if (i === rvbHorizon) {
+        // Verdict crosscheck: derive from break-even and horizon (past break-even => buying cheaper; before or no break-even => renting cheaper)
+        const result =
+          breakEvenYear === -1
+            ? "Renting is cheaper"
+            : rvbHorizon >= breakEvenYear
+              ? "Buying is cheaper"
+              : "Renting is cheaper";
         setRvbResults((prev) => ({
           ...prev,
           totalRent: Math.round(totalRentOutflow),
           totalEmi: Math.round(totalBuyingOutflow),
           futureValue: Math.round(houseFutureValue),
           netBuyingPosition: Math.round(houseFutureValue - totalBuyingOutflow),
-          result:
-            totalBuyingOutflow < totalRentOutflow
-              ? "Buying is cheaper"
-              : "Renting is cheaper",
+          result,
           breakEven: breakEvenYear,
         }));
       }
@@ -310,15 +315,16 @@ export default function Calculators() {
   };
 
   const calculateSmartEmi = () => {
+    const smartRateNum = parseFloat(smartInterestRate) || 0;
     if (
       smartLoanAmount <= 0 ||
-      smartInterestRate <= 0 ||
+      smartRateNum <= 0 ||
       smartTenure <= 0 ||
       smartIncome <= 0
     )
       return;
 
-    const rate = smartInterestRate / 12 / 100;
+    const rate = smartRateNum / 12 / 100;
     const months = smartTenure * 12;
     const emi =
       (smartLoanAmount * rate * Math.pow(1 + rate, months)) /
@@ -557,11 +563,13 @@ export default function Calculators() {
                       <Label>Interest (%)</Label>
                       <Input
                         type="text"
-                        value={smartInterestRate === 0 ? "" : smartInterestRate}
+                        inputMode="decimal"
+                        placeholder="e.g. 8.5"
+                        value={smartInterestRate}
                         onChange={(e) => {
                           const val = e.target.value;
                           if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                            setSmartInterestRate(val === "" ? 0 : Number(val));
+                            setSmartInterestRate(val);
                           }
                         }}
                       />
@@ -1271,11 +1279,13 @@ export default function Calculators() {
                       <Label>Interest (%)</Label>
                       <Input
                         type="text"
-                        value={eligInterestRate === 0 ? "" : eligInterestRate}
+                        inputMode="decimal"
+                        placeholder="e.g. 8.5"
+                        value={eligInterestRate}
                         onChange={(e) => {
                           const val = e.target.value;
                           if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                            setEligInterestRate(val === "" ? 0 : Number(val));
+                            setEligInterestRate(val);
                           }
                         }}
                       />
@@ -1377,7 +1387,7 @@ export default function Calculators() {
                     className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
                   >
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-medium text-foreground pr-4">
+                      <span className="text-left font-bold text-foreground pr-4">
                         How does the calculator decide my eligibility?
                       </span>
                     </AccordionTrigger>
@@ -1399,7 +1409,7 @@ export default function Calculators() {
                     className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
                   >
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-medium text-foreground pr-4">
+                      <span className="text-left font-bold text-foreground pr-4">
                         What is disposable income?
                       </span>
                     </AccordionTrigger>
@@ -1414,7 +1424,7 @@ export default function Calculators() {
                     className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
                   >
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-medium text-foreground pr-4">
+                      <span className="text-left font-bold text-foreground pr-4">
                         What is the Max EMI?
                       </span>
                     </AccordionTrigger>
@@ -1429,7 +1439,7 @@ export default function Calculators() {
                     className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
                   >
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-medium text-foreground pr-4">
+                      <span className="text-left font-bold text-foreground pr-4">
                         Why should I check eligibility before buying a home?
                       </span>
                     </AccordionTrigger>
@@ -1449,7 +1459,7 @@ export default function Calculators() {
                     className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
                   >
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-medium text-foreground pr-4">
+                      <span className="text-left font-bold text-foreground pr-4">
                         Is this calculator the same as what banks use?
                       </span>
                     </AccordionTrigger>
@@ -1722,7 +1732,7 @@ export default function Calculators() {
                     className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
                   >
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-medium text-foreground pr-4">
+                      <span className="text-left font-bold text-foreground pr-4">
                         How is stamp duty calculated?
                       </span>
                     </AccordionTrigger>
@@ -1740,7 +1750,7 @@ export default function Calculators() {
                     className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
                   >
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-medium text-foreground pr-4">
+                      <span className="text-left font-bold text-foreground pr-4">
                         What is TDS and how is it calculated?
                       </span>
                     </AccordionTrigger>
@@ -1755,7 +1765,7 @@ export default function Calculators() {
                     className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
                   >
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-medium text-foreground pr-4">
+                      <span className="text-left font-bold text-foreground pr-4">
                         How is maintenance cost calculated?
                       </span>
                     </AccordionTrigger>
@@ -1773,7 +1783,7 @@ export default function Calculators() {
                     className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
                   >
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-medium text-foreground pr-4">
+                      <span className="text-left font-bold text-foreground pr-4">
                         What are registration and advocate charges?
                       </span>
                     </AccordionTrigger>
@@ -1788,7 +1798,7 @@ export default function Calculators() {
                     className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
                   >
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-medium text-foreground pr-4">
+                      <span className="text-left font-bold text-foreground pr-4">
                         Why should I use the Ownership Cost Calculator?
                       </span>
                     </AccordionTrigger>
@@ -1807,7 +1817,7 @@ export default function Calculators() {
                     className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20"
                   >
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-medium text-foreground pr-4">
+                      <span className="text-left font-bold text-foreground pr-4">
                         Is this calculator accurate for real life purchases?
                       </span>
                     </AccordionTrigger>

@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster";
@@ -14,9 +14,9 @@ import NotFound from "./pages/not-found";
 import DataEntry from "./pages/DataEntry";
 import Blogs from "./pages/Blogs";
 import Investment from "./pages/Investment";
-import InvestmentInsert from "./pages/InvestmentInsert";
-
+import InvestmentDetails from "./pages/InvestmentDetails";
 import { Webinar } from "./pages/Webinar";
+import { ProtectedRoute, LoginPage } from "./components/auth/ProtectedRoute";
 
 function Router() {
   return (
@@ -24,7 +24,10 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/properties/:slug" component={Properties} />
       <Route path="/properties" component={Properties} />
-      <Route path="/investment/insert" component={InvestmentInsert} />
+      <Route path="/investment/insert">
+        {() => <Redirect to="/data-entry?mode=commercial" />}
+      </Route>
+      <Route path="/investment/:type/:id" component={InvestmentDetails} />
       <Route path="/investment" component={Investment} />
 
       {/* ✅ FIX 2: Change path to plural '/webinars' to match Header */}
@@ -35,7 +38,12 @@ function Router() {
       <Route path="/interiors" component={Interiors} />
       <Route path="/about-us" component={AboutUs} />
       <Route path="/calculators" component={Calculators} />
-      <Route path="/data-entry" component={DataEntry} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/data-entry">
+        <ProtectedRoute>
+          <DataEntry />
+        </ProtectedRoute>
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );

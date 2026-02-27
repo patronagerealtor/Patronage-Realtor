@@ -79,6 +79,8 @@ function PropertySearchInner({
   priceRangeMax = DEFAULT_MAX_PRICE,
 }: PropertySearchProps) {
   const [location, setLocation] = useLocation();
+  const pathname = location.split("?")[0];
+  const isOnHome = pathname === "/";
   const [status, setStatus] = useState("");
   const [locationVal, setLocationVal] = useState("");
   const [bhkType, setBhkType] = useState("");
@@ -138,11 +140,11 @@ function PropertySearchInner({
     setStatus("");
     setLocationVal("");
     setBhkType("");
-    setMinPrice(DEFAULT_MIN_PRICE);
-    setMaxPrice(sliderMax);
+    setPropertyType("");
+    setBudget("");
     setLocation("/properties");
     onSearchComplete?.();
-  }, [sliderMax, setLocation, onSearchComplete]);
+  }, [setLocation, onSearchComplete]);
 
   const hasActiveFilters = !!(
     status ||

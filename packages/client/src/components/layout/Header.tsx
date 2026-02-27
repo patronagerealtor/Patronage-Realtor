@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Menu, MapPin, Search } from "lucide-react";
 import { Button } from "../ui/button";
-import { Link, useLocation } from "wouter"; // ✅ Import Link
+import { Link, useLocation } from "wouter";
+import { isAuthenticated } from "../../lib/auth";
+import { UserProfile } from "../auth/UserProfile";
 import {
   Sheet,
   SheetContent,
@@ -21,7 +23,14 @@ const CONTACT_FORM_URL =
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [location] = useLocation(); // Optional: to style active state
+  const [location] = useLocation();
+  const [, setAuthVersion] = useState(0);
+  useEffect(() => {
+    const onAuthChange = () => setAuthVersion((v) => v + 1);
+    window.addEventListener("auth-change", onAuthChange);
+    return () => window.removeEventListener("auth-change", onAuthChange);
+  }, []);
+  const authenticated = isAuthenticated();
 
   const navLinkClass =
     "relative px-3 py-2 text-sm font-medium transition-colors hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all hover:after:w-full";
@@ -115,7 +124,14 @@ export function Header() {
         </div>
 
         {/* Right Action */}
-        <div className="hidden md:flex items-center">
+        <div className="hidden md:flex items-center gap-3">
+          {authenticated ? (
+            <UserProfile className="border-0 bg-transparent p-0 shadow-none" />
+          ) : (
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/login">Sign in</Link>
+            </Button>
+          )}
           <Button
             asChild
             className="transition-all hover:scale-105 hover:shadow-md"
@@ -185,6 +201,30 @@ export function Header() {
                 >
                   About Us
                 </Link>
+                {authenticated ? (
+                  <div
+                    className="mt-4"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setIsOpen(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setIsOpen(false);
+                      }
+                    }}
+                  >
+                    <UserProfile />
+                  </div>
+                ) : (
+                  <Link
+                    href="/login"
+                    onClick={() => setIsOpen(false)}
+                    className="text-lg font-medium"
+                  >
+                    Sign in
+                  </Link>
+                )}
                 <Button asChild className="mt-6 w-full">
                   <a
                     href={CONTACT_FORM_URL}

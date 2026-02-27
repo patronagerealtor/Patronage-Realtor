@@ -4,6 +4,7 @@ import { PropertyForm } from "../components/admin/PropertyForm";
 import { PropertyList } from "../components/admin/PropertyList";
 import { PropertyDetailDialog } from "../components/shared/PropertyDetailDialog";
 import { Button } from "../components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +25,8 @@ import {
 import type { Property } from "../lib/propertyStore";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { Download, Trash2, Users } from "lucide-react";
+import { Download, Trash2, Users, Home, Building2 } from "lucide-react";
+import { InvestmentInsertContent } from "./InvestmentInsert";
 
 type UpsertPropertyArg = Omit<Property, "id"> & { id?: string };
 
@@ -51,6 +53,13 @@ export default function DataEntry() {
   }, [location]);
 
   const editId = searchParams.get("edit");
+  const modeParam = searchParams.get("mode");
+  const urlMode = modeParam === "commercial" ? "commercial" : "residential";
+
+  const [dataEntryMode, setDataEntryMode] = useState<"residential" | "commercial">(urlMode);
+  useEffect(() => {
+    setDataEntryMode(urlMode);
+  }, [urlMode]);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(null);
@@ -387,10 +396,32 @@ export default function DataEntry() {
             Admin: Data Entry
           </h1>
           <p className="text-muted-foreground mt-2">
-            Add or edit properties used by the Property Details popup. Data is
-            stored in Supabase when configured, otherwise in your browser
-            (localStorage).
+            {dataEntryMode === "residential"
+              ? "Add or edit properties used by the Property Details popup. Data is stored in Supabase when configured, otherwise in your browser (localStorage)."
+              : "Add commercial or land listings for the Investment page. Stored in your browser (localStorage)."}
           </p>
+
+          <Tabs
+            value={dataEntryMode}
+            onValueChange={(v) => {
+              const mode = v as "residential" | "commercial";
+              setDataEntryMode(mode);
+              setLocation(mode === "commercial" ? "/data-entry?mode=commercial" : "/data-entry", { replace: true });
+            }}
+            className="mt-4"
+          >
+            <TabsList className="grid w-full max-w-full sm:max-w-xs grid-cols-2 h-auto py-2">
+              <TabsTrigger value="residential" className="gap-2 min-h-11 px-4 py-2 text-sm sm:text-base">
+                <Home className="h-4 w-4 shrink-0" />
+                Residential
+              </TabsTrigger>
+              <TabsTrigger value="commercial" className="gap-2 min-h-11 px-4 py-2 text-sm sm:text-base">
+                <Building2 className="h-4 w-4 shrink-0" />
+                Investment
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="residential" className="mt-0">
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm">
             <div className="flex flex-wrap items-center gap-3">
               <span
@@ -458,7 +489,6 @@ export default function DataEntry() {
               )}
             </Button>
           </div>
-        </div>
 
         <div className="max-w-6xl mx-auto grid lg:grid-cols-12 gap-6">
           <div className="lg:col-span-5 rounded-lg bg-muted/10 dark:bg-muted/15 p-4">
@@ -665,6 +695,13 @@ export default function DataEntry() {
             </div>
           </DialogContent>
         </Dialog>
+            </TabsContent>
+
+            <TabsContent value="commercial" className="mt-6">
+              <InvestmentInsertContent />
+            </TabsContent>
+          </Tabs>
+        </div>
       </main>
 
       <Footer />

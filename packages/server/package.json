@@ -10,6 +10,8 @@
     "start": "node dist/index.cjs",
     "check": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2"
+  },
   "devDependencies": {}
 }

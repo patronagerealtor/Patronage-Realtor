@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { Button, buttonVariants } from "../ui/button";
@@ -12,9 +12,33 @@ import { useProperties } from "../../hooks/use-properties";
 import type { PropertyRow } from "../../lib/supabase";
 import { getDisplayPrice } from "../../lib/formatIndianPrice";
 
+/** Deterministic hash from string (for daily seed). Same date => same featured set. */
+function hashString(str: string): number {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h << 5) - h + str.charCodeAt(i);
+    h |= 0;
+  }
+  return h;
+}
+
+/** Pick 3 properties at random, changing each day (seeded by YYYY-MM-DD). */
+function getDailyFeatured(properties: PropertyRow[], count: number): PropertyRow[] {
+  if (properties.length === 0) return [];
+  const today = new Date();
+  const dateSeed =
+    `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const shuffled = [...properties].sort((a, b) => {
+    const ha = hashString(`${dateSeed}-${a.id}`);
+    const hb = hashString(`${dateSeed}-${b.id}`);
+    return ha - hb;
+  });
+  return shuffled.slice(0, count);
+}
+
 export function FeaturedProperties() {
   const { properties } = useProperties();
-  const featured = properties.slice(0, 3);
+  const featured = useMemo(() => getDailyFeatured(properties, 3), [properties]);
   const [detailProperty, setDetailProperty] = useState<PropertyRow | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
@@ -48,7 +72,7 @@ export function FeaturedProperties() {
             Featured Properties
           </h2>
           <p className="text-muted-foreground max-w-lg">
-            Handpicked selection of the finest properties available this week.
+            A fresh random selection of three properties, updated every day.
           </p>
         </motion.div>
 
