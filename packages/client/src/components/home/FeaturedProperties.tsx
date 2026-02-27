@@ -71,7 +71,7 @@ export function FeaturedProperties() {
       </div>
 
       {/* Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
         {featured.map((property, index) => (
           <motion.div
             key={property.id}
@@ -79,9 +79,10 @@ export function FeaturedProperties() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
+            className="flex"
           >
             <Card
-              className="overflow-hidden group border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer"
+              className="overflow-hidden group border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col h-full min-h-[560px]"
               onClick={() => openDetail(property)}
               role="button"
               tabIndex={0}
@@ -92,7 +93,7 @@ export function FeaturedProperties() {
                 }
               }}
             >
-              <CardHeader className="p-0 relative">
+              <CardHeader className="p-0 relative shrink-0">
                 <Badge className="absolute top-4 left-4 z-10 bg-background/90 text-foreground backdrop-blur-sm shadow-sm">
                   {property.status}
                 </Badge>
@@ -125,40 +126,40 @@ export function FeaturedProperties() {
                 </div>
               </CardHeader>
 
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-heading font-bold text-xl">
+              <CardContent className="p-6 flex-1 flex flex-col min-h-0">
+                <div className="flex justify-between items-start gap-2 mb-2">
+                  <h3 className="font-heading font-bold text-xl line-clamp-2 min-w-0">
                     {property.title}
                   </h3>
-                  <span className="font-bold text-lg text-primary">
+                  <span className="font-bold text-lg text-primary shrink-0">
                     {getDisplayPrice(property)}
                   </span>
                 </div>
 
                 {property.developer ? (
-                  <div className="flex items-center text-muted-foreground text-sm mb-1">
+                  <div className="flex items-center text-muted-foreground text-sm mb-1 min-w-0">
                     <Building2 className="h-4 w-4 mr-1 shrink-0" />
-                    <span>{property.developer}</span>
+                    <span className="truncate">{property.developer}</span>
                   </div>
                 ) : null}
 
                 {property.location ? (
-                  <div className="flex items-center text-muted-foreground text-sm mb-1">
+                  <div className="flex items-center text-muted-foreground text-sm mb-1 min-w-0">
                     <MapPin className="h-4 w-4 mr-1 shrink-0" />
-                    <span>{property.location}</span>
+                    <span className="truncate">{property.location}</span>
                   </div>
                 ) : null}
 
                 {property.property_type ? (
-                  <div className="flex items-center text-muted-foreground text-sm mb-4">
+                  <div className="flex items-center text-muted-foreground text-sm mb-4 min-w-0">
                     <Home className="h-4 w-4 mr-1 shrink-0" />
-                    <span>{property.property_type}</span>
+                    <span className="truncate">{property.property_type}</span>
                   </div>
                 ) : (
                   <div className="mb-4" />
                 )}
 
-                <div className="flex items-center justify-between text-sm text-muted-foreground pt-4 border-t border-border">
+                <div className="flex items-center justify-between text-sm text-muted-foreground pt-4 border-t border-border mt-auto shrink-0">
                   {property.bhk_type ? (
                     <span className="flex items-center gap-1">
                       <Home className="h-4 w-4" /> {property.bhk_type}
@@ -176,7 +177,7 @@ export function FeaturedProperties() {
                 </div>
               </CardContent>
 
-              <CardFooter className="p-6 pt-0">
+              <CardFooter className="p-6 pt-0 shrink-0">
                 <Button
                   className="w-full transition-transform duration-300 hover:scale-105"
                   variant="outline"
