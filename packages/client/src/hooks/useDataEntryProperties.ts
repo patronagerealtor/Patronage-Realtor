@@ -60,6 +60,8 @@ function toProperty(row: PropertyRow): Property {
     longitude: row.longitude,
     google_map_link: row.google_map_link ?? undefined,
     price_value: row.price_value,
+    price_min: row.price_min,
+    price_max: row.price_max,
     slug: undefined,
     rera_applicable: row.rera_applicable ?? false,
     rera_number: row.rera_number ?? undefined,

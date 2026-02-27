@@ -53,10 +53,15 @@ function shouldLoad(index: number, active: number) {
   return Math.abs(index - active) <= 1;
 }
 
+const DRAG_THRESHOLD_PX = 5;
+
 export function Reels() {
   const containerRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const dragStartX = useRef(0);
+  const dragStartScrollLeft = useRef(0);
+  const didDragRef = useRef(false);
 
   const [activeIndex, setActiveIndex] = useState(INITIAL_INDEX);
   const [paused, setPaused] = useState(false);
@@ -64,6 +69,7 @@ export function Reels() {
   const [progress, setProgress] = useState<number[]>([]);
   const [showIcon, setShowIcon] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
 
   /* init arrays */
   useEffect(() => {
@@ -153,16 +159,101 @@ export function Reels() {
     []
   );
 
+  /* drag: compute active index from current scroll position */
+  const syncActiveIndexFromScroll = useCallback(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const center = container.scrollLeft + container.offsetWidth / 2;
+    let closest = 0;
+    let minDist = Infinity;
+    itemsRef.current.forEach((el, i) => {
+      if (!el) return;
+      const itemCenter = el.offsetLeft + el.offsetWidth / 2;
+      const d = Math.abs(center - itemCenter);
+      if (d < minDist) {
+        minDist = d;
+        closest = i;
+      }
+    });
+    setActiveIndex(closest);
+  }, []);
+
+  const getClientX = (e: MouseEvent | TouchEvent) =>
+    "touches" in e ? e.touches[0].clientX : e.clientX;
+
+  const handlePointerDown = useCallback(
+    (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+      const container = containerRef.current;
+      if (!container) return;
+      const x = "touches" in e ? e.touches[0].clientX : e.clientX;
+      dragStartX.current = x;
+      dragStartScrollLeft.current = container.scrollLeft;
+      didDragRef.current = false;
+      setIsDragging(true);
+
+      const onMove = (moveEvent: MouseEvent | TouchEvent) => {
+        const cx = getClientX(moveEvent);
+        const dx = dragStartX.current - cx;
+        container.scrollLeft = dragStartScrollLeft.current + dx;
+      };
+
+      const onUp = (upEvent: MouseEvent | TouchEvent) => {
+        const cx = getClientX(upEvent);
+        const moved = Math.abs(cx - dragStartX.current);
+        if (moved >= DRAG_THRESHOLD_PX) {
+          didDragRef.current = true;
+          syncActiveIndexFromScroll();
+        }
+        setIsDragging(false);
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+        window.removeEventListener("touchmove", onTouchMove);
+        window.removeEventListener("touchend", onUp);
+      };
+
+      const onTouchMove = (moveEvent: TouchEvent) => {
+        moveEvent.preventDefault();
+        onMove(moveEvent);
+      };
+
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+      window.addEventListener("touchmove", onTouchMove, { passive: false });
+      window.addEventListener("touchend", onUp);
+    },
+    [syncActiveIndexFromScroll]
+  );
+
+  const handleCardClick = useCallback((index: number) => {
+    if (didDragRef.current) {
+      didDragRef.current = false;
+      return;
+    }
+    setActiveIndex(index);
+  }, []);
+
   return (
     <section
       className="w-full py-16 bg-background overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="relative w-full">
+      <div className="relative w-full flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={next}
+          className="shrink-0 border-0 shadow-md hover:shadow-lg h-[533px] md:h-[604px] w-12 rounded-xl bg-background"
+          aria-label="Next reel"
+        >
+          <ChevronRight className="size-6" />
+        </Button>
         <div
           ref={containerRef}
-          className="flex gap-6 px-[50%] overflow-x-hidden py-10"
+          className="flex flex-1 min-w-0 gap-6 px-[50%] overflow-x-hidden py-10 select-none"
+          style={{ cursor: isDragging ? "grabbing" : "grab" }}
+          onMouseDown={handlePointerDown}
+          onTouchStart={handlePointerDown}
         >
           {REELS.map((reel, index) => {
             const isCenter = index === activeIndex;
@@ -177,7 +268,7 @@ export function Reels() {
                 ref={(el) => {
                   itemsRef.current[index] = el;
                 }}
-                onClick={() => setActiveIndex(index)}
+                onClick={() => handleCardClick(index)}
                 className="relative shrink-0 w-[300px] md:w-[340px] aspect-[9/16] rounded-3xl bg-black overflow-hidden shadow-2xl cursor-pointer"
                 animate={{
                   scale: isCenter ? 1.05 : distance === 1 ? 0.9 : 0.8,
@@ -266,14 +357,33 @@ export function Reels() {
                   <Instagram className="w-4 h-4 text-white" />
                 </button>
 
-                {/* Bottom Gradient + Text */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/00 to-transparent pointer-events-none" />
-
                 <div className="absolute bottom-0 p-6 text-white">
-                  <h3 className="text-lg font-bold">{reel.projectName}</h3>
-                  <p className="text-sm text-gray-300">{reel.config}</p>
-                  <div className="flex items-center gap-2 text-xs text-gray-000">
-                    <MapPin className="w-3 h-3" />
+                  <h3
+                    className="text-lg font-bold tracking-tight"
+                    style={{
+                      textShadow:
+                        "0 0 1px rgba(0,0,0,0.95), 0 1px 3px rgba(0,0,0,0.8), 0 2px 8px rgba(0,0,0,0.6)",
+                    }}
+                  >
+                    {reel.projectName}
+                  </h3>
+                  <p
+                    className="text-sm text-gray-200/95"
+                    style={{
+                      textShadow:
+                        "0 0 1px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,0.7), 0 2px 6px rgba(0,0,0,0.5)",
+                    }}
+                  >
+                    {reel.config}
+                  </p>
+                  <div
+                    className="flex items-center gap-2 text-xs text-gray-200/90"
+                    style={{
+                      textShadow:
+                        "0 0 1px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,0.6)",
+                    }}
+                  >
+                    <MapPin className="w-3 h-3" style={{ filter: "drop-shadow(0 0 1px rgba(0,0,0,0.9)) drop-shadow(0 1px 2px rgba(0,0,0,0.6))" }} />
                     {reel.location}
                   </div>
                 </div>
@@ -282,14 +392,15 @@ export function Reels() {
           })}
         </div>
 
-        <div className="flex justify-center gap-4 mt-8">
-          <Button variant="outline" size="icon" onClick={prev}>
-            <ChevronLeft />
-          </Button>
-          <Button variant="outline" size="icon" onClick={next}>
-            <ChevronRight />
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={prev}
+          className="shrink-0 border-0 shadow-md hover:shadow-lg h-[533px] md:h-[604px] w-12 rounded-xl bg-background"
+          aria-label="Previous reel"
+        >
+          <ChevronLeft className="size-6" />
+        </Button>
       </div>
     </section>
   );

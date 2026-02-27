@@ -403,3 +403,94 @@ export async function uploadWebinarPaymentProof(
   }
   return { success: true, url };
 }
+
+// ---------------------------------------------------------------------------
+// Contact leads (property inquiry form). Run supabase-contact_leads.sql first.
+// ---------------------------------------------------------------------------
+
+const CONTACT_LEADS_TABLE = "contact_leads";
+
+export type ContactLeadRow = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  property_id: string | null;
+  property_title: string;
+  created_at: string;
+};
+
+export type ContactLeadInsert = {
+  name: string;
+  email: string;
+  phone: string;
+  property_id: string;
+  property_title: string;
+};
+
+export type InsertContactLeadResult =
+  | { success: true; id: string }
+  | { success: false; error: string };
+
+export async function insertContactLead(
+  row: ContactLeadInsert
+): Promise<InsertContactLeadResult> {
+  if (!supabase) {
+    return {
+      success: false,
+      error: "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env",
+    };
+  }
+  const payload = {
+    name: row.name.trim(),
+    email: row.email.trim(),
+    phone: row.phone.trim(),
+    property_id: row.property_id,
+    property_title: row.property_title.trim(),
+  };
+  const { data, error } = await supabase
+    .from(CONTACT_LEADS_TABLE)
+    .insert(payload)
+    .select("id")
+    .single();
+  if (error) {
+    console.error("[Supabase] insert contact_leads error:", error);
+    return {
+      success: false,
+      error: error.message || "Database error. Check table and RLS policies.",
+    };
+  }
+  return data?.id ? { success: true, id: String(data.id) } : { success: false, error: "No id returned" };
+}
+
+export async function fetchContactLeads(): Promise<ContactLeadRow[]> {
+  if (!supabase) return [];
+  try {
+    const { data, error } = await supabase
+      .from(CONTACT_LEADS_TABLE)
+      .select("id, name, email, phone, property_id, property_title, created_at")
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("[Supabase] fetch contact_leads error:", error);
+      return [];
+    }
+    return (data ?? []) as ContactLeadRow[];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Deletes multiple contact leads by id. Throws if Supabase is not configured or deletion fails.
+ */
+export async function deleteMultipleContactLeads(ids: string[]): Promise<void> {
+  if (!supabase) {
+    throw new Error("Supabase is not configured.");
+  }
+  if (ids.length === 0) return;
+  const { error } = await supabase.from(CONTACT_LEADS_TABLE).delete().in("id", ids);
+  if (error) {
+    console.error("[Supabase] delete contact_leads error:", error);
+    throw new Error(error.message || "Failed to delete leads.");
+  }
+}
