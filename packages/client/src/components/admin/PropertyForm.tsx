@@ -15,6 +15,7 @@ import type { Property, PropertyStatus } from "../../lib/propertyStore";
 import { supabase } from "../../lib/supabase";
 import { ALLOWED_AMENITY_NAMES } from "../../lib/allowedAmenities";
 import { AmenityIcon } from "../shared/AmenityIcon";
+import { SupabaseImage } from "../shared/SupabaseImage";
 
 const STATUS_OPTIONS: PropertyStatus[] = [
   "Pre-Launch",
@@ -562,9 +563,10 @@ export function PropertyForm({
                   key={`existing-${index}`}
                   className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted"
                 >
-                  <img
+                  <SupabaseImage
                     src={url}
                     alt=""
+                    transformWidth={400}
                     className="h-full w-full object-cover"
                   />
                   <button

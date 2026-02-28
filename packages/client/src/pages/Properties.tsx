@@ -13,6 +13,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { PlaceholderImage } from "../components/shared/PlaceholderImage";
 import { PropertyDetailDialog } from "../components/shared/PropertyDetailDialog";
+import { SupabaseImage } from "../components/shared/SupabaseImage";
 import { MapPin, Building2, Home, CalendarDays, Ruler } from "lucide-react";
 import { useProperties } from "../hooks/use-properties";
 import type { PropertyRow } from "../lib/supabase";
@@ -284,18 +285,18 @@ export default function Properties() {
                     )}
                     <div className="overflow-hidden h-64 bg-muted">
                       {property.images && property.images.length > 0 ? (
-                        <img
+                        <SupabaseImage
                           src={property.images[0]}
                           alt={property.title}
+                          transformWidth={600}
                           className="w-full h-full object-cover rounded-none group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
                         />
                       ) : property.image_url ? (
-                        <img
+                        <SupabaseImage
                           src={property.image_url}
                           alt={property.title}
+                          transformWidth={600}
                           className="w-full h-full object-cover rounded-none group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
                         />
                       ) : (
                         <PlaceholderImage

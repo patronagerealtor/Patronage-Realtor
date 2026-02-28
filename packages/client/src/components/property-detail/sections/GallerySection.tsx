@@ -1,5 +1,6 @@
 import { LayoutGrid } from "lucide-react";
 import type { PropertyDetailData } from "@/types/propertyDetail";
+import { SupabaseImage } from "@/components/shared/SupabaseImage";
 
 type GallerySectionProps = {
   data: PropertyDetailData;
@@ -42,7 +43,7 @@ export function GallerySection({ data, sectionRef }: GallerySectionProps) {
         {/* Image 2 */}
         <div className="col-span-3 row-span-1 col-start-5 rounded-lg border border-border bg-muted overflow-hidden">
           {images[1] ? (
-            <img
+            <SupabaseImage
               src={images[1]}
               alt=""
               className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]"
@@ -57,7 +58,7 @@ export function GallerySection({ data, sectionRef }: GallerySectionProps) {
         {/* Image 3 */}
         <div className="col-span-3 row-span-1 row-start-3 rounded-lg border border-border bg-muted overflow-hidden">
           {images[2] ? (
-            <img
+            <SupabaseImage
               src={images[2]}
               alt=""
               className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]"
@@ -72,7 +73,7 @@ export function GallerySection({ data, sectionRef }: GallerySectionProps) {
         {/* Image 4 */}
         <div className="col-span-4 row-span-1 col-start-4 row-start-3 rounded-lg border border-border bg-muted overflow-hidden">
           {images[3] ? (
-            <img
+            <SupabaseImage
               src={images[3]}
               alt=""
               className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]"

@@ -30,6 +30,48 @@ export function getReelPublicUrl(path: string): string {
   return `${supabaseUrl}/storage/v1/object/public/${REELS_BUCKET}/${normalized}`;
 }
 
+// ---------------------------------------------------------------------------
+// Image CDN: transform URLs for optimized delivery (Pro plan: resize + WebP)
+// ---------------------------------------------------------------------------
+
+const OBJECT_PUBLIC_RE = /^(https?:\/\/[^/]+)\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/;
+
+export type ImageTransformOptions = {
+  width?: number;
+  height?: number;
+  quality?: number;
+  resize?: "cover" | "contain" | "fill";
+};
+
+/**
+ * Converts a Supabase Storage object URL to a CDN render URL with optional
+ * transform params (resize, quality). Use for thumbnails and responsive images.
+ * Non-Supabase URLs are returned unchanged.
+ */
+export function getTransformedImageUrl(
+  url: string,
+  options?: ImageTransformOptions
+): string {
+  if (!url || !supabaseUrl) return url;
+  const match = url.match(OBJECT_PUBLIC_RE);
+  if (!match) return url;
+  const [, origin, bucket, path] = match;
+  // Render API: /storage/v1/render/image/public/bucket/path
+  const renderPath = `${origin}/storage/v1/render/image/public/${bucket}/${path}`;
+  const params = new URLSearchParams();
+  if (options?.width != null) params.set("width", String(Math.round(options.width)));
+  if (options?.height != null) params.set("height", String(Math.round(options.height)));
+  if (options?.quality != null) params.set("quality", String(Math.min(100, Math.max(20, options.quality))));
+  if (options?.resize) params.set("resize", options.resize);
+  const qs = params.toString();
+  return qs ? `${renderPath}?${qs}` : renderPath;
+}
+
+/** True if url looks like a Supabase Storage object URL (for lazy/transform). */
+export function isSupabaseStorageUrl(url: string): boolean {
+  return typeof url === "string" && OBJECT_PUBLIC_RE.test(url);
+}
+
 export type SupabaseConnectionResult =
   | { connected: true; message: string; count: number }
   | { connected: false; message: string; error?: unknown };
@@ -280,7 +322,10 @@ export async function uploadPropertyImages(
     try {
       const { error: uploadError } = await supabase.storage
         .from(STORAGE_BUCKET)
-        .upload(path, fileToUpload, { upsert: true });
+        .upload(path, fileToUpload, {
+          upsert: true,
+          cacheControl: "31536000", // 1 year; paths are unique per upload
+        });
       if (uploadError) {
         console.error("[Supabase] upload image error:", uploadError);
         continue;
@@ -571,4 +616,80 @@ export async function deleteMultipleContactLeads(ids: string[]): Promise<void> {
     console.error("[Supabase] delete contact_leads error:", error);
     throw new Error(error.message || "Failed to delete leads.");
   }
+}
+
+// ---------------------------------------------------------------------------
+// User profiles (name, email, phone). Run supabase-user_profiles.sql first.
+// ---------------------------------------------------------------------------
+
+const USER_PROFILES_TABLE = "user_profiles";
+
+export type UserProfileRow = {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UserProfileUpsert = {
+  id: string;
+  email?: string | null;
+  full_name?: string | null;
+  phone?: string | null;
+  avatar_url?: string | null;
+};
+
+export async function getProfile(userId: string): Promise<UserProfileRow | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from(USER_PROFILES_TABLE)
+    .select("id, email, full_name, phone, avatar_url, created_at, updated_at")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) {
+    console.error("[Supabase] getProfile error:", error);
+    if (error.message?.includes("user_profiles") && error.message?.includes("schema cache")) {
+      console.warn(
+        "[Supabase] Create the table: open Supabase Dashboard → SQL Editor, then run the SQL in packages/client/supabase-user_profiles.sql"
+      );
+    }
+    return null;
+  }
+  return data as UserProfileRow | null;
+}
+
+export type UpsertProfileResult =
+  | { success: true; profile: UserProfileRow }
+  | { success: false; error: string };
+
+export async function upsertProfile(row: UserProfileUpsert): Promise<UpsertProfileResult> {
+  if (!supabase) {
+    return { success: false, error: "Supabase is not configured." };
+  }
+  const payload = {
+    id: row.id,
+    ...(row.email !== undefined && { email: row.email?.trim() || null }),
+    ...(row.full_name !== undefined && { full_name: row.full_name?.trim() || null }),
+    ...(row.phone !== undefined && { phone: row.phone?.trim() || null }),
+    ...(row.avatar_url !== undefined && { avatar_url: row.avatar_url?.trim() || null }),
+    updated_at: new Date().toISOString(),
+  };
+  const { data, error } = await supabase
+    .from(USER_PROFILES_TABLE)
+    .upsert(payload, { onConflict: "id" })
+    .select()
+    .single();
+  if (error) {
+    console.error("[Supabase] upsertProfile error:", error);
+    if (error.message?.includes("user_profiles") && error.message?.includes("schema cache")) {
+      console.warn(
+        "[Supabase] Create the table: open Supabase Dashboard → SQL Editor, then run the SQL in packages/client/supabase-user_profiles.sql"
+      );
+    }
+    return { success: false, error: error.message || "Failed to save profile." };
+  }
+  return { success: true, profile: data as UserProfileRow };
 }

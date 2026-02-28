@@ -14,6 +14,7 @@ import { motion, Variants } from "framer-motion";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { insertWebinarRegistration, uploadWebinarPaymentProof } from "../lib/supabase";
+import { SupabaseImage } from "../components/shared/SupabaseImage";
 
 // Payment: set VITE_WEBINAR_PAYMENT_LINK in .env to your Razorpay/Stripe payment link
 const WEBINAR_PAYMENT_LINK = import.meta.env.VITE_WEBINAR_PAYMENT_LINK ?? "";
@@ -131,9 +132,10 @@ function WebinarCard({
       <div className="relative h-48 w-full overflow-hidden">
         <div className="absolute inset-0 bg-black/20 z-10 group-hover:bg-black/10 transition-colors" />
 
-        <img
+        <SupabaseImage
           src={webinar.image}
           alt={webinar.title}
+          transformWidth={600}
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
 
@@ -378,9 +380,10 @@ export function Webinar() {
                 {selectedWebinar && (
                   <>
                     <div className="relative h-48 w-full overflow-hidden">
-                      <img
+                      <SupabaseImage
                         src={selectedWebinar.image}
                         alt={selectedWebinar.title}
+                        transformWidth={800}
                         className="h-full w-full object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />

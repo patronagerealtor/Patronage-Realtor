@@ -44,15 +44,17 @@ export function ProtectedRoute({ children, loginPath = "/login", allowedEmail }:
   return <>{children}</>;
 }
 
+const DEFAULT_AFTER_SIGNIN =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_AFTER_SIGNIN_REDIRECT) || "/dashboard";
+
 /**
- * Login page: shows LoginButton and redirects to ?redirect= or /dashboard after success.
+ * Login page: shows LoginButton and redirects to ?redirect= or VITE_AFTER_SIGNIN_REDIRECT after success.
  */
 export function LoginPage() {
-  const [, setLocation] = useLocation();
   const redirect =
     typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("redirect") || "/dashboard"
-      : "/dashboard";
+      ? new URLSearchParams(window.location.search).get("redirect") || DEFAULT_AFTER_SIGNIN
+      : DEFAULT_AFTER_SIGNIN;
 
   return (
     <>

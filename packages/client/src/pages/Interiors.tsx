@@ -19,6 +19,7 @@ import {
 import { Badge } from "../components/ui/badge";
 import { InteriorPriceCalculator } from "../components/interiors/InteriorPriceCalculator";
 import { InteriorsHero } from "../components/interiors/InteriorsHero";
+import { SupabaseImage } from "../components/shared/SupabaseImage";
 import {
   Sparkles,
   ArrowRight,
@@ -497,11 +498,10 @@ const InteriorsPackagesSection = React.memo(function InteriorsPackagesSection(pr
                   </div>
                 )}
                 <div className="overflow-hidden rounded-t-xl">
-                  <img
+                  <SupabaseImage
                     src={pkg.image}
                     alt={pkg.name}
-                    loading="lazy"
-                    decoding="async"
+                    transformWidth={500}
                     className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 </div>
@@ -554,9 +554,10 @@ const InteriorsPackagesSection = React.memo(function InteriorsPackagesSection(pr
             {selectedPackage && packageByBhk[selectedPackage.id] && (
               <div className="flex flex-col h-full max-h-[90vh] overflow-hidden">
                 <div className="relative h-40 flex-shrink-0 overflow-hidden rounded-t-lg">
-                  <img
+                  <SupabaseImage
                     src={selectedPackage.image}
                     alt={selectedPackage.name}
+                    transformWidth={800}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
@@ -735,11 +736,10 @@ const InteriorsGallerySection = React.memo(function InteriorsGallerySection(prop
                 }}
                 className="group relative overflow-hidden rounded-xl aspect-[4/3] cursor-pointer border border-border hover:border-primary/50 transition-colors"
               >
-                <img
+                <SupabaseImage
                   src={image.image}
                   alt={image.title}
-                  loading="lazy"
-                  decoding="async"
+                  transformWidth={600}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -787,12 +787,11 @@ const InteriorsGallerySection = React.memo(function InteriorsGallerySection(prop
                       key={img.id}
                         className="overflow-hidden rounded-lg border border-gray-200 aspect-[4/3] bg-gray-100"
                     >
-                      <img
+                      <SupabaseImage
                         src={img.image}
                         alt={img.title}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-full h-full object-cover"
+                        transformWidth={500}
+                        className="w-full h-full object-cover"
                       />
                         <p className="p-2 text-sm font-medium text-gray-900 truncate">{img.title}</p>
                       </div>

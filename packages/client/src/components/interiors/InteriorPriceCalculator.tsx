@@ -1,6 +1,8 @@
-import { useReducer, useState } from "react";
+import { useReducer } from "react";
+import { Link } from "wouter";
 import { calculatePrice } from "../../lib/interiors/priceCalculator";
 import { BHK, PackageTier, AREA_BANDS } from "../../lib/interiors/pricingConfig";
+import { useAuth } from "../../hooks/useAuth";
 import { Card, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -57,14 +59,12 @@ function calculatorReducer(state: CalculatorState, action: CalculatorAction): Ca
   }
 }
 
+const INTERIOR_QUOTE_REDIRECT = "/interiors#calculate-interior";
+
 export function InteriorPriceCalculator() {
   const [state, dispatch] = useReducer(calculatorReducer, initialState);
   const { bhk, pkg, renovation, customization, area } = state;
-
-  const [detailsSubmitted, setDetailsSubmitted] = useState(false);
-  const [submittedName, setSubmittedName] = useState<string | null>(null);
-  const [formValues, setFormValues] = useState({ name: "", email: "", whatsapp: "" });
-  const [formError, setFormError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const price = calculatePrice({
     bhk,
@@ -75,20 +75,6 @@ export function InteriorPriceCalculator() {
   });
 
   const band = AREA_BANDS[bhk];
-
-  const handleDetailsSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
-    const name = formValues.name.trim();
-    const email = formValues.email.trim();
-    const whatsapp = formValues.whatsapp.trim();
-    if (!name || !email || !whatsapp) {
-      setFormError("Name, WhatsApp No. and Email are required.");
-      return;
-    }
-    setSubmittedName(name);
-    setDetailsSubmitted(true);
-  };
 
   return (
     <section id="calculate-interior" className="py-20 bg-muted/30">
@@ -191,14 +177,11 @@ export function InteriorPriceCalculator() {
               </div>
             </Card>
 
-            {/* Right: Output or contact form */}
+            {/* Right: Output or sign-in CTA */}
             <div className="lg:col-span-7 flex flex-col">
               <Card className="p-6 flex flex-col justify-center min-h-full border-border shadow-lg bg-muted/20">
-                {detailsSubmitted && submittedName ? (
+                {user ? (
                   <>
-                    <p className="text-lg font-medium text-primary mb-4">
-                      We'll Get Back to You {submittedName}
-                    </p>
                     <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                       Estimated cost range
                     </h3>
@@ -214,52 +197,19 @@ export function InteriorPriceCalculator() {
                     </p>
                   </>
                 ) : (
-                  <form onSubmit={handleDetailsSubmit} className="space-y-4">
-                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-                      Enter your details to see estimate
+                  <div className="space-y-4 text-center">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                      Sign in to get your Interior Quote
                     </h3>
-                    <div className="space-y-2">
-                      <Label htmlFor="ipc-name">Name <span className="text-destructive">*</span></Label>
-                      <Input
-                        id="ipc-name"
-                        value={formValues.name}
-                        onChange={(e) => setFormValues((p) => ({ ...p, name: e.target.value }))}
-                        placeholder="Your name"
-                        required
-                        autoComplete="name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="ipc-whatsapp">WhatsApp No. <span className="text-destructive">*</span></Label>
-                      <Input
-                        id="ipc-whatsapp"
-                        type="tel"
-                        value={formValues.whatsapp}
-                        onChange={(e) => setFormValues((p) => ({ ...p, whatsapp: e.target.value }))}
-                        placeholder="e.g. 9876543210"
-                        required
-                        autoComplete="tel"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="ipc-email">Email <span className="text-destructive">*</span></Label>
-                      <Input
-                        id="ipc-email"
-                        type="email"
-                        value={formValues.email}
-                        onChange={(e) => setFormValues((p) => ({ ...p, email: e.target.value }))}
-                        placeholder="you@example.com"
-                        required
-                        autoComplete="email"
-                      />
-                    </div>
-                    {formError && (
-                      <p className="text-sm text-destructive">{formError}</p>
-                    )}
-                    <Button type="submit" className="w-full">
-                      See my estimate
+                    <p className="text-muted-foreground text-sm">
+                      Sign in with Google to see your estimated cost range.
+                    </p>
+                    <Button asChild className="w-full">
+                      <Link href={`/login?redirect=${encodeURIComponent(INTERIOR_QUOTE_REDIRECT)}`}>
+                        Sign in to get your Interior Quote
+                      </Link>
                     </Button>
-                  </form>
+                  </div>
                 )}
               </Card>
             </div>

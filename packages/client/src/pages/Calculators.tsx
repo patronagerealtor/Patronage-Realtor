@@ -33,6 +33,7 @@ import { useProperties } from "../hooks/use-properties";
 import type { PropertyRow } from "../lib/supabase";
 import { formatIndianPrice, getDisplayPrice } from "../lib/formatIndianPrice";
 import { PlaceholderImage } from "../components/shared/PlaceholderImage";
+import { SupabaseImage } from "../components/shared/SupabaseImage";
 import { PropertyDetailDialog } from "../components/property-detail/PropertyDetailDialog";
 import {
   Accordion,
@@ -793,15 +794,17 @@ export default function Calculators() {
                             </Badge>
                             <div className="overflow-hidden h-44">
                               {property.images && property.images.length > 0 ? (
-                                <img
+                                <SupabaseImage
                                   src={property.images[0]}
                                   alt={property.title}
+                                  transformWidth={400}
                                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 />
                               ) : property.image_url ? (
-                                <img
+                                <SupabaseImage
                                   src={property.image_url}
                                   alt={property.title}
+                                  transformWidth={400}
                                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 />
                               ) : (

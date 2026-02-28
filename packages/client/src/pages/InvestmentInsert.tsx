@@ -8,6 +8,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { SupabaseImage } from "../components/shared/SupabaseImage";
 import type { CommercialItem, LandItem } from "../lib/investmentStorage";
 
 const BADGE_OPTIONS = ["Hot", "New", "Prime", "Leased"] as const;
@@ -96,7 +97,7 @@ function ImageField({
         {value && (
           <>
             <div className="w-16 h-16 rounded border border-border overflow-hidden bg-muted shrink-0">
-              <img src={value} alt="" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+              <SupabaseImage src={value} alt="" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
             </div>
             <Button type="button" variant="ghost" size="sm" onClick={() => onChange("")} aria-label="Clear image">
               <X className="h-4 w-4" />
