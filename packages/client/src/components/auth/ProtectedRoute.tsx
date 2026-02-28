@@ -1,34 +1,58 @@
 import { Redirect, useLocation } from "wouter";
-import { isAuthenticated } from "../../lib/auth";
+import { useAuth } from "../../hooks/useAuth";
 import { LoginButton } from "./LoginButton";
 import { Header } from "../layout/Header";
 
 type ProtectedRouteProps = {
   children: React.ReactNode;
   loginPath?: string;
+  /** If set, only this email (case-insensitive) can access the route; others are redirected to /dashboard */
+  allowedEmail?: string;
 };
 
-/**
- * Renders children if the user has a stored JWT; otherwise redirects to login with ?redirect= current path.
- */
-export function ProtectedRoute({ children, loginPath = "/login" }: ProtectedRouteProps) {
-  const [pathname] = useLocation();
-  if (isAuthenticated()) {
-    return <>{children}</>;
-  }
-  const to = pathname ? `${loginPath}?redirect=${encodeURIComponent(pathname)}` : loginPath;
-  return <Redirect to={to} />;
+function normalizeEmail(email: string | undefined): string {
+  return (email ?? "").trim().toLowerCase();
 }
 
 /**
- * Login page: shows LoginButton and redirects to ?redirect= or / after success.
+ * If the user is authenticated (Supabase session), renders children.
+ * If allowedEmail is set, only that email can access; others are redirected to /dashboard?access_denied=1.
+ * If not authenticated, redirects to login with ?redirect= current path.
+ * Shows a loading spinner while auth is being checked.
+ */
+export function ProtectedRoute({ children, loginPath = "/login", allowedEmail }: ProtectedRouteProps) {
+  const { user, loading } = useAuth();
+  const [pathname] = useLocation();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center" role="status" aria-label="Checking authentication">
+        <span className="inline-block h-10 w-10 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    const to = pathname ? `${loginPath}?redirect=${encodeURIComponent(pathname)}` : loginPath;
+    return <Redirect to={to} />;
+  }
+
+  if (allowedEmail && normalizeEmail(user.email) !== normalizeEmail(allowedEmail)) {
+    return <Redirect to="/dashboard?access_denied=1" />;
+  }
+
+  return <>{children}</>;
+}
+
+/**
+ * Login page: shows LoginButton and redirects to ?redirect= or /dashboard after success.
  */
 export function LoginPage() {
   const [, setLocation] = useLocation();
   const redirect =
     typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search).get("redirect") || "/"
-      : "/";
+      ? new URLSearchParams(window.location.search).get("redirect") || "/dashboard"
+      : "/dashboard";
 
   return (
     <>
@@ -39,7 +63,7 @@ export function LoginPage() {
           <p className="text-center text-sm text-muted-foreground">
             Use your Google account to continue.
           </p>
-          <LoginButton onSuccess={() => setLocation(redirect)} />
+          <LoginButton redirectTo={redirect} />
         </div>
       </div>
     </>

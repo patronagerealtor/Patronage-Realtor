@@ -1,56 +1,14 @@
-import { useMemo, useState, useCallback } from "react";
-import { jwtDecode } from "jwt-decode";
 import { Button } from "../ui/button";
-import { AUTH_KEYS, getStoredJwt, clearAuth, type DecodedUser } from "../../lib/auth";
-import { logout as apiLogout } from "../../lib/authApi";
+import { useAuth } from "../../hooks/useAuth";
 import { cn } from "../../lib/utils";
 
-type StoredUser = { id?: string; email?: string; name?: string; picture?: string };
-
-function getStoredUser(): StoredUser | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(AUTH_KEYS.USER);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as unknown;
-    return parsed && typeof parsed === "object" ? (parsed as StoredUser) : null;
-  } catch {
-    return null;
-  }
-}
-
-function getUserFromJwt(): StoredUser | null {
-  const token = getStoredJwt();
-  if (!token) return null;
-  try {
-    const decoded = jwtDecode(token) as DecodedUser;
-    return {
-      id: decoded.sub,
-      email: decoded.email,
-      name: decoded.name,
-      picture: decoded.picture,
-    };
-  } catch {
-    return null;
-  }
-}
-
 export function UserProfile({ className }: { className?: string }) {
-  const [forceLogout, setForceLogout] = useState(false);
-
-  const user = useMemo(() => {
-    if (forceLogout) return null;
-    const stored = getStoredUser();
-    if (stored?.name || stored?.email) return stored;
-    return getUserFromJwt();
-  }, [forceLogout]);
-
-  const handleLogout = useCallback(() => {
-    apiLogout();
-    setForceLogout(true);
-  }, []);
+  const { user, logout } = useAuth();
 
   if (!user) return null;
+
+  const name = user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email ?? null;
+  const picture = user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null;
 
   return (
     <div
@@ -59,9 +17,9 @@ export function UserProfile({ className }: { className?: string }) {
         className
       )}
     >
-      {user.picture && (
+      {picture && (
         <img
-          src={user.picture}
+          src={picture}
           alt=""
           className="h-10 w-10 rounded-full object-cover"
           width={40}
@@ -69,14 +27,14 @@ export function UserProfile({ className }: { className?: string }) {
         />
       )}
       <div className="min-w-0 flex-1">
-        {user.name && (
-          <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
+        {name && (
+          <p className="truncate text-sm font-medium text-foreground">{name}</p>
         )}
         {user.email && (
           <p className="truncate text-xs text-muted-foreground">{user.email}</p>
         )}
       </div>
-      <Button type="button" variant="outline" size="sm" onClick={handleLogout}>
+      <Button type="button" variant="outline" size="sm" onClick={() => logout()}>
         Log out
       </Button>
     </div>

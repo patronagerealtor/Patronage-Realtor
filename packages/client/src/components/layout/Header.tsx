@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Menu, MapPin, Search } from "lucide-react";
 import { Button } from "../ui/button";
 import { Link, useLocation } from "wouter";
-import { isAuthenticated } from "../../lib/auth";
+import { useAuth } from "../../hooks/useAuth";
 import { UserProfile } from "../auth/UserProfile";
 import {
   Sheet,
@@ -24,13 +24,8 @@ const CONTACT_FORM_URL =
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [location] = useLocation();
-  const [, setAuthVersion] = useState(0);
-  useEffect(() => {
-    const onAuthChange = () => setAuthVersion((v) => v + 1);
-    window.addEventListener("auth-change", onAuthChange);
-    return () => window.removeEventListener("auth-change", onAuthChange);
-  }, []);
-  const authenticated = isAuthenticated();
+  const { user } = useAuth();
+  const authenticated = !!user;
 
   const navLinkClass =
     "relative px-3 py-2 text-sm font-medium transition-colors hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all hover:after:w-full";

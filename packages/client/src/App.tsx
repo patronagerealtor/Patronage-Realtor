@@ -12,11 +12,12 @@ import AboutUs from "./pages/AboutUs";
 import Calculators from "./pages/Calculators";
 import NotFound from "./pages/not-found";
 import DataEntry from "./pages/DataEntry";
+import Dashboard from "./pages/Dashboard";
 import Blogs from "./pages/Blogs";
 import Investment from "./pages/Investment";
 import InvestmentDetails from "./pages/InvestmentDetails";
 import { Webinar } from "./pages/Webinar";
-import { LoginPage } from "./components/auth/ProtectedRoute";
+import { ProtectedRoute, LoginPage } from "./components/auth/ProtectedRoute";
 
 function Router() {
   return (
@@ -39,7 +40,16 @@ function Router() {
       <Route path="/about-us" component={AboutUs} />
       <Route path="/calculators" component={Calculators} />
       <Route path="/login" component={LoginPage} />
-      <Route path="/data-entry" component={DataEntry} />
+      <Route path="/dashboard">
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/data-entry">
+        <ProtectedRoute allowedEmail={import.meta.env.VITE_DATA_ENTRY_ALLOWED_EMAIL}>
+          <DataEntry />
+        </ProtectedRoute>
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );
