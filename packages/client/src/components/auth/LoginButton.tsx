@@ -1,19 +1,18 @@
 import { useState } from "react";
-import { useGoogleLogin } from "@react-oauth/google";
 import { Button } from "../ui/button";
-import { AUTH_KEYS } from "../../lib/auth";
-import { exchangeGoogleToken } from "../../lib/authApi";
+import { supabase } from "../../lib/supabase";
 import { cn } from "../../lib/utils";
 
 type LoginButtonProps = {
-  onSuccess?: () => void;
+  /** Path to redirect to after successful sign-in (default: /dashboard) */
+  redirectTo?: string;
   onError?: (message: string) => void;
   className?: string;
   disabled?: boolean;
 };
 
 export function LoginButton({
-  onSuccess,
+  redirectTo = "/dashboard",
   onError,
   className,
   disabled = false,
@@ -21,41 +20,43 @@ export function LoginButton({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      setError(null);
-      setLoading(true);
-      try {
-        const accessToken = tokenResponse.access_token;
-        if (!accessToken) {
-          setError("No access token received");
-          onError?.("No access token received");
-          return;
-        }
-        localStorage.setItem(AUTH_KEYS.GOOGLE_ACCESS_TOKEN, accessToken);
-        const result = await exchangeGoogleToken(accessToken);
-        if (result.success) {
-          onSuccess?.();
-        } else {
-          setError(result.error);
-          onError?.(result.error);
-        }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Login failed";
+  async function handleSignIn() {
+    if (!supabase) {
+      const msg = "Supabase is not configured.";
+      setError(msg);
+      onError?.(msg);
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    try {
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const redirect = `${origin}${redirectTo.startsWith("/") ? redirectTo : `/${redirectTo}`}`;
+      const { error: signInError } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: redirect },
+      });
+      if (signInError) {
+        const isProviderDisabled =
+          signInError.message?.toLowerCase().includes("provider is not enabled") ||
+          (signInError as { msg?: string }).msg?.toLowerCase().includes("provider is not enabled");
+        const message = isProviderDisabled
+          ? "Google sign-in is not enabled. In Supabase Dashboard go to Authentication → Providers and enable Google."
+          : signInError.message;
         setError(message);
         onError?.(message);
-      } finally {
         setLoading(false);
+        return;
       }
-    },
-    onError: (err) => {
-      const message = err?.error_description ?? err?.error ?? "Google sign-in failed";
-      setError(message);
+      // OAuth redirects the page; if we're still here, something blocked the redirect
       setLoading(false);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Sign-in failed";
+      setError(message);
       onError?.(message);
-    },
-    flow: "implicit",
-  });
+      setLoading(false);
+    }
+  }
 
   const isDisabled = disabled || loading;
 
@@ -65,7 +66,7 @@ export function LoginButton({
         type="button"
         variant="outline"
         disabled={isDisabled}
-        onClick={() => googleLogin()}
+        onClick={handleSignIn}
         className={cn("gap-2", className)}
         aria-busy={loading}
       >
