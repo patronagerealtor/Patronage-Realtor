@@ -3,8 +3,11 @@ import { Button } from "../ui/button";
 import { supabase } from "../../lib/supabase";
 import { cn } from "../../lib/utils";
 
+const DEFAULT_REDIRECT =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_AFTER_SIGNIN_REDIRECT) || "/dashboard";
+
 type LoginButtonProps = {
-  /** Path to redirect to after successful sign-in (default: /dashboard) */
+  /** Path to redirect to after successful sign-in (default: VITE_AFTER_SIGNIN_REDIRECT or /dashboard) */
   redirectTo?: string;
   onError?: (message: string) => void;
   className?: string;
@@ -12,7 +15,7 @@ type LoginButtonProps = {
 };
 
 export function LoginButton({
-  redirectTo = "/dashboard",
+  redirectTo = DEFAULT_REDIRECT,
   onError,
   className,
   disabled = false,
@@ -30,8 +33,13 @@ export function LoginButton({
     setError(null);
     setLoading(true);
     try {
-      const origin = typeof window !== "undefined" ? window.location.origin : "";
-      const redirect = `${origin}${redirectTo.startsWith("/") ? redirectTo : `/${redirectTo}`}`;
+      const baseUrl =
+        typeof import.meta !== "undefined" && import.meta.env?.VITE_APP_URL
+          ? String(import.meta.env.VITE_APP_URL).replace(/\/$/, "")
+          : typeof window !== "undefined"
+            ? window.location.origin
+            : "";
+      const redirect = `${baseUrl}${redirectTo.startsWith("/") ? redirectTo : `/${redirectTo}`}`;
       const { error: signInError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { redirectTo: redirect },

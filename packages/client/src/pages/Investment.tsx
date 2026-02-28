@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
+import { SupabaseImage } from "../components/shared/SupabaseImage";
 import { useInvestmentProperties } from "../hooks/useInvestmentProperties";
 
 const tabs = ["Overview", "Commercial", "Land Acquisition"];
@@ -290,7 +291,7 @@ export default function InvestmentPage() {
                 {reels.map((reel) => (
                   <div key={reel.id} className="reel-card">
                     <div style={{ position: "relative", height: 380, overflow: "hidden", background: "#111" }}>
-                      <img className="reel-thumb" src={reel.thumb} alt={reel.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", opacity: 0.88 }} />
+                      <SupabaseImage className="reel-thumb" src={reel.thumb} alt={reel.title} transformWidth={600} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", opacity: 0.88 }} />
                       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to top, rgba(0,0,0,0.78) 0%, transparent 100%)" }} />
                       <div style={{ position: "absolute", top: 14, left: 14, background: tagBg[reel.tag] || "#111", color: "#fff", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "5px 10px", borderRadius: 2 }}>{reel.tag}</div>
                       <div style={{ position: "absolute", top: 14, right: 14, background: "rgba(0,0,0,0.55)", color: "#fff", fontSize: 11, padding: "4px 8px", borderRadius: 2, fontWeight: 600 }}>{reel.duration}</div>
@@ -390,7 +391,7 @@ export default function InvestmentPage() {
                 {commercialProperties.map((p) => (
                   <div key={p.id} className="prop-card">
                     <div style={{ position: "relative" }}>
-                      <img src={p.img} alt={p.title} style={{ width: "100%", height: 220, objectFit: "cover", display: "block" }} />
+                      <SupabaseImage src={p.img} alt={p.title} transformWidth={500} style={{ width: "100%", height: 220, objectFit: "cover", display: "block" }} />
                       <span style={{ ...S.badge, background: badgeColor[p.badge] }}>{p.badge}</span>
                       <span style={S.priceTag}>{p.price}</span>
                     </div>
@@ -513,7 +514,7 @@ export default function InvestmentPage() {
                 {landListings.map((p) => (
                   <div key={p.id} className="prop-card">
                     <div style={{ position: "relative" }}>
-                      <img src={p.img} alt={p.title} style={{ width: "100%", height: 220, objectFit: "cover", display: "block" }} />
+                      <SupabaseImage src={p.img} alt={p.title} transformWidth={500} style={{ width: "100%", height: 220, objectFit: "cover", display: "block" }} />
                       <span style={{ ...S.badge, background: badgeColor[p.badge] }}>{p.badge}</span>
                       <span style={S.priceTag}>{p.price}</span>
                     </div>

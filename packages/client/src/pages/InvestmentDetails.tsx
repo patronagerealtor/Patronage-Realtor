@@ -1,6 +1,7 @@
 import { useParams, Link } from "wouter";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
+import { SupabaseImage } from "../components/shared/SupabaseImage";
 import { useInvestmentProperties } from "../hooks/useInvestmentProperties";
 import type { CommercialItem, LandItem } from "../lib/investmentStorage";
 
@@ -56,10 +57,12 @@ export default function InvestmentDetails() {
 
         <article className="bg-card border border-border rounded-lg overflow-hidden">
           <div style={{ position: "relative" }}>
-            <img
+            <SupabaseImage
               src={(item as CommercialItem | LandItem).img}
               alt={(item as CommercialItem | LandItem).title}
-              style={{ width: "100%", height: 320, objectFit: "cover", display: "block" }}
+              transformWidth={800}
+              className="w-full object-cover"
+              style={{ width: "100%", height: 320, display: "block" }}
             />
             <span style={{ ...S.badge, background: badgeColor[(item as CommercialItem | LandItem).badge] ?? "#111", position: "absolute", top: 20, left: 20 }}>
               {(item as CommercialItem | LandItem).badge}

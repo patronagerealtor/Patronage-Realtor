@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { PlaceholderImage } from "../shared/PlaceholderImage";
 import { PropertyDetailDialog } from "../shared/PropertyDetailDialog";
+import { SupabaseImage } from "../shared/SupabaseImage";
 import { cn } from "../../lib/utils";
 import { MapPin, ArrowRight, Building2, Home, CalendarDays, Ruler } from "lucide-react";
 import { useProperties } from "../../hooks/use-properties";
@@ -129,15 +130,17 @@ export function FeaturedProperties() {
 
                 <div className="overflow-hidden h-64">
                   {property.images && property.images.length > 0 ? (
-                    <img
+                    <SupabaseImage
                       src={property.images[0]}
                       alt={property.title}
+                      transformWidth={600}
                       className="w-full h-full object-cover rounded-none group-hover:scale-110 transition-transform duration-500"
                     />
                   ) : property.image_url ? (
-                    <img
+                    <SupabaseImage
                       src={property.image_url}
                       alt={property.title}
+                      transformWidth={600}
                       className="w-full h-full object-cover rounded-none group-hover:scale-110 transition-transform duration-500"
                     />
                   ) : (

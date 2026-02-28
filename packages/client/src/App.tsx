@@ -18,6 +18,7 @@ import Investment from "./pages/Investment";
 import InvestmentDetails from "./pages/InvestmentDetails";
 import { Webinar } from "./pages/Webinar";
 import { ProtectedRoute, LoginPage } from "./components/auth/ProtectedRoute";
+import { AuthPhoneGate } from "./components/auth/AuthPhoneGate";
 
 function Router() {
   return (
@@ -61,7 +62,9 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <AuthPhoneGate>
+            <Router />
+          </AuthPhoneGate>
         </TooltipProvider>
       </QueryClientProvider>
     </MotionConfig>

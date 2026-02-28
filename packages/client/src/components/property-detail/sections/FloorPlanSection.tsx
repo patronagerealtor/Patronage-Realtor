@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { LayoutGrid } from "lucide-react";
+import { Link } from "wouter";
 import type { PropertyDetailData } from "@/types/propertyDetail";
 import {
   Dialog,
@@ -8,8 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { SupabaseImage } from "@/components/shared/SupabaseImage";
 
 export type FloorPlanRequestPayload = {
   name: string;
@@ -53,56 +53,18 @@ export function FloorPlanSection({
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [submittedName, setSubmittedName] = useState<string | null>(null);
-  const [formSubmitting, setFormSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [formValues, setFormValues] = useState({ name: "", email: "", whatsapp: "" });
+
+  const redirect =
+    typeof window !== "undefined"
+      ? encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)
+      : "";
 
   // Reset selected index if plans change
   useEffect(() => {
     setSelectedIndex(0);
   }, [plans.length]);
 
-  const handleOpenRequest = () => {
-    if (submittedName) return;
-    setFormError(null);
-    setFormValues({ name: "", email: "", whatsapp: "" });
-    setDialogOpen(true);
-  };
-
-  const handleFormSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
-    const name = formValues.name.trim();
-    const email = formValues.email.trim();
-    const whatsapp = formValues.whatsapp.trim();
-    if (!name || !email || !whatsapp) {
-      setFormError("Name, WhatsApp No. and Email are required.");
-      return;
-    }
-    if (!onFloorPlanRequest) {
-      setFormError("Floor plan request is not available.");
-      return;
-    }
-    setFormSubmitting(true);
-    try {
-      const success = await onFloorPlanRequest({ name, email, whatsapp });
-      if (success) {
-        setSubmittedName(name);
-        setDialogOpen(false);
-      } else {
-        setFormError("Something went wrong. Please try again.");
-      }
-    } catch {
-      setFormError("Something went wrong. Please try again.");
-    } finally {
-      setFormSubmitting(false);
-    }
-  };
-
-  const requestCtaContent = submittedName
-    ? `We'll Get Back to You ${submittedName}`
-    : "Request a Floor Plan";
+  const handleOpenRequest = () => setDialogOpen(true);
 
   if (!plans.length) {
     return (
@@ -127,10 +89,9 @@ export function FloorPlanSection({
               <button
                 type="button"
                 onClick={onRequestFloorPlan ?? (onFloorPlanRequest ? handleOpenRequest : undefined)}
-                disabled={!onRequestFloorPlan && !!submittedName}
-                className="rounded-full bg-background/25 px-5 py-2.5 text-sm font-semibold text-white shadow-xl ring-1 ring-white/20 backdrop-blur-md transition-transform duration-200 hover:scale-105 hover:bg-background/30 disabled:cursor-default disabled:opacity-90 sm:px-7 sm:py-3 sm:text-base [text-shadow:0_1px_2px_rgba(0,0,0,0.5),0_0_1px_rgba(0,0,0,0.8)]"
+                className="rounded-full bg-background/25 px-5 py-2.5 text-sm font-semibold text-white shadow-xl ring-1 ring-white/20 backdrop-blur-md transition-transform duration-200 hover:scale-105 hover:bg-background/30 sm:px-7 sm:py-3 sm:text-base [text-shadow:0_1px_2px_rgba(0,0,0,0.5),0_0_1px_rgba(0,0,0,0.8)]"
               >
-                {onRequestFloorPlan ? "Request a Floor Plan" : requestCtaContent}
+                {onRequestFloorPlan ? "Request a Floor Plan" : "Request a Floor Plan"}
               </button>
             </div>
           </div>
@@ -141,49 +102,16 @@ export function FloorPlanSection({
             <DialogHeader>
               <DialogTitle>Request a Floor Plan</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleFormSubmit} className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label htmlFor="fp-name">Name <span className="text-destructive">*</span></Label>
-                <Input
-                  id="fp-name"
-                  value={formValues.name}
-                  onChange={(e) => setFormValues((p) => ({ ...p, name: e.target.value }))}
-                  placeholder="Your name"
-                  required
-                  autoComplete="name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="fp-whatsapp">WhatsApp No. <span className="text-destructive">*</span></Label>
-                <Input
-                  id="fp-whatsapp"
-                  type="tel"
-                  value={formValues.whatsapp}
-                  onChange={(e) => setFormValues((p) => ({ ...p, whatsapp: e.target.value }))}
-                  placeholder="e.g. 9876543210"
-                  required
-                  autoComplete="tel"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="fp-email">Email <span className="text-destructive">*</span></Label>
-                <Input
-                  id="fp-email"
-                  type="email"
-                  value={formValues.email}
-                  onChange={(e) => setFormValues((p) => ({ ...p, email: e.target.value }))}
-                  placeholder="you@example.com"
-                  required
-                  autoComplete="email"
-                />
-              </div>
-              {formError && (
-                <p className="text-sm text-destructive">{formError}</p>
-              )}
-              <Button type="submit" className="w-full" disabled={formSubmitting}>
-                {formSubmitting ? "Sending…" : "Submit"}
+            <div className="space-y-4 pt-2 text-center">
+              <p className="text-sm text-muted-foreground">
+                Sign in to get your Floor Plan.
+              </p>
+              <Button asChild className="w-full">
+                <Link href={redirect ? `/login?redirect=${redirect}` : "/login"}>
+                  Sign in to get your Floor Plan
+                </Link>
               </Button>
-            </form>
+            </div>
           </DialogContent>
         </Dialog>
       </section>
@@ -224,7 +152,7 @@ export function FloorPlanSection({
         {/* Image */}
         <div className="mt-6 aspect-[4/3] overflow-hidden rounded-lg border border-border bg-muted flex items-center justify-center">
           {current.image ? (
-            <img
+            <SupabaseImage
               src={current.image}
               alt={current.bhk}
               className="h-full w-full object-contain"
@@ -252,20 +180,14 @@ export function FloorPlanSection({
 
         {onFloorPlanRequest && (
           <div className="mt-6 pt-6 border-t border-border">
-            {submittedName ? (
-              <p className="text-center font-medium text-primary">
-                We'll Get Back to You {submittedName}
-              </p>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full sm:w-auto"
-                onClick={handleOpenRequest}
-              >
-                {requestCtaContent}
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={handleOpenRequest}
+            >
+              Request a Floor Plan
+            </Button>
           </div>
         )}
 
@@ -274,49 +196,16 @@ export function FloorPlanSection({
             <DialogHeader>
               <DialogTitle>Request a Floor Plan</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleFormSubmit} className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label htmlFor="fp-name-2">Name <span className="text-destructive">*</span></Label>
-                <Input
-                  id="fp-name-2"
-                  value={formValues.name}
-                  onChange={(e) => setFormValues((p) => ({ ...p, name: e.target.value }))}
-                  placeholder="Your name"
-                  required
-                  autoComplete="name"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="fp-whatsapp-2">WhatsApp No. <span className="text-destructive">*</span></Label>
-                <Input
-                  id="fp-whatsapp-2"
-                  type="tel"
-                  value={formValues.whatsapp}
-                  onChange={(e) => setFormValues((p) => ({ ...p, whatsapp: e.target.value }))}
-                  placeholder="e.g. 9876543210"
-                  required
-                  autoComplete="tel"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="fp-email-2">Email <span className="text-destructive">*</span></Label>
-                <Input
-                  id="fp-email-2"
-                  type="email"
-                  value={formValues.email}
-                  onChange={(e) => setFormValues((p) => ({ ...p, email: e.target.value }))}
-                  placeholder="you@example.com"
-                  required
-                  autoComplete="email"
-                />
-              </div>
-              {formError && (
-                <p className="text-sm text-destructive">{formError}</p>
-              )}
-              <Button type="submit" className="w-full" disabled={formSubmitting}>
-                {formSubmitting ? "Sending…" : "Submit"}
+            <div className="space-y-4 pt-2 text-center">
+              <p className="text-sm text-muted-foreground">
+                Sign in to get your Floor Plan.
+              </p>
+              <Button asChild className="w-full">
+                <Link href={redirect ? `/login?redirect=${redirect}` : "/login"}>
+                  Sign in to get your Floor Plan
+                </Link>
               </Button>
-            </form>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

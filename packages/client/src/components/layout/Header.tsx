@@ -21,11 +21,23 @@ import {
 const CONTACT_FORM_URL =
   import.meta.env.VITE_CONTACT_FORM_URL ?? "https://forms.gle/oSqrGhasHGWenKNf8";
 
+const DATA_ENTRY_ALLOWED_EMAIL = (
+  typeof import.meta !== "undefined" && import.meta.env?.VITE_DATA_ENTRY_ALLOWED_EMAIL
+) ? String(import.meta.env.VITE_DATA_ENTRY_ALLOWED_EMAIL).trim().toLowerCase() : "";
+
+function normalizeEmail(email: string | undefined): string {
+  return (email ?? "").trim().toLowerCase();
+}
+
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [location] = useLocation();
   const { user } = useAuth();
   const authenticated = !!user;
+  const canAccessDataEntry =
+    authenticated &&
+    DATA_ENTRY_ALLOWED_EMAIL &&
+    normalizeEmail(user?.email) === DATA_ENTRY_ALLOWED_EMAIL;
 
   const navLinkClass =
     "relative px-3 py-2 text-sm font-medium transition-colors hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all hover:after:w-full";
@@ -114,6 +126,13 @@ export function Header() {
                   About Us
                 </Link>
               </NavigationMenuItem>
+              {canAccessDataEntry && (
+                <NavigationMenuItem>
+                  <Link href="/data-entry" className={navLinkClass}>
+                    Data Entry
+                  </Link>
+                </NavigationMenuItem>
+              )}
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -196,6 +215,15 @@ export function Header() {
                 >
                   About Us
                 </Link>
+                {canAccessDataEntry && (
+                  <Link
+                    href="/data-entry"
+                    onClick={() => setIsOpen(false)}
+                    className="text-lg font-medium"
+                  >
+                    Data Entry
+                  </Link>
+                )}
                 {authenticated ? (
                   <div
                     className="mt-4"

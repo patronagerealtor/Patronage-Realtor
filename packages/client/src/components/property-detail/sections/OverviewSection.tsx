@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { MapPin, LayoutGrid, Image as ImageIcon, Home, Ruler, Banknote } from "lucide-react";
 import type { PropertyDetailData } from "@/types/propertyDetail";
 import { getDisplayPrice } from "@/lib/formatIndianPrice";
+import { SupabaseImage } from "@/components/shared/SupabaseImage";
 
 type OverviewSectionProps = {
   data: PropertyDetailData;
@@ -47,9 +48,10 @@ function getCarpetRange(data: PropertyDetailData): string | null {
 function MainImage({ src }: { src?: string }) {
   if (src) {
     return (
-      <img
+      <SupabaseImage
         src={src}
         alt=""
+        fetchPriority="high"
         className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.02]"
       />
     );
