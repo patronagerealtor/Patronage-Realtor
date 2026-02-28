@@ -4,27 +4,9 @@
 
 import { AUTH_KEYS, setStoredJwt, clearAuth } from "./auth";
 
-// Use VITE_API_URL when set. If the app is served from another host
-// but VITE_API_URL is localhost, use same origin so the request hits the right server.
-function getApiBase(): string {
-  const envUrl =
-    typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL
-      ? String(import.meta.env.VITE_API_URL).replace(/\/$/, "")
-      : "";
-  if (!envUrl) return "";
-  if (typeof window === "undefined") return envUrl;
-  try {
-    const envHost = new URL(envUrl).hostname;
-    const pageHost = window.location.hostname;
-    // If env points to localhost but we're not on localhost (e.g. deployed elsewhere), use same origin.
-    if (envHost === "localhost" && pageHost !== "localhost" && pageHost !== "127.0.0.1") {
-      return "";
-    }
-  } catch {
-    // ignore invalid URL
-  }
-  return envUrl;
-}
+// Always use same origin so /api hits the server that served the page.
+// In dev with client-only (e.g. port 5173), Vite proxies /api to the backend (see vite.config server.proxy).
+const API_BASE = "";
 
 export type GoogleAuthResponse = {
   token: string;
@@ -41,8 +23,7 @@ export async function exchangeGoogleToken(accessToken: string): Promise<{
   error: string;
 }> {
   try {
-    const base = getApiBase();
-    const url = `${base}/api/auth/google`;
+    const url = `${API_BASE}/api/auth/google`;
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
