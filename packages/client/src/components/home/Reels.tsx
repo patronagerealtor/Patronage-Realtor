@@ -13,40 +13,7 @@ import {
   VolumeX,
   Volume2,
 } from "lucide-react";
-import { getReelPublicUrl } from "@/lib/supabase";
-
-/** Cloudinary public_id (reels/canary). Version fixes 404/416. Supabase: path → reels/canary.mp4. */
-const REELS = [
-  {
-    id: 1,
-    projectName: "Ram Smruti",
-    config: "4 BHK",
-    location: "Aundh, Pune",
-    instagramUrl: "https://www.instagram.com/reel/DUiOYhEjJYv/?igsh=MTgxZjVzcWwzZmZzMA==",
-    videoPath: "reels/canary" as const,
-    cloudinaryVersion: "1772293314",
-  },
-  {
-    id: 2,
-    projectName: "Premium Residences",
-    config: "3 BHK",
-    price: "₹1.2 Cr",
-    location: "Baner, Pune",
-    instagramUrl: "https://www.instagram.com/reel/DC9bKzZPkdq/",
-    videoPath: "reels/premium" as const,
-    cloudinaryVersion: "1772293316",
-  },
-  {
-    id: 3,
-    projectName: "Luxury Tour",
-    config: "5 BHK",
-    price: "₹3.5 Cr",
-    location: "Koregaon Park",
-    instagramUrl: "https://www.instagram.com/reel/DC9bKzZPkdq/",
-    videoPath: "reels/luxury" as const,
-    cloudinaryVersion: "1772293318",
-  },
-] as const;
+import { getReelPublicUrl, fetchReels, type ReelRow } from "@/lib/supabase";
 
 const AUTO_ROTATE_MS = 5000;
 const INITIAL_INDEX = 1;
@@ -73,12 +40,35 @@ export function Reels() {
   const [showIcon, setShowIcon] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [reelsList, setReelsList] = useState<ReelRow[]>([]);
+  const [failedVideoIndices, setFailedVideoIndices] = useState<Set<number>>(new Set());
 
-  /* init arrays */
-  useEffect(() => {
-    setProgress(new Array(REELS.length).fill(0));
-    setIsPlaying(new Array(REELS.length).fill(false));
+  const list = reelsList;
+
+  const markVideoFailed = useCallback((index: number) => {
+    setFailedVideoIndices((prev) => new Set(prev).add(index));
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchReels().then((data) => {
+      if (!cancelled) setReelsList(Array.isArray(data) ? data : []);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  /* init arrays and clear video errors when list length changes */
+  useEffect(() => {
+    setProgress(new Array(list.length).fill(0));
+    setIsPlaying(new Array(list.length).fill(false));
+    setFailedVideoIndices(new Set());
+  }, [list.length]);
+
+  /* clamp activeIndex when list length changes */
+  useEffect(() => {
+    const n = list.length;
+    if (n > 0 && activeIndex >= n) setActiveIndex(n - 1);
+  }, [list.length, activeIndex]);
 
   /* center active card */
   useEffect(() => {
@@ -98,12 +88,14 @@ export function Reels() {
   /* autoplay rotation */
   useEffect(() => {
     if (paused) return;
+    const n = list.length;
+    if (n === 0) return;
     const id = setInterval(
-      () => setActiveIndex((i) => (i + 1) % REELS.length),
+      () => setActiveIndex((i) => (i + 1) % n),
       AUTO_ROTATE_MS
     );
     return () => clearInterval(id);
-  }, [paused]);
+  }, [paused, list.length]);
 
   /* pause non-active reels when switching; active reel stays paused until user taps play */
   useEffect(() => {
@@ -156,13 +148,13 @@ export function Reels() {
   };
 
   const next = useCallback(
-    () => setActiveIndex((i) => (i + 1) % REELS.length),
-    []
+    () => setActiveIndex((i) => (i + 1) % list.length),
+    [list.length]
   );
 
   const prev = useCallback(
-    () => setActiveIndex((i) => (i === 0 ? REELS.length - 1 : i - 1)),
-    []
+    () => setActiveIndex((i) => (i === 0 ? list.length - 1 : i - 1)),
+    [list.length]
   );
 
   /* drag: compute active index from current scroll position */
@@ -238,6 +230,8 @@ export function Reels() {
     setActiveIndex(index);
   }, []);
 
+  if (list.length === 0) return null;
+
   return (
     <section
       className="w-full py-16 bg-background overflow-hidden"
@@ -272,12 +266,13 @@ export function Reels() {
           onMouseDown={handlePointerDown}
           onTouchStart={handlePointerDown}
         >
-          {REELS.map((reel, index) => {
+          {list.map((reel, index) => {
             const isCenter = index === activeIndex;
             const distance = Math.abs(activeIndex - index);
             const loadVideo = shouldLoad(index, activeIndex);
             const videoSrc = getReelPublicUrl(reel.videoPath, reel.cloudinaryVersion);
             const hasVideo = Boolean(loadVideo && videoSrc);
+            const showVideo = hasVideo && !failedVideoIndices.has(index);
 
             return (
               <motion.div
@@ -294,7 +289,7 @@ export function Reels() {
                 }}
                 transition={CARD_TRANSITION}
               >
-                {hasVideo ? (
+                {showVideo ? (
                   <video
                     ref={(el) => {
                       videoRefs.current[index] = el;
@@ -306,6 +301,7 @@ export function Reels() {
                     controlsList="nofullscreen"
                     muted={muted}
                     loop
+                    onError={() => markVideoFailed(index)}
                     onClick={(e) => {
                       e.stopPropagation();
                       togglePlay(index);

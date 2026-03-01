@@ -33,13 +33,15 @@ export const supabase: SupabaseClient | null = supabaseClient;
 
 const REELS_BUCKET = "reels";
 
-/** Public CDN URL for a reel video. Cloudinary (path e.g. reels/canary, optional version) or Supabase. */
+/** Public CDN URL for a reel video. Path = Cloudinary public_id (folder/name e.g. reels/canary, reels/premium, reels/luxury) or Supabase object path. */
 export function getReelPublicUrl(path: string, version?: string): string {
+  if (!path || typeof path !== "string") return "";
+  const normalized = path.startsWith("/") ? path.slice(1) : path;
+  if (normalized.startsWith("http")) return normalized;
   if (useCloudinary) return cloudinaryGetReelPublicUrl(path, version);
   if (!supabaseUrl) return "";
-  const normalized = path.startsWith("/") ? path.slice(1) : path;
-  let bucketPath = normalized.startsWith("reels/") ? normalized.slice(6) : normalized;
-  if (bucketPath && !bucketPath.includes(".")) bucketPath = `${bucketPath}.mp4`;
+  // Object path inside bucket: strip "reels/" prefix only; do not append .mp4 (storage key may be id-only)
+  const bucketPath = normalized.startsWith("reels/") ? normalized.slice(6) : normalized;
   return `${supabaseUrl}/storage/v1/object/public/${REELS_BUCKET}/${bucketPath}`;
 }
 
@@ -99,6 +101,7 @@ export type SupabaseConnectionResult =
 const PROPERTIES_TABLE = "properties";
 const PROPERTY_IMAGES_TABLE = "property_images";
 const PROPERTY_AMENITIES_TABLE = "property_amenities";
+const REELS_TABLE = "reels";
 
 /** Verifies Supabase backend and that properties are reachable. */
 export async function checkSupabaseConnection(): Promise<SupabaseConnectionResult> {
@@ -296,6 +299,42 @@ export async function fetchAmenities(): Promise<{ id: string; name: string; icon
   if (!supabaseClient) return [];
   const { data } = await supabaseClient.from("amenities").select("*");
   return (data ?? []).map((r: { id: string; name: string; icon: string }) => ({ id: String(r.id).toLowerCase(), name: r.name ?? "", icon: r.icon ?? "" }));
+}
+
+export type ReelRow = {
+  id: string | number;
+  projectName: string;
+  config: string;
+  location: string;
+  instagramUrl: string;
+  videoPath: string;
+  cloudinaryVersion?: string;
+  price?: string;
+};
+
+export async function fetchReels(): Promise<ReelRow[]> {
+  if (!supabaseClient) return [];
+  const { data, error } = await supabaseClient
+    .from(REELS_TABLE)
+    .select("id, project_name, config, location, instagram_url, video_path, cloudinary_version, price, sort_order")
+    .order("sort_order", { ascending: true });
+  if (error) {
+    console.warn("[Supabase] fetch reels error:", error.message);
+    return [];
+  }
+  const rows = (data ?? []) as { id: string; project_name?: string; config?: string; location?: string; instagram_url?: string; video_path?: string; cloudinary_version?: string | null; price?: string | null }[];
+  return rows
+    .filter((r) => r.id != null && (r.video_path ?? "").trim() !== "")
+    .map((r) => ({
+      id: r.id,
+      projectName: r.project_name ?? "",
+      config: r.config ?? "",
+      location: r.location ?? "",
+      instagramUrl: r.instagram_url ?? "",
+      videoPath: (r.video_path ?? "").trim(),
+      cloudinaryVersion: r.cloudinary_version ?? undefined,
+      price: r.price ?? undefined,
+    }));
 }
 
 export async function insertPropertyBackend(id: string, payload: Record<string, unknown>): Promise<void> {

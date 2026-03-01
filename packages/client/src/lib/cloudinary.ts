@@ -100,8 +100,7 @@ export async function cloudinaryUploadRaw(
 
 /**
  * Return public Cloudinary URL for a reel video.
- * path = public_id e.g. reels/canary (no .mp4). version = upload version e.g. 1772293314 (avoids 416 range errors).
- * If path is already a full URL, return as-is.
+ * path = Cloudinary public_id (e.g. reels/canary). If you get 404, check Media Library: public_id must match exactly.
  */
 export function getReelPublicUrl(path: string, version?: string): string {
   if (!cloudName) return "";
