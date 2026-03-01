@@ -15,6 +15,7 @@ import { useToast } from "../hooks/use-toast";
 import { useDataEntryPropertiesOrLocal } from "../hooks/useDataEntryProperties";
 import {
   uploadPropertyImages,
+  syncPropertyImagesBackend,
   fetchContactLeads,
   deleteMultipleContactLeads,
   fetchNewsletterSubscribers,
@@ -268,6 +269,7 @@ export default function DataEntry() {
           ...basePayload,
           images: imageUrls,
         } as unknown as UpsertPropertyArg);
+        await syncPropertyImagesBackend(nextId, imageUrls);
       } else {
         nextId = effectiveEditId!;
         const uploaded = await uploadPropertyImages(nextId, payload.filesToUpload);
@@ -277,6 +279,7 @@ export default function DataEntry() {
           ...basePayload,
           images: imageUrls,
         } as unknown as UpsertPropertyArg);
+        await syncPropertyImagesBackend(nextId, imageUrls);
       }
     } else {
       nextId = await upsertProperty({
@@ -284,6 +287,7 @@ export default function DataEntry() {
         ...basePayload,
         images: imageUrls,
       } as unknown as UpsertPropertyArg);
+      await syncPropertyImagesBackend(nextId, imageUrls);
     }
 
     setPreviewId(nextId);
@@ -433,7 +437,7 @@ export default function DataEntry() {
               >
                 {dataSource === "supabase"
                   ? "Connected to Supabase (properties)"
-                  : "Using localStorage (set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in root .env for Supabase)"}
+                  : "Using localStorage (set VITE_SUPABASE_2_URL and VITE_SUPABASE_2_ANON_KEY in root .env for Supabase 2)"}
               </span>
               {isLoading && (
                 <span className="text-muted-foreground">Loading…</span>

@@ -29,7 +29,7 @@ export default function Home() {
     <div className="min-h-screen bg-background flex flex-col font-sans">
       <Header />
 
-      <main className="flex-grow">
+      <main className="flex-grow relative">
         <Hero />
         <Reels />
         <WhyChooseUs />

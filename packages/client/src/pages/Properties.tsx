@@ -201,7 +201,14 @@ export default function Properties() {
         <Header />
         <main className="flex-grow container mx-auto px-4 py-16 md:py-24">
           <div className="text-center py-12">
-            <p className="text-red-500">Error loading properties: {error.message}</p>
+            <p className="text-red-500">
+              Error loading properties: {error instanceof Error ? error.message : String(error)}
+            </p>
+            <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
+              Check .env for VITE_SUPABASE_2_URL and VITE_SUPABASE_2_ANON_KEY. In Supabase, ensure the{" "}
+              <code className="text-xs bg-muted px-1 rounded">properties</code> table exists and has a policy allowing
+              read (e.g. &quot;Allow anon all for migration&quot;).
+            </p>
           </div>
         </main>
         <Footer />

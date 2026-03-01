@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /_meta/{doc} {
+      allow read, write: if true;
+    }
+    match /properties/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+    match /properties/{id}/property_images/{img} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+    match /amenities/{id} {
+      allow read: if true;
+      allow create, update, delete: if true;
+    }
+    match /user_profiles/{userId} {
+      allow read, write: if true;
+    }
+    match /contact_leads/{id} {
+      allow read, create, update, delete: if true;
+    }
+    match /webinar_registrations/{id} {
+      allow read, create, update, delete: if true;
+    }
+    match /newsletter_subscribers/{id} {
+      allow read, create, delete: if true;
+    }
+  }
+}
