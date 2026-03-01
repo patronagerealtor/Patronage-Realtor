@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/button";
-import { ChevronDown } from "lucide-react";
 
 const HERO_BG_IMAGE = "/interiors/Interior Background.png";
 const HERO_BG_IMAGE_URL = encodeURI(HERO_BG_IMAGE);
@@ -65,7 +64,7 @@ export function InteriorsHero({ onScrollToSection }: InteriorsHeroProps) {
   return (
     <section
       id="hero"
-      className="relative min-h-[85vh] flex items-center justify-center overflow-hidden pt-20 text-white"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 text-white"
       aria-label="Hero"
     >
       {/* Background image: full-width, cover, center, scale-105 for cinematic feel */}
@@ -116,11 +115,10 @@ export function InteriorsHero({ onScrollToSection }: InteriorsHeroProps) {
         </p>
         <Button
           size="lg"
-          className="group text-lg px-8 py-6 backdrop-blur-md bg-white/15 border border-white/25 text-white shadow-lg hover:bg-white/25 hover:border-white/35"
+          className="rounded-full text-lg px-8 py-4 backdrop-blur-md bg-white/15 border border-white/25 text-white shadow-lg hover:bg-white/25 hover:border-white/35"
           onClick={() => onScrollToSection("packages")}
         >
           Explore Interiors
-          <ChevronDown className="w-5 h-5 ml-2 group-hover:translate-y-1 transition-transform" />
         </Button>
       </div>
     </section>

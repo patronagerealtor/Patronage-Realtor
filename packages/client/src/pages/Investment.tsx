@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
@@ -129,7 +129,8 @@ export default function InvestmentPage() {
   const [landCategory, setLandCategory] = useState<(typeof LAND_CATEGORIES)[number]>("All Zones");
   const [landDealType, setLandDealType] = useState<string>("");
   const [hoveredLandCategory, setHoveredLandCategory] = useState<string | null>(null);
-  const reelScrollRef = useRef<HTMLDivElement>(null);
+  const [showCommercialVideo, setShowCommercialVideo] = useState(false);
+  const [showLandVideo, setShowLandVideo] = useState(false);
 
   const getDealOptionsFor = (cat: string) =>
     cat === "Show Room" ? DEAL_OPTIONS_NO_SHARE : DEAL_OPTIONS;
@@ -138,11 +139,10 @@ export default function InvestmentPage() {
     window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }, []);
 
-  const scrollReels = (dir: "left" | "right") => {
-    if (reelScrollRef.current) {
-      reelScrollRef.current.scrollBy({ left: dir === "right" ? 340 : -340, behavior: "smooth" });
-    }
-  };
+  useEffect(() => {
+    if (activeTab !== "Commercial") setShowCommercialVideo(false);
+    if (activeTab !== "Land Acquisition") setShowLandVideo(false);
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
@@ -220,7 +220,7 @@ export default function InvestmentPage() {
           onKeyDown={(e) => e.key === "Enter" && document.getElementById("investment-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" })}
         >
           {tabs.map((t) => (
-            <button key={t} type="button" className={`tab-btn ${activeTab === t ? "active" : ""}`} onClick={(e) => { e.stopPropagation(); setActiveTab(t); document.getElementById("investment-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>{t}</button>
+            <button key={t} type="button" className={`tab-btn ${activeTab === t ? "active" : ""}`} onClick={(e) => { e.stopPropagation(); setActiveTab(t); if (t === "Commercial") setShowCommercialVideo(true); if (t === "Land Acquisition") setShowLandVideo(true); document.getElementById("investment-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" }); }}>{t}</button>
           ))}
         </div>
       </div>
@@ -248,7 +248,24 @@ export default function InvestmentPage() {
                       <span style={S.eyebrow}>{card.num}</span>
                       <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 400, color: "#111", marginTop: 10 }}>{card.title}</h3>
                       <p style={{ fontSize: 14, lineHeight: 1.75, color: "#666", marginTop: 12 }}>{card.desc}</p>
-                      <button className="outline-btn" style={{ marginTop: 24 }}>Explore {card.tab === "Commercial" ? "Commercial" : "Land"} →</button>
+                      <button
+                        type="button"
+                        className="outline-btn"
+                        style={{ marginTop: 24 }}
+                        onClick={(e) => {
+                          if (card.tab === "Commercial") {
+                            e.stopPropagation();
+                            setActiveTab("Commercial");
+                            setShowCommercialVideo(true);
+                          } else if (card.tab === "Land Acquisition") {
+                            e.stopPropagation();
+                            setActiveTab("Land Acquisition");
+                            setShowLandVideo(true);
+                          }
+                        }}
+                      >
+                        Explore {card.tab === "Commercial" ? "Commercial" : "Land"} →
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -271,50 +288,28 @@ export default function InvestmentPage() {
                 ))}
               </div>
             </section>
-
-            {/* REELS */}
-            <section className="py-16 md:py-20 border-t border-border">
-              <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 48 }}>
-                <div>
-                  <span style={S.eyebrow}>PROPERTY REELS</span>
-                  <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 48, fontWeight: 400, color: "#111", marginTop: 10, lineHeight: 1.1 }}>See It Before You Buy It</h2>
-                  <p style={{ fontSize: 14, color: "#888", marginTop: 8, maxWidth: 420 }}>
-                    Short-form video tours of our latest listings — shot on location, unfiltered.
-                  </p>
-                </div>
-                <div style={{ display: "flex", gap: 10 }}>
-                  <button className="scroll-btn" onClick={() => scrollReels("left")}>←</button>
-                  <button className="scroll-btn" onClick={() => scrollReels("right")}>→</button>
-                </div>
-              </div>
-              <div className="reels-track" ref={reelScrollRef}>
-                {reels.map((reel) => (
-                  <div key={reel.id} className="reel-card">
-                    <div style={{ position: "relative", height: 380, overflow: "hidden", background: "#111" }}>
-                      <SupabaseImage className="reel-thumb" src={reel.thumb} alt={reel.title} transformWidth={600} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", opacity: 0.88 }} />
-                      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "60%", background: "linear-gradient(to top, rgba(0,0,0,0.78) 0%, transparent 100%)" }} />
-                      <div style={{ position: "absolute", top: 14, left: 14, background: tagBg[reel.tag] || "#111", color: "#fff", fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", padding: "5px 10px", borderRadius: 2 }}>{reel.tag}</div>
-                      <div style={{ position: "absolute", top: 14, right: 14, background: "rgba(0,0,0,0.55)", color: "#fff", fontSize: 11, padding: "4px 8px", borderRadius: 2, fontWeight: 600 }}>{reel.duration}</div>
-                      <div className="play-btn">▶</div>
-                      <div style={{ position: "absolute", bottom: 16, left: 16, right: 16 }}>
-                        <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 17, fontWeight: 600, color: "#fff", lineHeight: 1.3 }}>{reel.title}</p>
-                        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", marginTop: 4 }}>📍 {reel.location}</p>
-                      </div>
-                    </div>
-                    <div style={{ padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 12, color: "#999" }}>👁 {reel.views} views</span>
-                      <button className="cta-btn" style={{ padding: "8px 16px", fontSize: 11 }}>Watch Reel</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
           </div>
         )}
 
         {/* COMMERCIAL */}
         {activeTab === "Commercial" && (
           <div>
+            {showCommercialVideo ? (
+              <section className="pt-0 pb-0 md:pt-0 md:pb-8">
+                <div style={{ marginBottom: 24 }}>
+                  <video
+                    src="/Hero/maintenance-loop.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    style={{ width: "100%", maxHeight: "80vh", objectFit: "cover", display: "block", borderRadius: 4 }}
+                    title="Commercial maintenance"
+                  />
+                </div>
+              </section>
+            ) : (
+              <>
             <section className="pt-0 pb-0 md:pt-0 md:pb-8">
               <div className="mb-12 text-center">
                 <span style={S.eyebrow}>COMMERCIAL PORTFOLIO</span>
@@ -433,12 +428,30 @@ export default function InvestmentPage() {
                 <img src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=600&q=80" alt="Commercial" style={{ width: "100%", height: 360, objectFit: "cover", borderRadius: 4 }} />
               </div>
             </section>
+              </>
+            )}
           </div>
         )}
 
         {/* LAND ACQUISITION */}
         {activeTab === "Land Acquisition" && (
           <div>
+            {showLandVideo ? (
+              <section className="pt-0 pb-0 md:pt-0 md:pb-8">
+                <div style={{ marginBottom: 24 }}>
+                  <video
+                    src="/Hero/maintenance-loop.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    style={{ width: "100%", maxHeight: "80vh", objectFit: "cover", display: "block", borderRadius: 4 }}
+                    title="Land maintenance"
+                  />
+                </div>
+              </section>
+            ) : (
+              <>
             <section className="pt-0 pb-0 md:pt-0 md:pb-8">
               <div className="mb-12 text-center">
                 <span style={S.eyebrow}>LAND PORTFOLIO</span>
@@ -565,6 +578,8 @@ export default function InvestmentPage() {
                 </div>
               </div>
             </section>
+              </>
+            )}
           </div>
         )}
 
