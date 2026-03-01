@@ -9,7 +9,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { upsertProfile } from "@/lib/supabase";
+
+const PURPOSE_OPTIONS = [
+  { value: "Real Estate Consultation", label: "Real Estate Consultation" },
+  { value: "Interior Consultation", label: "Interior Consultation" },
+] as const;
 
 type PhoneRequiredModalProps = {
   open: boolean;
@@ -32,6 +39,7 @@ export function PhoneRequiredModal({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [purposeOfVisit, setPurposeOfVisit] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,6 +48,7 @@ export function PhoneRequiredModal({
       setName(defaultName(user));
       setEmail(defaultEmail(user));
       setPhone("");
+      setPurposeOfVisit("");
       setError(null);
     }
   }, [open, user]);
@@ -64,6 +73,7 @@ export function PhoneRequiredModal({
       email: trimmedEmail || null,
       full_name: trimmedName || null,
       phone: trimmedPhone,
+      purpose_of_visit: purposeOfVisit.trim() || null,
       avatar_url: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
     });
     setSubmitting(false);
@@ -123,6 +133,40 @@ export function PhoneRequiredModal({
               autoComplete="tel"
               disabled={submitting}
             />
+          </div>
+          <div className="space-y-2">
+            <Label>Purpose of visit</Label>
+            <div className="flex gap-2">
+              {PURPOSE_OPTIONS.map((opt) => {
+                const selected = purposeOfVisit === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setPurposeOfVisit(opt.value)}
+                    disabled={submitting}
+                    className={cn(
+                      "flex flex-1 items-center justify-center gap-2 rounded-full border-2 py-3 px-4 transition-colors",
+                      "border-border bg-background hover:bg-muted/60",
+                      selected && "border-primary bg-muted/50",
+                      submitting && "pointer-events-none opacity-60"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "flex h-5 w-5 shrink-0 items-center justify-center rounded border-2",
+                        selected
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-input bg-background"
+                      )}
+                    >
+                      {selected && <Check className="h-3 w-3 stroke-[2.5]" />}
+                    </span>
+                    <span className="text-sm font-medium">{opt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
           {error && (
             <p className="text-sm text-destructive" role="alert">

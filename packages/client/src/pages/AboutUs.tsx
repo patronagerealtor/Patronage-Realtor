@@ -2,17 +2,18 @@ import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
-import { Award, Users, Target, CheckCircle2 } from "lucide-react";
-import { useEffect } from "react";
+import { Award, Users, Target, CheckCircle2, Plus, Minus } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
+import { useAuth } from "../hooks/useAuth";
+import { fetchSiteStats, updateSiteStats, subscribeSiteStats, type SiteStatsRow } from "../lib/supabase";
 
-const stats = [
-  { label: "Happy Clients", value: "1000+", icon: Users },
-  { label: "Trust", value: "100%", icon: CheckCircle2 },
-  { label: "Properties Sold", value: "500+", icon: Target },
-  { label: "Years Experience", value: "4+", icon: Award }
-];
+function parseDataEntryAllowedEmails(): string[] {
+  const raw = (typeof import.meta !== "undefined" && import.meta.env?.VITE_DATA_ENTRY_ALLOWED_EMAIL) || "";
+  if (!raw.trim()) return [];
+  return raw.split(",").map((e: string) => e.trim().toLowerCase()).filter(Boolean);
+}
 
 const easePremium = [0.22, 1, 0.36, 1] as const;
 
@@ -37,10 +38,48 @@ const heroStagger = {
 
 export default function AboutUs() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
+  const allowedEmails = parseDataEntryAllowedEmails();
+  const userEmail = user?.email?.trim().toLowerCase() ?? "";
+  const canEdit =
+    allowedEmails.length > 0 &&
+    userEmail.length > 0 &&
+    allowedEmails.includes(userEmail);
+
+  const [stats, setStats] = useState<SiteStatsRow>({
+    happy_clients: 1000,
+    properties_sold: 500,
+    years_experience: 4,
+  });
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
+
+  useEffect(() => {
+    fetchSiteStats().then(setStats);
+    const unsub = subscribeSiteStats(setStats);
+    return unsub;
+  }, []);
+
+  const adjustStat = useCallback(
+    (key: keyof SiteStatsRow, delta: number) => {
+      const next = Math.max(0, stats[key] + delta);
+      setStats((prev) => ({ ...prev, [key]: next }));
+      updateSiteStats({ [key]: next }).catch((err) => {
+        console.warn("Failed to update site stats:", err);
+        fetchSiteStats().then(setStats);
+      });
+    },
+    [stats]
+  );
+
+  const statsDisplay = [
+    { label: "Happy Clients", value: String(stats.happy_clients), icon: Users, key: "happy_clients" as const },
+    { label: "Trust", value: "100%", icon: CheckCircle2, key: null },
+    { label: "Properties Sold", value: String(stats.properties_sold), icon: Target, key: "properties_sold" as const },
+    { label: "Years Experience", value: String(stats.years_experience), icon: Award, key: "years_experience" as const },
+  ];
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-hidden relative">
@@ -159,13 +198,43 @@ export default function AboutUs() {
             transition={{ duration: 0.85, delay: 0.15, ease: easePremium }}
             className="grid grid-cols-2 gap-8"
           >
-            {stats.map((stat) => (
+            {statsDisplay.map((stat) => (
               <Card
                 key={stat.label}
                 className="p-10 rounded-3xl backdrop-blur-md bg-white/5 border border-white/10 text-center shadow-[0_20px_60px_rgba(0,0,0,0.4)] hover:bg-white/10 transition-all duration-500"
               >
                 <stat.icon className="h-10 w-10 mx-auto mb-6 text-primary" />
-                <p className="text-4xl font-bold mb-2">{stat.value}</p>
+                {stat.key && canEdit ? (
+                  <div className="flex items-center justify-center gap-3 mb-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-10 w-10 shrink-0 rounded-full border-2 border-primary bg-primary/20 text-primary hover:bg-primary/30 hover:text-primary-foreground"
+                      onClick={() => adjustStat(stat.key!, -1)}
+                      aria-label={`Decrease ${stat.label}`}
+                    >
+                      <Minus className="h-5 w-5" />
+                    </Button>
+                    <p className="min-w-[4rem] text-4xl font-bold text-center tabular-nums" aria-live="polite">
+                      {stat.value}
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-10 w-10 shrink-0 rounded-full border-2 border-primary bg-primary/20 text-primary hover:bg-primary/30 hover:text-primary-foreground"
+                      onClick={() => adjustStat(stat.key!, 1)}
+                      aria-label={`Increase ${stat.label}`}
+                    >
+                      <Plus className="h-5 w-5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <p className="text-4xl font-bold mb-2 tabular-nums" aria-live="polite">
+                    {stat.value}
+                  </p>
+                )}
                 <p className="text-xs uppercase tracking-widest text-muted-foreground">
                   {stat.label}
                 </p>

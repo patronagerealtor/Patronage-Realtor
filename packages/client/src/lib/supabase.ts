@@ -102,6 +102,7 @@ const PROPERTIES_TABLE = "properties";
 const PROPERTY_IMAGES_TABLE = "property_images";
 const PROPERTY_AMENITIES_TABLE = "property_amenities";
 const REELS_TABLE = "reels";
+const SITE_STATS_TABLE = "site_stats";
 
 /** Verifies Supabase backend and that properties are reachable. */
 export async function checkSupabaseConnection(): Promise<SupabaseConnectionResult> {
@@ -335,6 +336,63 @@ export async function fetchReels(): Promise<ReelRow[]> {
       cloudinaryVersion: r.cloudinary_version ?? undefined,
       price: r.price ?? undefined,
     }));
+}
+
+export type SiteStatsRow = {
+  happy_clients: number;
+  properties_sold: number;
+  years_experience: number;
+};
+
+const DEFAULT_SITE_STATS: SiteStatsRow = { happy_clients: 1000, properties_sold: 500, years_experience: 4 };
+
+export async function fetchSiteStats(): Promise<SiteStatsRow> {
+  if (!supabaseClient) return DEFAULT_SITE_STATS;
+  const { data, error } = await supabaseClient
+    .from(SITE_STATS_TABLE)
+    .select("happy_clients, properties_sold, years_experience")
+    .eq("id", "default")
+    .maybeSingle();
+  if (error) {
+    console.warn("[Supabase] fetch site_stats error:", error.message);
+    return DEFAULT_SITE_STATS;
+  }
+  if (!data) return DEFAULT_SITE_STATS;
+  return {
+    happy_clients: Number(data.happy_clients) || DEFAULT_SITE_STATS.happy_clients,
+    properties_sold: Number(data.properties_sold) || DEFAULT_SITE_STATS.properties_sold,
+    years_experience: Number(data.years_experience) || DEFAULT_SITE_STATS.years_experience,
+  };
+}
+
+export async function updateSiteStats(updates: Partial<SiteStatsRow>): Promise<void> {
+  if (!supabaseClient) throw new Error("Backend not configured.");
+  const payload: Record<string, unknown> = { ...updates, updated_at: new Date().toISOString() };
+  const { error } = await supabaseClient.from(SITE_STATS_TABLE).update(payload).eq("id", "default");
+  if (error) throw error;
+}
+
+/** Subscribe to site_stats changes (Realtime). Returns unsubscribe. */
+export function subscribeSiteStats(onStats: (stats: SiteStatsRow) => void): () => void {
+  if (!supabaseClient) return () => {};
+  const channel = supabaseClient
+    .channel("site_stats_changes")
+    .on(
+      "postgres_changes",
+      { event: "UPDATE", schema: "public", table: SITE_STATS_TABLE },
+      (payload) => {
+        const r = (payload.new as { happy_clients?: number; properties_sold?: number; years_experience?: number }) ?? {};
+        onStats({
+          happy_clients: Number(r.happy_clients) ?? DEFAULT_SITE_STATS.happy_clients,
+          properties_sold: Number(r.properties_sold) ?? DEFAULT_SITE_STATS.properties_sold,
+          years_experience: Number(r.years_experience) ?? DEFAULT_SITE_STATS.years_experience,
+        });
+      }
+    )
+    .subscribe();
+  return () => {
+    supabaseClient.removeChannel(channel);
+  };
 }
 
 export async function insertPropertyBackend(id: string, payload: Record<string, unknown>): Promise<void> {
@@ -673,6 +731,7 @@ export type UserProfileRow = {
   full_name: string | null;
   phone: string | null;
   avatar_url: string | null;
+  purpose_of_visit: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -683,13 +742,14 @@ export type UserProfileUpsert = {
   full_name?: string | null;
   phone?: string | null;
   avatar_url?: string | null;
+  purpose_of_visit?: string | null;
 };
 
 export async function getProfile(userId: string): Promise<UserProfileRow | null> {
   if (!supabaseClient) return null;
   const { data, error } = await supabaseClient
     .from(USER_PROFILES_TABLE)
-    .select("id, email, full_name, phone, avatar_url, created_at, updated_at")
+    .select("id, email, full_name, phone, avatar_url, purpose_of_visit, created_at, updated_at")
     .eq("id", userId)
     .maybeSingle();
   if (error) {
@@ -710,6 +770,7 @@ export async function upsertProfile(row: UserProfileUpsert): Promise<UpsertProfi
     ...(row.full_name !== undefined && { full_name: row.full_name?.trim() || null }),
     ...(row.phone !== undefined && { phone: row.phone?.trim() || null }),
     ...(row.avatar_url !== undefined && { avatar_url: row.avatar_url?.trim() || null }),
+    ...(row.purpose_of_visit !== undefined && { purpose_of_visit: row.purpose_of_visit?.trim() || null }),
     updated_at: new Date().toISOString(),
   };
   if (!supabaseClient) return { success: false, error: "Backend not configured." };
