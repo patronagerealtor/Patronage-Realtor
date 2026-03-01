@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { LayoutGrid } from "lucide-react";
-import { Link } from "wouter";
 import type { PropertyDetailData } from "@/types/propertyDetail";
 import {
   Dialog,
@@ -54,10 +53,7 @@ export function FloorPlanSection({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const redirect =
-    typeof window !== "undefined"
-      ? encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)
-      : "";
+  const contactFormUrl = import.meta.env.VITE_CONTACT_FORM_URL ?? "https://forms.gle/oSqrGhasHGWenKNf8";
 
   // Reset selected index if plans change
   useEffect(() => {
@@ -104,12 +100,12 @@ export function FloorPlanSection({
             </DialogHeader>
             <div className="space-y-4 pt-2 text-center">
               <p className="text-sm text-muted-foreground">
-                Sign in to get your Floor Plan.
+                Contact us to get your Floor Plan.
               </p>
               <Button asChild className="w-full">
-                <Link href={redirect ? `/login?redirect=${redirect}` : "/login"}>
-                  Sign in to get your Floor Plan
-                </Link>
+                <a href={contactFormUrl} target="_blank" rel="noopener noreferrer">
+                  Contact us for Floor Plan
+                </a>
               </Button>
             </div>
           </DialogContent>
@@ -198,12 +194,12 @@ export function FloorPlanSection({
             </DialogHeader>
             <div className="space-y-4 pt-2 text-center">
               <p className="text-sm text-muted-foreground">
-                Sign in to get your Floor Plan.
+                Contact us to get your Floor Plan.
               </p>
               <Button asChild className="w-full">
-                <Link href={redirect ? `/login?redirect=${redirect}` : "/login"}>
-                  Sign in to get your Floor Plan
-                </Link>
+                <a href={contactFormUrl} target="_blank" rel="noopener noreferrer">
+                  Contact us for Floor Plan
+                </a>
               </Button>
             </div>
           </DialogContent>

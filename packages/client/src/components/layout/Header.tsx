@@ -1,15 +1,23 @@
 import { useState } from "react";
-import { Menu, MapPin, Search } from "lucide-react";
+import { Menu, MapPin, Search, User, LogOut } from "lucide-react";
 import { Button } from "../ui/button";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "../../hooks/useAuth";
-import { UserProfile } from "../auth/UserProfile";
+import { useProfile } from "../../hooks/useProfile";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
   SheetTitle,
 } from "../ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "../ui/dropdown-menu";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -21,23 +29,31 @@ import {
 const CONTACT_FORM_URL =
   import.meta.env.VITE_CONTACT_FORM_URL ?? "https://forms.gle/oSqrGhasHGWenKNf8";
 
-const DATA_ENTRY_ALLOWED_EMAIL = (
-  typeof import.meta !== "undefined" && import.meta.env?.VITE_DATA_ENTRY_ALLOWED_EMAIL
-) ? String(import.meta.env.VITE_DATA_ENTRY_ALLOWED_EMAIL).trim().toLowerCase() : "";
-
-function normalizeEmail(email: string | undefined): string {
-  return (email ?? "").trim().toLowerCase();
+function parseDataEntryAllowedEmails(): string[] {
+  const raw = (typeof import.meta !== "undefined" && import.meta.env?.VITE_DATA_ENTRY_ALLOWED_EMAIL) || "";
+  if (!raw.trim()) return [];
+  return raw.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
 }
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [location] = useLocation();
-  const { user } = useAuth();
-  const authenticated = !!user;
+  const { user, logout } = useAuth();
+  const { profile } = useProfile(user?.id);
+  const dataEntryAllowed = parseDataEntryAllowedEmails();
   const canAccessDataEntry =
-    authenticated &&
-    DATA_ENTRY_ALLOWED_EMAIL &&
-    normalizeEmail(user?.email) === DATA_ENTRY_ALLOWED_EMAIL;
+    !!user &&
+    dataEntryAllowed.length > 0 &&
+    dataEntryAllowed.includes((user.email ?? "").trim().toLowerCase());
+
+  const displayName =
+    profile?.full_name?.trim() ||
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email ||
+    "—";
+  const displayEmail = profile?.email?.trim() || user?.email || "—";
+  const displayPhone = profile?.phone?.trim() || "—";
 
   const navLinkClass =
     "relative px-3 py-2 text-sm font-medium transition-colors hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all hover:after:w-full";
@@ -139,12 +155,54 @@ export function Header() {
 
         {/* Right Action */}
         <div className="hidden md:flex items-center gap-3">
-          {authenticated ? (
-            <UserProfile className="border-0 bg-transparent p-0 shadow-none" />
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <User className="h-4 w-4" aria-hidden />
+                  Profile
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col gap-1.5">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Name</p>
+                      <p className="text-sm font-medium">{displayName}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Email</p>
+                      <p className="text-sm font-medium break-all">{displayEmail}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Phone</p>
+                      <p className="text-sm font-medium">{displayPhone}</p>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer text-destructive focus:text-destructive"
+                  onClick={() => logout()}
+                >
+                  <LogOut className="h-4 w-4 mr-2" aria-hidden />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/login">Sign in</Link>
-            </Button>
+            <>
+              <Link href="/login">
+                <Button variant="ghost" size="sm">
+                  Sign in
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button variant="default" size="sm">
+                  Sign up
+                </Button>
+              </Link>
+            </>
           )}
           <Button
             asChild
@@ -224,29 +282,43 @@ export function Header() {
                     Data Entry
                   </Link>
                 )}
-                {authenticated ? (
-                  <div
-                    className="mt-4"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setIsOpen(false)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
+                {user ? (
+                  <>
+                    <div className="rounded-lg border bg-muted/30 p-4 space-y-2">
+                      <p className="text-xs text-muted-foreground">Name</p>
+                      <p className="text-sm font-medium">{displayName}</p>
+                      <p className="text-xs text-muted-foreground mt-2">Email</p>
+                      <p className="text-sm font-medium break-all">{displayEmail}</p>
+                      <p className="text-xs text-muted-foreground mt-2">Phone</p>
+                      <p className="text-sm font-medium">{displayPhone}</p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-2"
+                      onClick={() => {
+                        logout();
                         setIsOpen(false);
-                      }
-                    }}
-                  >
-                    <UserProfile />
-                  </div>
+                      }}
+                    >
+                      <LogOut className="h-4 w-4" aria-hidden />
+                      Log out
+                    </Button>
+                  </>
                 ) : (
-                  <Link
-                    href="/login"
-                    onClick={() => setIsOpen(false)}
-                    className="text-lg font-medium"
-                  >
-                    Sign in
-                  </Link>
+                  <>
+                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" size="sm" className="w-full">
+                        Sign in
+                      </Button>
+                    </Link>
+                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="default" size="sm" className="w-full">
+                        Sign up
+                      </Button>
+                    </Link>
+                  </>
                 )}
                 <Button asChild className="mt-6 w-full">
                   <a

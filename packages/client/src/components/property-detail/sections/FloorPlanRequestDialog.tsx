@@ -5,7 +5,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+
+const CONTACT_FORM_URL =
+  import.meta.env.VITE_CONTACT_FORM_URL ?? "https://forms.gle/oSqrGhasHGWenKNf8";
 
 type FloorPlanRequestDialogProps = {
   open: boolean;
@@ -19,11 +21,6 @@ export function FloorPlanRequestDialog({
   onOpenChange,
   propertyTitle,
 }: FloorPlanRequestDialogProps) {
-  const redirect =
-    typeof window !== "undefined"
-      ? encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)
-      : "";
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="rounded-xl border border-border bg-card shadow-lg sm:max-w-md overflow-hidden">
@@ -34,7 +31,7 @@ export function FloorPlanRequestDialog({
               Request Detailed Floor Plans
             </DialogTitle>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Sign in to get unit layouts, carpet area breakdown & exclusive availability details.
+              Get unit layouts, carpet area breakdown and exclusive availability details.
             </p>
             {propertyTitle && (
               <p className="text-xs font-medium text-muted-foreground pt-0.5">
@@ -44,12 +41,12 @@ export function FloorPlanRequestDialog({
           </DialogHeader>
           <div className="mt-6 space-y-4 text-center">
             <p className="text-sm text-muted-foreground">
-              Sign in with Google to request your floor plan.
+              Contact us to request your floor plan.
             </p>
             <Button asChild className="w-full rounded-xl py-3.5 text-sm font-medium">
-              <Link href={redirect ? `/login?redirect=${redirect}` : "/login"}>
-                Sign in to get your Floor Plan
-              </Link>
+              <a href={CONTACT_FORM_URL} target="_blank" rel="noopener noreferrer">
+                Contact us for Floor Plan
+              </a>
             </Button>
           </div>
         </div>

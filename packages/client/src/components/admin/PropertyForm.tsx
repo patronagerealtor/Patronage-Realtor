@@ -12,7 +12,7 @@ import {
 import { Button } from "../ui/button";
 import { useEffect, useState } from "react";
 import type { Property, PropertyStatus } from "../../lib/propertyStore";
-import { supabase } from "../../lib/supabase";
+import { fetchAmenities } from "../../lib/supabase";
 import { ALLOWED_AMENITY_NAMES } from "../../lib/allowedAmenities";
 import { AmenityIcon } from "../shared/AmenityIcon";
 import { SupabaseImage } from "../shared/SupabaseImage";
@@ -239,24 +239,20 @@ export function PropertyForm({
   }, [title, slug]);
 
   useEffect(() => {
-    if (!supabase) return;
-    supabase
-      .from("amenities")
-      .select("*")
-      .then(({ data }) => {
-        if (Array.isArray(data)) {
-          const allowedSet = new Set<string>(ALLOWED_AMENITY_NAMES);
-          setAmenitiesList(
-            data
-              .map((r: { id: string; name: string; icon: string }) => ({
-                id: String(r.id).toLowerCase(),
-                name: r.name ?? "",
-                icon: r.icon ?? "",
-              }))
-              .filter((a) => allowedSet.has(a.name))
-          );
-        }
-      });
+    fetchAmenities().then((data) => {
+      if (Array.isArray(data)) {
+        const allowedSet = new Set<string>(ALLOWED_AMENITY_NAMES);
+        setAmenitiesList(
+          data
+            .map((r) => ({
+              id: String(r.id).toLowerCase(),
+              name: r.name ?? "",
+              icon: r.icon ?? "",
+            }))
+            .filter((a) => allowedSet.has(a.name))
+        );
+      }
+    });
   }, []);
 
   const toggleAmenity = (id: string) => {
