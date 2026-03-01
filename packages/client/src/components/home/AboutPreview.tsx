@@ -34,7 +34,7 @@ export function AboutPreview() {
           transparency, and trust into the real estate journey. What started as a 
           self-funded initiative has evolved into a growing real estate solutions 
           platform, focused on guiding individuals with informed insights and ethical 
-          practices. We believe finding the right property should be a confident and 
+          practices. We believe having the perfect home/property should be a confident and 
           empowering experience — not a confusing or overwhelming one.
           </p>
 
