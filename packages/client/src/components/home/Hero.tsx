@@ -84,7 +84,7 @@ export function Hero() {
   return (
     <motion.section
       ref={sectionRef}
-      style={{ opacity, scale }} // ✅ Scroll effect applied
+      style={{ opacity, scale, position: "relative" }}
       className="relative w-full py-20 md:py-32 lg:py-40 overflow-hidden flex items-center justify-center min-h-[70vh]"
     >
       <div className="absolute inset-0 z-0">

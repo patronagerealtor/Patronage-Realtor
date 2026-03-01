@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { getReelPublicUrl } from "@/lib/supabase";
 
-/** File path in Supabase Storage bucket `reels` (e.g. canary.mp4). */
+/** Cloudinary public_id (reels/canary). Version fixes 404/416. Supabase: path → reels/canary.mp4. */
 const REELS = [
   {
     id: 1,
@@ -23,7 +23,8 @@ const REELS = [
     config: "4 BHK",
     location: "Aundh, Pune",
     instagramUrl: "https://www.instagram.com/reel/DUiOYhEjJYv/?igsh=MTgxZjVzcWwzZmZzMA==",
-    videoPath: "canary.mp4" as const,
+    videoPath: "reels/canary" as const,
+    cloudinaryVersion: "1772293314",
   },
   {
     id: 2,
@@ -32,7 +33,8 @@ const REELS = [
     price: "₹1.2 Cr",
     location: "Baner, Pune",
     instagramUrl: "https://www.instagram.com/reel/DC9bKzZPkdq/",
-    videoPath: "premium.mp4" as const,
+    videoPath: "reels/premium" as const,
+    cloudinaryVersion: "1772293316",
   },
   {
     id: 3,
@@ -41,7 +43,8 @@ const REELS = [
     price: "₹3.5 Cr",
     location: "Koregaon Park",
     instagramUrl: "https://www.instagram.com/reel/DC9bKzZPkdq/",
-    videoPath: "luxury.mp4" as const,
+    videoPath: "reels/luxury" as const,
+    cloudinaryVersion: "1772293318",
   },
 ] as const;
 
@@ -273,7 +276,7 @@ export function Reels() {
             const isCenter = index === activeIndex;
             const distance = Math.abs(activeIndex - index);
             const loadVideo = shouldLoad(index, activeIndex);
-            const videoSrc = getReelPublicUrl(reel.videoPath);
+            const videoSrc = getReelPublicUrl(reel.videoPath, reel.cloudinaryVersion);
             const hasVideo = Boolean(loadVideo && videoSrc);
 
             return (

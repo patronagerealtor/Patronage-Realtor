@@ -2,7 +2,6 @@ import { useReducer } from "react";
 import { Link } from "wouter";
 import { calculatePrice } from "../../lib/interiors/priceCalculator";
 import { BHK, PackageTier, AREA_BANDS } from "../../lib/interiors/pricingConfig";
-import { useAuth } from "../../hooks/useAuth";
 import { Card, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -15,7 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Calculator } from "lucide-react";
+import { Calculator, Lock } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
 
 type CustomizationLevel = "low" | "medium" | "high";
 
@@ -59,12 +59,11 @@ function calculatorReducer(state: CalculatorState, action: CalculatorAction): Ca
   }
 }
 
-const INTERIOR_QUOTE_REDIRECT = "/interiors#calculate-interior";
-
 export function InteriorPriceCalculator() {
   const [state, dispatch] = useReducer(calculatorReducer, initialState);
   const { bhk, pkg, renovation, customization, area } = state;
   const { user } = useAuth();
+  const showQuote = !!user;
 
   const price = calculatePrice({
     bhk,
@@ -177,10 +176,10 @@ export function InteriorPriceCalculator() {
               </div>
             </Card>
 
-            {/* Right: Output or sign-in CTA */}
-            <div className="lg:col-span-7 flex flex-col">
+            {/* Right: Output (or Sign up layer) */}
+            <div className="lg:col-span-7 flex flex-col relative">
               <Card className="p-6 flex flex-col justify-center min-h-full border-border shadow-lg bg-muted/20">
-                {user ? (
+                {showQuote ? (
                   <>
                     <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                       Estimated cost range
@@ -197,18 +196,22 @@ export function InteriorPriceCalculator() {
                     </p>
                   </>
                 ) : (
-                  <div className="space-y-4 text-center">
-                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                      Sign in to get your Interior Quote
-                    </h3>
-                    <p className="text-muted-foreground text-sm">
-                      Sign in with Google to see your estimated cost range.
+                  <div className="flex flex-col items-center justify-center text-center py-4 px-2">
+                    <div className="rounded-full bg-primary/10 p-4 mb-4">
+                      <Lock className="h-8 w-8 text-primary" aria-hidden />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-1">Sign up to see your Quote and Floor Plan</h3>
+                    <p className="text-sm text-muted-foreground mb-6 max-w-sm">
+                      Create an account to view your estimated cost range and access floor plan options.
                     </p>
-                    <Button asChild className="w-full">
-                      <Link href={`/login?redirect=${encodeURIComponent(INTERIOR_QUOTE_REDIRECT)}`}>
-                        Sign in to get your Interior Quote
+                    <div className="flex flex-wrap gap-3 justify-center">
+                      <Link href="/login">
+                        <Button variant="default">Sign up</Button>
                       </Link>
-                    </Button>
+                      <Link href="/login">
+                        <Button variant="outline">Sign in</Button>
+                      </Link>
+                    </div>
                   </div>
                 )}
               </Card>
