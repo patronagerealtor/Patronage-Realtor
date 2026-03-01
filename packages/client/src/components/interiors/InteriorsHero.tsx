@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Scene } from "../ui/hero-section";
 import { Button } from "../ui/button";
 import { ChevronDown } from "lucide-react";
 
+const HERO_BG_IMAGE = "/interiors/Interior Background.png";
+const HERO_BG_IMAGE_URL = encodeURI(HERO_BG_IMAGE);
 const HERO_SCROLL_MAX = 700;
 const SCROLL_THROTTLE_STEP = 16; // ~60fps
 
@@ -12,12 +13,25 @@ export type InteriorsHeroProps = {
 
 export function InteriorsHero({ onScrollToSection }: InteriorsHeroProps) {
   const [scrollY, setScrollY] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const [contentReady, setContentReady] = useState(false);
   const rafRef = useRef<number | null>(null);
   const lastScrollRef = useRef(0);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
+
+  useEffect(() => {
+    const t = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(t);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    const id = window.setTimeout(() => setContentReady(true), 180);
+    return () => window.clearTimeout(id);
+  }, [mounted]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,32 +65,58 @@ export function InteriorsHero({ onScrollToSection }: InteriorsHeroProps) {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-gradient-to-br from-[#000] to-[#1A2428] text-white"
+      className="relative min-h-[85vh] flex items-center justify-center overflow-hidden pt-20 text-white"
+      aria-label="Hero"
     >
-      <div className="absolute inset-0">
-        <Scene />
-      </div>
+      {/* Background image: full-width, cover, center, scale-105 for cinematic feel */}
       <div
-        className="relative z-10 container mx-auto px-4 text-center"
-        style={heroStyle}
+        className="absolute inset-0 z-0 overflow-hidden"
+        aria-hidden
       >
-        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 font-heading">
+        <img
+          src={HERO_BG_IMAGE_URL}
+          alt=""
+          className="absolute inset-0 h-full w-full scale-105 object-cover object-center transition-opacity duration-700 ease-out"
+          style={{ opacity: mounted ? 1 : 0 }}
+          fetchPriority="high"
+        />
+      </div>
+
+      {/* Dark gradient overlay: top 65% → bottom 45% black, subtle backdrop blur */}
+      <div
+        className="absolute inset-0 z-[1] backdrop-blur-[2px] transition-opacity duration-700 ease-out"
+        style={{
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.65), rgba(0,0,0,0.45))",
+          opacity: mounted ? 1 : 0,
+        }}
+        aria-hidden
+      />
+
+      {/* Content: relative container, smooth fade-in on load, high contrast for readability */}
+      <div
+        className="relative z-10 container mx-auto px-4 text-center transition-opacity duration-500 ease-out"
+        style={{
+          ...heroStyle,
+          opacity: contentReady ? heroStyle.opacity : 0,
+        }}
+      >
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 font-heading tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
           Design Your Dream
           <br />
           <span className="text-amber-300">Interior</span>
         </h1>
-        <p className="text-2xl md:text-3xl font-semibold text-white/95 mb-4 max-w-2xl mx-auto">
+        <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-white/95 mb-4 max-w-2xl mx-auto drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
           <a href="#" className="hover:text-amber-300 transition-colors underline underline-offset-4 decoration-amber-300/50 hover:decoration-amber-300">Patronage</a>
           {" × "}
           <a href="#" className="hover:text-amber-300 transition-colors underline underline-offset-4 decoration-amber-300/50 hover:decoration-amber-300">SoulSpace</a>
         </p>
-        <p className="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
+        <p className="text-lg sm:text-xl text-gray-200 mb-8 max-w-2xl mx-auto drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
           Where creativity meets functionality. Let us bring your vision to
           life with stunning interior designs.
         </p>
         <Button
           size="lg"
-          className="group text-lg px-8 py-6"
+          className="group text-lg px-8 py-6 shadow-lg"
           onClick={() => onScrollToSection("packages")}
         >
           Explore Interiors
