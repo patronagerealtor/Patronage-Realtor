@@ -2,4 +2,4 @@
 alter table public.user_profiles
   add column if not exists purpose_of_visit text;
 
-comment on column public.user_profiles.purpose_of_visit is 'Real Estate Consultation | Interior Consultation';
+comment on column public.user_profiles.purpose_of_visit is 'Single or comma-separated: Real Estate Consultation, Interior Consultation, Both / Multiple';
