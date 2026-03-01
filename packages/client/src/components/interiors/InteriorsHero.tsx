@@ -106,9 +106,9 @@ export function InteriorsHero({ onScrollToSection }: InteriorsHeroProps) {
           <span className="text-amber-300">Interior</span>
         </h1>
         <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-white/95 mb-4 max-w-2xl mx-auto drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
-          <a href="#" className="hover:text-amber-300 transition-colors underline underline-offset-4 decoration-amber-300/50 hover:decoration-amber-300">Patronage</a>
+          <a href="https://www.instagram.com/patronage_realtor?utm_source=qr" target="_blank" rel="noopener noreferrer" className="hover:text-amber-300 transition-colors underline underline-offset-4 decoration-amber-300/50 hover:decoration-amber-300">Patronage</a>
           {" × "}
-          <a href="#" className="hover:text-amber-300 transition-colors underline underline-offset-4 decoration-amber-300/50 hover:decoration-amber-300">SoulSpace</a>
+          <a href="https://www.instagram.com/soul_and_space_interiorstudio?igsh=MTl5djAwNjRpNWNxcQ==" target="_blank" rel="noopener noreferrer" className="hover:text-amber-300 transition-colors underline underline-offset-4 decoration-amber-300/50 hover:decoration-amber-300">Soul&Space</a>
         </p>
         <p className="text-lg sm:text-xl text-gray-200 mb-8 max-w-2xl mx-auto drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
           Where creativity meets functionality. Let us bring your vision to
@@ -116,7 +116,7 @@ export function InteriorsHero({ onScrollToSection }: InteriorsHeroProps) {
         </p>
         <Button
           size="lg"
-          className="group text-lg px-8 py-6 shadow-lg"
+          className="group text-lg px-8 py-6 backdrop-blur-md bg-white/15 border border-white/25 text-white shadow-lg hover:bg-white/25 hover:border-white/35"
           onClick={() => onScrollToSection("packages")}
         >
           Explore Interiors
