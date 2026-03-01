@@ -50,6 +50,16 @@ function getBedroomsFromBhk(bhkTypeOrRange: string | null | undefined): string |
   return trimmed || null;
 }
 
+/** Format possession_by for display as "Dec, 2032" (short month, full year). Safe for null/undefined. */
+function formatPossessionBy(value: string | null | undefined): string {
+  if (value === undefined || value === null || value.trim() === "") return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" })
+    .format(date)
+    .replace(" ", ", ");
+}
+
 export function DetailsSection({ data, sectionRef }: DetailsSectionProps) {
   const bhkRange = getBhkRange(data);
   const carpetRange = getCarpetRange(data);
@@ -118,9 +128,7 @@ export function DetailsSection({ data, sectionRef }: DetailsSectionProps) {
           <div className="mt-10">
             <p className="text-sm text-muted-foreground">Possession By</p>
             <p className="text-lg font-semibold text-foreground">
-              {data.possessionBy
-                ? new Date(data.possessionBy).toLocaleDateString?.() || data.possessionBy
-                : "—"}
+              {formatPossessionBy(data.possessionBy)}
             </p>
           </div>
         </div>
