@@ -3,6 +3,7 @@ import type { User } from "@supabase/supabase-js";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -16,6 +17,7 @@ import { upsertProfile } from "@/lib/supabase";
 const PURPOSE_OPTIONS = [
   { value: "Real Estate Consultation", label: "Real Estate Consultation" },
   { value: "Interior Consultation", label: "Interior Consultation" },
+  { value: "Both / Multiple", label: "Both / Multiple" },
 ] as const;
 
 type PhoneRequiredModalProps = {
@@ -39,7 +41,7 @@ export function PhoneRequiredModal({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [purposeOfVisit, setPurposeOfVisit] = useState<string>("");
+  const [purposeOfVisit, setPurposeOfVisit] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,7 +50,7 @@ export function PhoneRequiredModal({
       setName(defaultName(user));
       setEmail(defaultEmail(user));
       setPhone("");
-      setPurposeOfVisit("");
+      setPurposeOfVisit([]);
       setError(null);
     }
   }, [open, user]);
@@ -73,14 +75,19 @@ export function PhoneRequiredModal({
       email: trimmedEmail || null,
       full_name: trimmedName || null,
       phone: trimmedPhone,
-      purpose_of_visit: purposeOfVisit.trim() || null,
+      purpose_of_visit: purposeOfVisit.length ? purposeOfVisit.join(", ") : null,
       avatar_url: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
     });
     setSubmitting(false);
     if (result.success) {
       onComplete();
     } else {
-      setError(result.error);
+      const msg = result.error ?? "";
+      setError(
+        /session|expired|invalid.*token|401|400|refresh/i.test(msg)
+          ? "Your session expired. Please sign in again."
+          : msg
+      );
     }
   }
 
@@ -93,9 +100,11 @@ export function PhoneRequiredModal({
       >
         <DialogHeader>
           <DialogTitle>Complete your profile</DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            Add your phone number. Name and email are from your account.
-          </p>
+          <DialogDescription asChild>
+            <p className="text-sm text-muted-foreground">
+              Add your phone number. Name and email are from your account.
+            </p>
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
@@ -135,18 +144,24 @@ export function PhoneRequiredModal({
             />
           </div>
           <div className="space-y-2">
-            <Label>Purpose of visit</Label>
-            <div className="flex gap-2">
+            <Label>Purpose of visit (you can select multiple)</Label>
+            <div className="flex flex-wrap gap-2">
               {PURPOSE_OPTIONS.map((opt) => {
-                const selected = purposeOfVisit === opt.value;
+                const selected = purposeOfVisit.includes(opt.value);
                 return (
                   <button
                     key={opt.value}
                     type="button"
-                    onClick={() => setPurposeOfVisit(opt.value)}
+                    onClick={() => {
+                      setPurposeOfVisit((prev) =>
+                        prev.includes(opt.value)
+                          ? prev.filter((v) => v !== opt.value)
+                          : [...prev, opt.value]
+                      );
+                    }}
                     disabled={submitting}
                     className={cn(
-                      "flex flex-1 items-center justify-center gap-2 rounded-full border-2 py-3 px-4 transition-colors",
+                      "flex items-center justify-center gap-2 rounded-full border-2 py-3 px-4 transition-colors",
                       "border-border bg-background hover:bg-muted/60",
                       selected && "border-primary bg-muted/50",
                       submitting && "pointer-events-none opacity-60"

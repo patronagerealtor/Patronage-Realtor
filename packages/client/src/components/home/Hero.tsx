@@ -82,9 +82,10 @@ export function Hero() {
   }, [titleNumber]);
 
   return (
-    <div ref={sectionRef} style={{ position: "relative" }}>
+    <div style={{ position: "relative" }}>
       <motion.section
-        style={{ opacity, scale }}
+        ref={sectionRef}
+        style={{ opacity, scale, position: "relative" }}
         className="relative w-full py-20 md:py-32 lg:py-40 overflow-hidden flex items-center justify-center min-h-[70vh]"
       >
       <div className="absolute inset-0 z-0">
