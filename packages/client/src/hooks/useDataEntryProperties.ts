@@ -268,7 +268,7 @@ export function useDataEntryProperties() {
 
       try {
         await upsertMutation.mutateAsync({ id, payload: { ...propertyPayload, id } });
-        if (!useSupabase) await syncPropertyImages(id, partial.images ?? []);
+        if (useSupabase) await syncPropertyImages(id, partial.images ?? []);
         await syncPropertyAmenities(id, amenityIds);
         return id;
       } catch (e) {

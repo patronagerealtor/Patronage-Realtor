@@ -206,12 +206,17 @@ type PropertiesTableRow = {
 
 function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
   if (!row || row.id == null) return null;
-  const images = row.property_images
-    ? row.property_images
-        .slice()
-        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-        .map((img) => img.image_url)
-    : [];
+  const rawImages = row.property_images;
+  const imagesArray = Array.isArray(rawImages)
+    ? rawImages
+    : rawImages && typeof rawImages === "object"
+      ? [rawImages]
+      : [];
+  const images = imagesArray
+    .slice()
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map((img) => (img && typeof img === "object" && "image_url" in img ? img.image_url : null))
+    .filter((url): url is string => typeof url === "string" && url.trim().startsWith("http"));
   return {
     id: String(row.id),
     title: row.title ?? "",
