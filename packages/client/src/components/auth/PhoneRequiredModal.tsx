@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { User } from "@supabase/supabase-js";
 import {
   Dialog,
@@ -17,27 +17,40 @@ type PhoneRequiredModalProps = {
   onComplete: () => void;
 };
 
+const defaultName = (user: User | null) =>
+  user?.user_metadata?.full_name ??
+  user?.user_metadata?.name ??
+  user?.email ??
+  "";
+const defaultEmail = (user: User | null) => user?.email ?? "";
+
 export function PhoneRequiredModal({
   open,
   user,
   onComplete,
 }: PhoneRequiredModalProps) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const name =
-    user?.user_metadata?.full_name ??
-    user?.user_metadata?.name ??
-    user?.email ??
-    "";
-  const email = user?.email ?? "";
+  useEffect(() => {
+    if (open && user) {
+      setName(defaultName(user));
+      setEmail(defaultEmail(user));
+      setPhone("");
+      setError(null);
+    }
+  }, [open, user]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const trimmed = phone.trim();
-    if (!trimmed) {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedPhone = phone.trim();
+    if (!trimmedPhone) {
       setError("Phone number is required.");
       return;
     }
@@ -48,9 +61,9 @@ export function PhoneRequiredModal({
     setSubmitting(true);
     const result = await upsertProfile({
       id: user.id,
-      email: email || null,
-      full_name: name || null,
-      phone: trimmed,
+      email: trimmedEmail || null,
+      full_name: trimmedName || null,
+      phone: trimmedPhone,
       avatar_url: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
     });
     setSubmitting(false);
@@ -71,17 +84,30 @@ export function PhoneRequiredModal({
         <DialogHeader>
           <DialogTitle>Complete your profile</DialogTitle>
           <p className="text-sm text-muted-foreground">
-            Please add your phone number so we can reach you.
+            Add your phone number. Name and email are from your account.
           </p>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
-            <Label>Name</Label>
-            <Input value={name} readOnly className="bg-muted" />
+            <Label htmlFor="profile-name">Name</Label>
+            <Input
+              id="profile-name"
+              value={name}
+              readOnly
+              className="bg-muted cursor-not-allowed"
+              aria-readonly="true"
+            />
           </div>
           <div className="space-y-2">
-            <Label>Email</Label>
-            <Input type="email" value={email} readOnly className="bg-muted" />
+            <Label htmlFor="profile-email">Email</Label>
+            <Input
+              id="profile-email"
+              type="email"
+              value={email}
+              readOnly
+              className="bg-muted cursor-not-allowed"
+              aria-readonly="true"
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="profile-phone">

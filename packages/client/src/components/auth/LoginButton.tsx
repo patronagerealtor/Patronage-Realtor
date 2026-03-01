@@ -4,14 +4,20 @@ import { supabase } from "../../lib/supabase";
 import { cn } from "../../lib/utils";
 
 const DEFAULT_REDIRECT =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_AFTER_SIGNIN_REDIRECT) || "/dashboard";
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_AFTER_SIGNIN_REDIRECT) || "/";
 
 type LoginButtonProps = {
-  /** Path to redirect to after successful sign-in (default: VITE_AFTER_SIGNIN_REDIRECT or /dashboard) */
+  /** Path to redirect to after successful sign-in (default: VITE_AFTER_SIGNIN_REDIRECT or /) */
   redirectTo?: string;
   onError?: (message: string) => void;
   className?: string;
   disabled?: boolean;
+  /** Button label. Default: "Sign in with Google". Use "Sign up with Google" for sign-up. */
+  label?: string;
+  /** Loading label when OAuth is in progress. Default: "Signing in…" */
+  loadingLabel?: string;
+  /** Button variant. Use "default" for a solid primary Sign up button. */
+  variant?: "default" | "outline" | "ghost" | "link" | "destructive" | "secondary";
 };
 
 export function LoginButton({
@@ -19,6 +25,9 @@ export function LoginButton({
   onError,
   className,
   disabled = false,
+  label = "Sign in with Google",
+  loadingLabel = "Signing in…",
+  variant = "outline",
 }: LoginButtonProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +81,7 @@ export function LoginButton({
     <div className="flex flex-col gap-2">
       <Button
         type="button"
-        variant="outline"
+        variant={variant}
         disabled={isDisabled}
         onClick={handleSignIn}
         className={cn("gap-2", className)}
@@ -84,10 +93,10 @@ export function LoginButton({
               className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
               aria-hidden
             />
-            Signing in…
+            {loadingLabel}
           </>
         ) : (
-          "Sign in with Google"
+          label
         )}
       </Button>
       {error && (

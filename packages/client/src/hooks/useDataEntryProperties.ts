@@ -1,5 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase, fetchPropertiesFromSupabase } from "../lib/supabase";
+import {
+  fetchPropertiesFromSupabase,
+  isBackendConfigured,
+  insertPropertyBackend,
+  updatePropertyBackend,
+  upsertPropertyBackend,
+  deletePropertyBackend,
+  syncPropertyImagesBackend,
+  syncPropertyAmenitiesBackend,
+} from "../lib/supabase";
 import type { PropertyRow } from "../lib/supabase";
 import {
   createPropertyId,
@@ -11,24 +20,7 @@ import {
 import { useCallback, useMemo } from "react";
 import { useEffect, useState } from "react";
 
-const PROPERTIES_TABLE = "properties";
-const PROPERTY_IMAGES_TABLE = "property_images";
-const PROPERTY_AMENITIES_TABLE = "property_amenities";
-const STORAGE_BUCKET = "property-images";
-
-/** Extract storage path from public URL: ".../property-images/{propertyId}/file" -> "{propertyId}/file" */
-function getStoragePathsFromImageUrls(urls: { image_url: string }[]): string[] {
-  const paths: string[] = [];
-  const bucketRegex = /\/property-images\/([^?#]+)/;
-  for (const { image_url } of urls) {
-    if (!image_url || typeof image_url !== "string") continue;
-    const match = image_url.match(bucketRegex);
-    if (match && match[1]) paths.push(match[1].trim());
-  }
-  return paths;
-}
-
-/** Map PropertyRow (from Supabase) to Property (used by DataEntry/UI) */
+/** Map PropertyRow (from backend) to Property (used by DataEntry/UI) */
 function toProperty(row: PropertyRow): Property {
   const priceStr =
     row.price_min != null && row.price_max != null
@@ -68,51 +60,20 @@ function toProperty(row: PropertyRow): Property {
   };
 }
 
-/** Sync property_images table: replace all rows for property_id with given image URLs */
+/** Sync property_images (backend-agnostic). */
 async function syncPropertyImages(
   propertyId: string,
   imageUrls: string[]
 ): Promise<void> {
-  if (!supabase) return;
-  const { error: delError } = await supabase
-    .from(PROPERTY_IMAGES_TABLE)
-    .delete()
-    .eq("property_id", propertyId);
-  if (delError) console.error("[Supabase] delete property_images error:", delError);
-  if (imageUrls.length === 0) return;
-  const { error: insertError } = await supabase
-    .from(PROPERTY_IMAGES_TABLE)
-    .insert(
-      imageUrls.map((image_url, index) => ({
-        property_id: propertyId,
-        image_url,
-        sort_order: index,
-      }))
-    );
-  if (insertError) console.error("[Supabase] insert property_images error:", insertError);
+  await syncPropertyImagesBackend(propertyId, imageUrls);
 }
 
-/** Sync property_amenities junction table: replace all rows for property_id with given amenity IDs */
+/** Sync property_amenities (backend-agnostic). */
 async function syncPropertyAmenities(
   propertyId: string,
   amenityIds: string[]
 ): Promise<void> {
-  if (!supabase) return;
-  const { error: delError } = await supabase
-    .from(PROPERTY_AMENITIES_TABLE)
-    .delete()
-    .eq("property_id", propertyId);
-  if (delError) console.error("[Supabase] delete property_amenities error:", delError);
-  if (amenityIds.length === 0) return;
-  const { error: insertError } = await supabase
-    .from(PROPERTY_AMENITIES_TABLE)
-    .insert(
-      amenityIds.map((amenity_id) => ({
-        property_id: propertyId,
-        amenity_id,
-      }))
-    );
-  if (insertError) console.error("[Supabase] insert property_amenities error:", insertError);
+  await syncPropertyAmenitiesBackend(propertyId, amenityIds);
 }
 
 /** localStorage-backed fallback (same API as useProperties) */
@@ -184,15 +145,17 @@ function usePropertiesLocal() {
   };
 }
 
-/** Supabase-backed DataEntry properties (properties + property_images only) */
+/** Backend-backed DataEntry properties (Firebase or Supabase) */
 export function useDataEntryProperties() {
   const queryClient = useQueryClient();
-  const useSupabase = !!supabase;
+  const useSupabase = isBackendConfigured();
 
   const query = useQuery({
     queryKey: ["properties"],
     queryFn: fetchPropertiesFromSupabase,
     enabled: useSupabase,
+    staleTime: 1000 * 60 * 5, // 5 min – reduce Supabase requests, cache at edge
+    refetchOnWindowFocus: false,
   });
 
   const properties = useSupabase
@@ -213,14 +176,9 @@ export function useDataEntryProperties() {
       payload: Record<string, unknown>;
       id: string;
     }) => {
-      if (!supabase) throw new Error("Supabase not configured");
-      const { data, error } = await supabase
-        .from(PROPERTIES_TABLE)
-        .insert({ ...payload, id })
-        .select("id")
-        .single();
-      if (error) throw error;
-      return data?.id != null ? String(data.id) : id;
+      if (!useSupabase) throw new Error("Backend not configured");
+      await insertPropertyBackend(id, { ...payload, id });
+      return id;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
@@ -235,12 +193,24 @@ export function useDataEntryProperties() {
       id: string;
       payload: Record<string, unknown>;
     }) => {
-      if (!supabase) throw new Error("Supabase not configured");
-      const { error } = await supabase
-        .from(PROPERTIES_TABLE)
-        .update(payload)
-        .eq("id", id);
-      if (error) throw error;
+      if (!useSupabase) throw new Error("Backend not configured");
+      await updatePropertyBackend(id, payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["properties"] });
+    },
+  });
+
+  const upsertMutation = useMutation({
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: Record<string, unknown>;
+    }) => {
+      if (!useSupabase) throw new Error("Backend not configured");
+      await upsertPropertyBackend(id, payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
@@ -249,44 +219,8 @@ export function useDataEntryProperties() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      if (!supabase) throw new Error("Supabase not configured");
-      try {
-        const { data: imageRows } = await supabase
-          .from(PROPERTY_IMAGES_TABLE)
-          .select("image_url")
-          .eq("property_id", id);
-        const urls = Array.isArray(imageRows) ? imageRows : [];
-        const paths = getStoragePathsFromImageUrls(urls);
-        if (paths.length > 0) {
-          console.log("Deleting storage paths:", paths);
-          try {
-            const { error: storageError } = await supabase.storage
-              .from(STORAGE_BUCKET)
-              .remove(paths);
-            if (storageError) {
-              console.error("[Supabase] storage cleanup error:", storageError);
-            }
-          } catch (e) {
-            console.error("[Supabase] storage cleanup exception:", e);
-          }
-        }
-        const { error: imagesError } = await supabase
-          .from(PROPERTY_IMAGES_TABLE)
-          .delete()
-          .eq("property_id", id);
-        if (imagesError) {
-          console.error("[Supabase] delete property_images error:", imagesError);
-        }
-        const { error: propError } = await supabase
-          .from(PROPERTIES_TABLE)
-          .delete()
-          .eq("id", id);
-        if (propError) {
-          console.error("[Supabase] delete property error:", propError);
-        }
-      } catch (e) {
-        console.error("[Supabase] delete property exception:", e);
-      }
+      if (!useSupabase) throw new Error("Backend not configured");
+      await deletePropertyBackend(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
@@ -333,21 +267,15 @@ export function useDataEntryProperties() {
         : [];
 
       try {
-        if (partial.id && properties.some((p) => p.id === partial.id)) {
-          await updateMutation.mutateAsync({ id, payload: propertyPayload });
-          await syncPropertyImages(id, partial.images ?? []);
-          await syncPropertyAmenities(id, amenityIds);
-        } else {
-          await insertMutation.mutateAsync({ payload: propertyPayload, id });
-          await syncPropertyImages(id, partial.images ?? []);
-          await syncPropertyAmenities(id, amenityIds);
-        }
+        await upsertMutation.mutateAsync({ id, payload: { ...propertyPayload, id } });
+        if (!useSupabase) await syncPropertyImages(id, partial.images ?? []);
+        await syncPropertyAmenities(id, amenityIds);
         return id;
       } catch (e) {
         throw e;
       }
     },
-    [useSupabase, properties, insertMutation, updateMutation],
+    [useSupabase, upsertMutation],
   );
 
   const deleteProperty = useCallback(
@@ -359,7 +287,7 @@ export function useDataEntryProperties() {
   );
 
   const resetToDefaults = useCallback(async () => {
-    if (!useSupabase || !supabase) return;
+    if (!useSupabase) return;
     for (const p of DEFAULT_PROPERTIES) {
       const id = p.id ?? createPropertyId();
       const payload = {
@@ -385,7 +313,7 @@ export function useDataEntryProperties() {
         rera_applicable: false,
         rera_number: null,
       };
-      await supabase.from(PROPERTIES_TABLE).insert({ ...payload, id });
+      await insertPropertyBackend(id, { ...payload, id });
       await syncPropertyImages(id, p.images ?? []);
       const defaultAmenityIds = Array.isArray(p.amenities)
         ? p.amenities.map((a) => (typeof a === "string" ? a : a.id))
@@ -415,10 +343,10 @@ export function useDataEntryProperties() {
   };
 }
 
-/** Unified hook: uses Supabase when configured, localStorage otherwise. Both hooks called unconditionally to preserve React hook order. */
+/** Unified hook: uses backend (Firebase or Supabase) when configured, localStorage otherwise. */
 export function useDataEntryPropertiesOrLocal() {
   const supabaseHook = useDataEntryProperties();
   const localHook = usePropertiesLocal();
-  const useSupabase = !!supabase;
-  return useSupabase ? supabaseHook : localHook;
+  const useBackend = isBackendConfigured();
+  return useBackend ? supabaseHook : localHook;
 }

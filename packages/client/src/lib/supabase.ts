@@ -1,37 +1,50 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import imageCompression from "browser-image-compression";
+import {
+  isCloudinaryConfigured,
+  getReelPublicUrl as cloudinaryGetReelPublicUrl,
+  getTransformedImageUrl as cloudinaryGetTransformedImageUrl,
+  getCloudinarySrcSet as cloudinaryGetCloudinarySrcSet,
+  isCloudinaryUrl,
+  cloudinaryUploadImage,
+  cloudinaryUploadRaw,
+} from "./cloudinary";
 
-const supabaseUrl = typeof import.meta?.env?.VITE_SUPABASE_URL === "string"
-  ? import.meta.env.VITE_SUPABASE_URL
-  : "";
-const supabaseAnonKey = typeof import.meta?.env?.VITE_SUPABASE_ANON_KEY === "string"
-  ? import.meta.env.VITE_SUPABASE_ANON_KEY
-  : "";
+const supabaseUrl = typeof import.meta?.env?.VITE_SUPABASE_2_URL === "string" ? import.meta.env.VITE_SUPABASE_2_URL : "";
+const supabaseAnonKey = typeof import.meta?.env?.VITE_SUPABASE_2_ANON_KEY === "string" ? import.meta.env.VITE_SUPABASE_2_ANON_KEY : "";
 
-export const supabase: SupabaseClient | null =
+const supabaseClient: SupabaseClient | null =
   supabaseUrl && supabaseAnonKey
     ? createClient(supabaseUrl, supabaseAnonKey)
     : null;
 
+const useCloudinary = isCloudinaryConfigured();
+
+/** True when Supabase backend is available (for Data Entry). */
+export function isBackendConfigured(): boolean {
+  return !!supabaseClient;
+}
+
+export const supabase: SupabaseClient | null = supabaseClient;
+
 // ---------------------------------------------------------------------------
-// Storage: public "reels" bucket (MP4 videos, CDN URLs, no signed URLs)
+// Storage: reels (Cloudinary or Supabase)
 // ---------------------------------------------------------------------------
 
 const REELS_BUCKET = "reels";
 
-/**
- * Returns the public CDN URL for an MP4 reel in the Supabase Storage bucket `reels`.
- * Use with native <video>; no signed URLs, no server proxy.
- * Requires VITE_SUPABASE_URL to be set.
- */
-export function getReelPublicUrl(path: string): string {
+/** Public CDN URL for a reel video. Cloudinary (path e.g. reels/canary, optional version) or Supabase. */
+export function getReelPublicUrl(path: string, version?: string): string {
+  if (useCloudinary) return cloudinaryGetReelPublicUrl(path, version);
   if (!supabaseUrl) return "";
   const normalized = path.startsWith("/") ? path.slice(1) : path;
-  return `${supabaseUrl}/storage/v1/object/public/${REELS_BUCKET}/${normalized}`;
+  let bucketPath = normalized.startsWith("reels/") ? normalized.slice(6) : normalized;
+  if (bucketPath && !bucketPath.includes(".")) bucketPath = `${bucketPath}.mp4`;
+  return `${supabaseUrl}/storage/v1/object/public/${REELS_BUCKET}/${bucketPath}`;
 }
 
 // ---------------------------------------------------------------------------
-// Image CDN: transform URLs for optimized delivery (Pro plan: resize + WebP)
+// Image CDN: Cloudinary (server-side cache) or Supabase transform
 // ---------------------------------------------------------------------------
 
 const OBJECT_PUBLIC_RE = /^(https?:\/\/[^/]+)\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/;
@@ -43,20 +56,17 @@ export type ImageTransformOptions = {
   resize?: "cover" | "contain" | "fill";
 };
 
-/**
- * Converts a Supabase Storage object URL to a CDN render URL with optional
- * transform params (resize, quality). Use for thumbnails and responsive images.
- * Non-Supabase URLs are returned unchanged.
- */
+/** Optimized image URL (Cloudinary or Supabase). Server-side CDN when using Cloudinary. */
 export function getTransformedImageUrl(
   url: string,
   options?: ImageTransformOptions
 ): string {
-  if (!url || !supabaseUrl) return url;
+  if (!url) return url;
+  if (isCloudinaryUrl(url)) return cloudinaryGetTransformedImageUrl(url, options);
+  if (!supabaseUrl) return url;
   const match = url.match(OBJECT_PUBLIC_RE);
   if (!match) return url;
   const [, origin, bucket, path] = match;
-  // Render API: /storage/v1/render/image/public/bucket/path
   const renderPath = `${origin}/storage/v1/render/image/public/${bucket}/${path}`;
   const params = new URLSearchParams();
   if (options?.width != null) params.set("width", String(Math.round(options.width)));
@@ -67,10 +77,20 @@ export function getTransformedImageUrl(
   return qs ? `${renderPath}?${qs}` : renderPath;
 }
 
-/** True if url looks like a Supabase Storage object URL (for lazy/transform). */
+/** True if URL is Cloudinary or Supabase Storage (for lazy/transform). */
 export function isSupabaseStorageUrl(url: string): boolean {
-  return typeof url === "string" && OBJECT_PUBLIC_RE.test(url);
+  return (typeof url === "string" && OBJECT_PUBLIC_RE.test(url)) || isCloudinaryUrl(url);
 }
+
+/** Responsive srcset for Cloudinary images (CDN-friendly, on-demand sizes). */
+export function getCloudinarySrcSet(
+  url: string,
+  options: { maxWidth: number; height?: number; quality?: number; resize?: "cover" | "contain" | "fill" }
+): string {
+  return cloudinaryGetCloudinarySrcSet(url, options);
+}
+
+export { isCloudinaryUrl };
 
 export type SupabaseConnectionResult =
   | { connected: true; message: string; count: number }
@@ -78,20 +98,21 @@ export type SupabaseConnectionResult =
 
 const PROPERTIES_TABLE = "properties";
 const PROPERTY_IMAGES_TABLE = "property_images";
+const PROPERTY_AMENITIES_TABLE = "property_amenities";
 
-/** Verifies Supabase env and that the `properties` table is reachable. */
+/** Verifies Supabase backend and that properties are reachable. */
 export async function checkSupabaseConnection(): Promise<SupabaseConnectionResult> {
   if (!supabaseUrl || !supabaseAnonKey) {
     return {
       connected: false,
-      message: "Missing env: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env",
+      message: "Missing env: set VITE_SUPABASE_2_URL and VITE_SUPABASE_2_ANON_KEY in .env",
     };
   }
-  if (!supabase) {
+  if (!supabaseClient) {
     return { connected: false, message: "Supabase client not initialized." };
   }
   try {
-    const { count, error } = await supabase
+    const { count, error } = await supabaseClient
       .from(PROPERTIES_TABLE)
       .select("*", { count: "exact", head: true });
     if (error) {
@@ -208,7 +229,7 @@ function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
     baths: Number(row.baths ?? 0),
     sqft: row.sqft ?? "",
     status: row.construction_status ?? "",
-    image_url: null,
+    image_url: images.length ? images[0] : null,
     images,
     description: row.description ?? "",
     latitude: row.latitude ?? null,
@@ -234,35 +255,117 @@ function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
 }
 
 export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
-  if (!supabase) return [];
-  try {
-    const { data, error } = await supabase
-      .from(PROPERTIES_TABLE)
-      .select(
-        `
-        *,
-        property_images (
-          image_url,
-          sort_order
-        ),
-        property_amenities (
-          amenities (
-            id,
-            name,
-            icon
-          )
-        )
+  if (!supabaseClient) {
+    throw new Error(
+      "Supabase is not configured. Set VITE_SUPABASE_2_URL and VITE_SUPABASE_2_ANON_KEY in .env to load properties."
+    );
+  }
+  const { data, error } = await supabaseClient
+    .from(PROPERTIES_TABLE)
+    .select(
       `
+      *,
+      property_images (
+        image_url,
+        sort_order
+      ),
+      property_amenities (
+        amenities (
+          id,
+          name,
+          icon
+        )
       )
-      .order("created_at", { ascending: false });
-    if (error) {
-      console.error("[Supabase] fetch properties error:", error);
-      return [];
+    `
+    )
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("[Supabase] fetch properties error:", error);
+    throw new Error(error.message || "Failed to load properties from database.");
+  }
+  const rows = (data ?? []) as PropertiesTableRow[];
+  return rows.map((r) => toPropertyRow(r)).filter((r): r is PropertyRow => r != null);
+}
+
+export async function fetchAmenities(): Promise<{ id: string; name: string; icon: string }[]> {
+  if (!supabaseClient) return [];
+  const { data } = await supabaseClient.from("amenities").select("*");
+  return (data ?? []).map((r: { id: string; name: string; icon: string }) => ({ id: String(r.id).toLowerCase(), name: r.name ?? "", icon: r.icon ?? "" }));
+}
+
+export async function insertPropertyBackend(id: string, payload: Record<string, unknown>): Promise<void> {
+  if (!supabaseClient) throw new Error("Backend not configured.");
+  const { error } = await supabaseClient.from(PROPERTIES_TABLE).insert({ ...payload, id }).select("id").single();
+  if (error) throw error;
+}
+
+export async function updatePropertyBackend(id: string, payload: Record<string, unknown>): Promise<void> {
+  if (!supabaseClient) throw new Error("Backend not configured.");
+  const { error } = await supabaseClient.from(PROPERTIES_TABLE).update(payload).eq("id", id);
+  if (error) throw error;
+}
+
+/** Insert or update by id. Use this when saving so a second save with the same id (e.g. after uploading images) does not 409. */
+export async function upsertPropertyBackend(id: string, payload: Record<string, unknown>): Promise<void> {
+  if (!supabaseClient) throw new Error("Backend not configured.");
+  const { error } = await supabaseClient
+    .from(PROPERTIES_TABLE)
+    .upsert({ ...payload, id }, { onConflict: "id" })
+    .select("id")
+    .single();
+  if (error) throw error;
+}
+
+export async function deletePropertyBackend(id: string): Promise<void> {
+  if (!supabaseClient) throw new Error("Backend not configured.");
+  const { data: imageRows } = await supabaseClient.from(PROPERTY_IMAGES_TABLE).select("image_url").eq("property_id", id);
+  const re = /\/property-images\/([^?#]+)/;
+  const paths = Array.isArray(imageRows)
+    ? (imageRows as { image_url: string }[]).map((r) => re.exec(r.image_url ?? "")?.[1]).filter((x): x is string => !!x)
+    : [];
+  if (paths.length > 0) {
+    try {
+      await supabaseClient.storage.from(STORAGE_BUCKET).remove(paths);
+    } catch (_) {}
+  }
+  await supabaseClient.from(PROPERTY_IMAGES_TABLE).delete().eq("property_id", id);
+  await supabaseClient.from(PROPERTIES_TABLE).delete().eq("id", id);
+}
+
+export async function syncPropertyImagesBackend(propertyId: string, imageUrls: string[]): Promise<void> {
+  if (!supabaseClient) return;
+  const id = String(propertyId).trim();
+  const { error: deleteError } = await supabaseClient.from(PROPERTY_IMAGES_TABLE).delete().eq("property_id", id);
+  if (deleteError) {
+    console.error("[Supabase] syncPropertyImages delete error:", deleteError);
+    throw deleteError;
+  }
+  const validUrls = imageUrls.filter((url) => typeof url === "string" && url.trim().startsWith("http"));
+  if (validUrls.length) {
+    const rows = validUrls.map((image_url, sort_order) => ({
+      property_id: id,
+      image_url: image_url.trim(),
+      sort_order,
+    }));
+    const { data, error: insertError } = await supabaseClient
+      .from(PROPERTY_IMAGES_TABLE)
+      .insert(rows)
+      .select("id, property_id, image_url");
+    if (insertError) {
+      console.error("[Supabase] syncPropertyImages insert error:", insertError);
+      throw insertError;
     }
-    const rows = (data ?? []) as PropertiesTableRow[];
-    return rows.map((r) => toPropertyRow(r)).filter((r): r is PropertyRow => r != null);
-  } catch {
-    return [];
+    if (!data?.length) {
+      console.warn("[Supabase] syncPropertyImages insert returned no rows; RLS may block SELECT on insert.");
+    }
+  }
+}
+
+export async function syncPropertyAmenitiesBackend(propertyId: string, amenityIds: string[]): Promise<void> {
+  if (!supabaseClient) return;
+  await supabaseClient.from(PROPERTY_AMENITIES_TABLE).delete().eq("property_id", propertyId);
+  if (amenityIds.length) {
+    await supabaseClient.from(PROPERTY_AMENITIES_TABLE).insert(amenityIds.map((amenity_id) => ({ property_id: propertyId, amenity_id })));
   }
 }
 
@@ -277,75 +380,57 @@ const COMPRESSION_OPTIONS = {
 };
 
 /**
- * Uploads files to Supabase Storage under property-images/{propertyId}/{uuid}.webp,
- * then inserts each into property_images (property_id, image_url, sort_order).
- * Images are compressed client-side (resize max 1600px, WebP, target &lt;500 KB) before upload.
- * Returns an array of public URLs for successfully uploaded files.
+ * Uploads property images to Cloudinary (server-side CDN) or Supabase Storage.
+ * Returns public URLs; caller syncs to backend via syncPropertyImagesBackend.
  */
 export async function uploadPropertyImages(
   propertyId: string,
   files: File[]
 ): Promise<string[]> {
-  if (!supabase || !files.length) return [];
+  if (!files.length) return [];
   const urls: string[] = [];
+
+  if (useCloudinary) {
+    const folder = `property-images/${propertyId}`;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      let fileToUpload: File = file;
+      try {
+        const compressed = await imageCompression(file, COMPRESSION_OPTIONS);
+        if (compressed?.size) fileToUpload = compressed;
+      } catch (_) {}
+      const result = await cloudinaryUploadImage(fileToUpload, folder);
+      if ("url" in result) urls.push(result.url);
+    }
+    return urls;
+  }
+
+  if (!supabaseClient) return [];
   for (let index = 0; index < files.length; index++) {
     const file = files[index];
-    const originalSizeMB = file.size / (1024 * 1024);
     let fileToUpload: File = file;
+    const name = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     let path: string;
-    const name =
-      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-
     try {
       const compressed = await imageCompression(file, COMPRESSION_OPTIONS);
-      if (compressed && compressed.size > 0) {
+      if (compressed?.size) {
         fileToUpload = compressed;
         path = `${propertyId}/${name}.webp`;
-        const compressedSizeMB = compressed.size / (1024 * 1024);
-        console.log(
-          `[Supabase] Image compression: original ${originalSizeMB.toFixed(3)} MB → compressed ${compressedSizeMB.toFixed(3)} MB`
-        );
       } else {
         const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-        const safeExt = /^[a-z0-9]+$/i.test(ext) ? ext : "jpg";
-        path = `${propertyId}/${name}.${safeExt}`;
+        path = `${propertyId}/${name}.${/^[a-z0-9]+$/i.test(ext) ? ext : "jpg"}`;
       }
-    } catch (e) {
-      console.error("[Supabase] image compression error (using original):", e);
+    } catch {
       const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const safeExt = /^[a-z0-9]+$/i.test(ext) ? ext : "jpg";
-      path = `${propertyId}/${name}.${safeExt}`;
+      path = `${propertyId}/${name}.${/^[a-z0-9]+$/i.test(ext) ? ext : "jpg"}`;
     }
-
     try {
-      const { error: uploadError } = await supabase.storage
-        .from(STORAGE_BUCKET)
-        .upload(path, fileToUpload, {
-          upsert: true,
-          cacheControl: "31536000", // 1 year; paths are unique per upload
-        });
-      if (uploadError) {
-        console.error("[Supabase] upload image error:", uploadError);
-        continue;
-      }
-      const { data } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
-      const publicUrl = data.publicUrl;
-      urls.push(publicUrl);
-      const { error: insertError } = await supabase
-        .from(PROPERTY_IMAGES_TABLE)
-        .insert({
-          property_id: propertyId,
-          image_url: publicUrl,
-          sort_order: index,
-        });
-      if (insertError) {
-        console.error("[Supabase] insert property_images error:", insertError);
-      }
-    } catch (e) {
-      console.error("[Supabase] upload image exception:", e);
-    }
+      const { error: uploadError } = await supabaseClient.storage.from(STORAGE_BUCKET).upload(path, fileToUpload, { upsert: true, cacheControl: "31536000" });
+      if (uploadError) continue;
+      const { data } = supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+      urls.push(data.publicUrl);
+      await supabaseClient.from(PROPERTY_IMAGES_TABLE).insert({ property_id: propertyId, image_url: data.publicUrl, sort_order: index });
+    } catch (_) {}
   }
   return urls;
 }
@@ -379,29 +464,14 @@ export type WebinarRegistrationResult =
 export async function insertWebinarRegistration(
   row: WebinarRegistrationRow
 ): Promise<WebinarRegistrationResult> {
-  if (!supabase) {
-    return {
-      success: false,
-      error: "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env",
-    };
-  }
   const payload = {
     name: row.name.trim(),
     email: row.email.trim(),
     contact_number: row.contact_number.trim(),
   };
-  const { data, error } = await supabase
-    .from(WEBINAR_REGISTRATIONS_TABLE)
-    .insert(payload)
-    .select("id")
-    .single();
-  if (error) {
-    console.error("[Supabase] insert webinar_registrations error:", error);
-    return {
-      success: false,
-      error: error.message || "Database error. Check table name and RLS policies.",
-    };
-  }
+  if (!supabaseClient) return { success: false, error: "Backend not configured." };
+  const { data, error } = await supabaseClient.from(WEBINAR_REGISTRATIONS_TABLE).insert(payload).select("id").single();
+  if (error) return { success: false, error: error.message || "Database error." };
   return data?.id ? { success: true, id: String(data.id) } : { success: false, error: "No id returned" };
 }
 
@@ -415,37 +485,24 @@ export async function uploadWebinarPaymentProof(
   registrationId: string,
   file: File
 ): Promise<UploadPaymentProofResult> {
-  if (!supabase) {
-    return {
-      success: false,
-      error: "Supabase is not configured.",
-    };
+  let url: string;
+  if (useCloudinary) {
+    const folder = `webinar-proofs/${registrationId}`;
+    const isPdf = file.type === "application/pdf";
+    const result = isPdf ? await cloudinaryUploadRaw(file, folder) : await cloudinaryUploadImage(file, folder);
+    if ("error" in result) return { success: false, error: result.error };
+    url = result.url;
+  } else {
+    if (!supabaseClient) return { success: false, error: "Backend not configured." };
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${registrationId}/proof.${ext}`;
+    const { error: uploadError } = await supabaseClient.storage.from(WEBINAR_PAYMENT_BUCKET).upload(path, file, { upsert: true, contentType: file.type });
+    if (uploadError) return { success: false, error: uploadError.message || "Upload failed." };
+    url = supabaseClient.storage.from(WEBINAR_PAYMENT_BUCKET).getPublicUrl(path).data.publicUrl;
   }
-  const ext = file.name.split(".").pop() || "jpg";
-  const path = `${registrationId}/proof.${ext}`;
-  const { error: uploadError } = await supabase.storage
-    .from(WEBINAR_PAYMENT_BUCKET)
-    .upload(path, file, { upsert: true, contentType: file.type });
-  if (uploadError) {
-    console.error("[Supabase] storage upload error:", uploadError);
-    return {
-      success: false,
-      error: uploadError.message || "Upload failed.",
-    };
-  }
-  const { data: urlData } = supabase.storage.from(WEBINAR_PAYMENT_BUCKET).getPublicUrl(path);
-  const url = urlData.publicUrl;
-  const { error: updateError } = await supabase
-    .from(WEBINAR_REGISTRATIONS_TABLE)
-    .update({ payment_proof_url: url })
-    .eq("id", registrationId);
-  if (updateError) {
-    console.error("[Supabase] update payment_proof_url error:", updateError);
-    return {
-      success: false,
-      error: updateError.message || "Failed to save proof link.",
-    };
-  }
+  if (!supabaseClient) return { success: false, error: "Backend not configured." };
+  const { error: updateError } = await supabaseClient.from(WEBINAR_REGISTRATIONS_TABLE).update({ payment_proof_url: url }).eq("id", registrationId);
+  if (updateError) return { success: false, error: updateError.message || "Failed to save proof link." };
   return { success: true, url };
 }
 
@@ -475,52 +532,27 @@ const PG_UNIQUE_VIOLATION = "23505";
 export async function insertNewsletterSubscriber(
   email: string
 ): Promise<InsertNewsletterSubscriberResult> {
-  if (!supabase) {
-    return {
-      success: false,
-      code: "error",
-      message: "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env",
-    };
-  }
+  if (!supabaseClient) return { success: false, code: "error", message: "Backend not configured." };
   const trimmed = email.trim();
-  const payload: NewsletterSubscriberInsert = { email: trimmed };
-  const { error } = await supabase
-    .from(NEWSLETTER_SUBSCRIBERS_TABLE)
-    .insert(payload);
+  const { error } = await supabaseClient.from(NEWSLETTER_SUBSCRIBERS_TABLE).insert({ email: trimmed });
   if (error) {
-    if (error.code === PG_UNIQUE_VIOLATION) {
-      return { success: false, code: "duplicate", message: "Already subscribed" };
-    }
-    return {
-      success: false,
-      code: "error",
-      message: error.message || "Failed to subscribe.",
-    };
+    if (error.code === PG_UNIQUE_VIOLATION) return { success: false, code: "duplicate", message: "Already subscribed" };
+    return { success: false, code: "error", message: error.message || "Failed to subscribe." };
   }
   return { success: true };
 }
 
 export async function fetchNewsletterSubscribers(): Promise<NewsletterSubscriberRow[]> {
-  if (!supabase) return [];
-  try {
-    const { data, error } = await supabase
-      .from(NEWSLETTER_SUBSCRIBERS_TABLE)
-      .select("id, email, created_at")
-      .order("created_at", { ascending: false });
-    if (error) return [];
-    return (data ?? []) as NewsletterSubscriberRow[];
-  } catch {
-    return [];
-  }
+  if (!supabaseClient) return [];
+  const { data, error } = await supabaseClient.from(NEWSLETTER_SUBSCRIBERS_TABLE).select("id, email, created_at").order("created_at", { ascending: false });
+  if (error) return [];
+  return (data ?? []) as NewsletterSubscriberRow[];
 }
 
 export async function deleteMultipleNewsletterSubscribers(ids: string[]): Promise<void> {
-  if (!supabase) throw new Error("Supabase is not configured.");
   if (ids.length === 0) return;
-  const { error } = await supabase
-    .from(NEWSLETTER_SUBSCRIBERS_TABLE)
-    .delete()
-    .in("id", ids);
+  if (!supabaseClient) throw new Error("Backend not configured.");
+  const { error } = await supabaseClient.from(NEWSLETTER_SUBSCRIBERS_TABLE).delete().in("id", ids);
   if (error) throw new Error(error.message || "Failed to delete subscribers.");
 }
 
@@ -557,12 +589,6 @@ export type InsertContactLeadResult =
 export async function insertContactLead(
   row: ContactLeadInsert
 ): Promise<InsertContactLeadResult> {
-  if (!supabase) {
-    return {
-      success: false,
-      error: "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env",
-    };
-  }
   const payload = {
     name: row.name.trim(),
     email: row.email.trim(),
@@ -571,51 +597,24 @@ export async function insertContactLead(
     property_title: row.property_title.trim(),
     lead_type: row.lead_type ?? "site_visit",
   };
-  const { data, error } = await supabase
-    .from(CONTACT_LEADS_TABLE)
-    .insert(payload)
-    .select("id")
-    .single();
-  if (error) {
-    console.error("[Supabase] insert contact_leads error:", error);
-    return {
-      success: false,
-      error: error.message || "Database error. Check table and RLS policies.",
-    };
-  }
+  if (!supabaseClient) return { success: false, error: "Backend not configured." };
+  const { data, error } = await supabaseClient.from(CONTACT_LEADS_TABLE).insert(payload).select("id").single();
+  if (error) return { success: false, error: error.message || "Database error." };
   return data?.id ? { success: true, id: String(data.id) } : { success: false, error: "No id returned" };
 }
 
 export async function fetchContactLeads(): Promise<ContactLeadRow[]> {
-  if (!supabase) return [];
-  try {
-    const { data, error } = await supabase
-      .from(CONTACT_LEADS_TABLE)
-      .select("id, name, email, phone, property_id, property_title, created_at")
-      .order("created_at", { ascending: false });
-    if (error) {
-      console.error("[Supabase] fetch contact_leads error:", error);
-      return [];
-    }
-    return (data ?? []) as ContactLeadRow[];
-  } catch {
-    return [];
-  }
+  if (!supabaseClient) return [];
+  const { data, error } = await supabaseClient.from(CONTACT_LEADS_TABLE).select("id, name, email, phone, property_id, property_title, created_at").order("created_at", { ascending: false });
+  if (error) return [];
+  return (data ?? []) as ContactLeadRow[];
 }
 
-/**
- * Deletes multiple contact leads by id. Throws if Supabase is not configured or deletion fails.
- */
 export async function deleteMultipleContactLeads(ids: string[]): Promise<void> {
-  if (!supabase) {
-    throw new Error("Supabase is not configured.");
-  }
   if (ids.length === 0) return;
-  const { error } = await supabase.from(CONTACT_LEADS_TABLE).delete().in("id", ids);
-  if (error) {
-    console.error("[Supabase] delete contact_leads error:", error);
-    throw new Error(error.message || "Failed to delete leads.");
-  }
+  if (!supabaseClient) throw new Error("Backend not configured.");
+  const { error } = await supabaseClient.from(CONTACT_LEADS_TABLE).delete().in("id", ids);
+  if (error) throw new Error(error.message || "Failed to delete leads.");
 }
 
 // ---------------------------------------------------------------------------
@@ -643,19 +642,14 @@ export type UserProfileUpsert = {
 };
 
 export async function getProfile(userId: string): Promise<UserProfileRow | null> {
-  if (!supabase) return null;
-  const { data, error } = await supabase
+  if (!supabaseClient) return null;
+  const { data, error } = await supabaseClient
     .from(USER_PROFILES_TABLE)
     .select("id, email, full_name, phone, avatar_url, created_at, updated_at")
     .eq("id", userId)
     .maybeSingle();
   if (error) {
     console.error("[Supabase] getProfile error:", error);
-    if (error.message?.includes("user_profiles") && error.message?.includes("schema cache")) {
-      console.warn(
-        "[Supabase] Create the table: open Supabase Dashboard → SQL Editor, then run the SQL in packages/client/supabase-user_profiles.sql"
-      );
-    }
     return null;
   }
   return data as UserProfileRow | null;
@@ -666,9 +660,6 @@ export type UpsertProfileResult =
   | { success: false; error: string };
 
 export async function upsertProfile(row: UserProfileUpsert): Promise<UpsertProfileResult> {
-  if (!supabase) {
-    return { success: false, error: "Supabase is not configured." };
-  }
   const payload = {
     id: row.id,
     ...(row.email !== undefined && { email: row.email?.trim() || null }),
@@ -677,19 +668,8 @@ export async function upsertProfile(row: UserProfileUpsert): Promise<UpsertProfi
     ...(row.avatar_url !== undefined && { avatar_url: row.avatar_url?.trim() || null }),
     updated_at: new Date().toISOString(),
   };
-  const { data, error } = await supabase
-    .from(USER_PROFILES_TABLE)
-    .upsert(payload, { onConflict: "id" })
-    .select()
-    .single();
-  if (error) {
-    console.error("[Supabase] upsertProfile error:", error);
-    if (error.message?.includes("user_profiles") && error.message?.includes("schema cache")) {
-      console.warn(
-        "[Supabase] Create the table: open Supabase Dashboard → SQL Editor, then run the SQL in packages/client/supabase-user_profiles.sql"
-      );
-    }
-    return { success: false, error: error.message || "Failed to save profile." };
-  }
+  if (!supabaseClient) return { success: false, error: "Backend not configured." };
+  const { data, error } = await supabaseClient.from(USER_PROFILES_TABLE).upsert(payload, { onConflict: "id" }).select().single();
+  if (error) return { success: false, error: error.message || "Failed to save profile." };
   return { success: true, profile: data as UserProfileRow };
 }

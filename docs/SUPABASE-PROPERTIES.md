@@ -4,10 +4,10 @@ Property listings on the **Home** (Featured Properties) and **Properties** pages
 
 ## DataEntry: Add, Edit, Delete properties
 
-The **Admin Data Entry** page (`/data-entry`) supports full CRUD when linked to Supabase. It uses a dedicated table `property_listings`:
+The **Admin Data Entry** page (`/data-entry`) supports full CRUD when linked to Supabase. It uses the `properties` table (and `property_images`, `property_amenities`).
 
-1. Run the SQL migration: open `docs/supabase-property-listings.sql` and execute it in Supabase Dashboard → SQL Editor.
-2. Ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set in `.env`.
+1. Run the SQL: open `docs/supabase-2-create-all-tables.sql` and execute it in Supabase Dashboard → SQL Editor.
+2. Ensure `VITE_SUPABASE_2_URL` and `VITE_SUPABASE_2_ANON_KEY` are set in `.env`.
 3. Visit `/data-entry` to add, edit, or delete properties. Data is stored in Supabase.
 
 If Supabase is not configured, DataEntry falls back to localStorage. The app **maps your schema** to the UI as follows:
@@ -44,16 +44,16 @@ Insert data as you did (e.g. `insert into properties (title, developer, bhk_type
 1. Open [Supabase Dashboard](https://supabase.com/dashboard) and select your project.
 2. Go to **Project Settings** (gear) → **API**.
 3. Copy:
-   - **Project URL** → use as `VITE_SUPABASE_URL`
-   - **anon public** key → use as `VITE_SUPABASE_ANON_KEY`
+   - **Project URL** → use as `VITE_SUPABASE_2_URL`
+   - **anon public** key → use as `VITE_SUPABASE_2_ANON_KEY`
 
 ## 3. Configure environment variables
 
 In the **project root** (the `Patronage-Realtor` folder that contains `vite.config.ts` and `package.json`), create a `.env` file with **exactly** these names (Vite only exposes variables that start with `VITE_`):
 
 ```env
-VITE_SUPABASE_URL=https://xxxxxxxx.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+VITE_SUPABASE_2_URL=https://xxxxxxxx.supabase.co
+VITE_SUPABASE_2_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 Use your real Project URL and anon key. **Restart the dev server** after adding or changing `.env` so the app picks them up.
