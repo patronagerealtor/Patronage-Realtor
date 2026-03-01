@@ -82,11 +82,11 @@ export function Hero() {
   }, [titleNumber]);
 
   return (
-    <motion.section
-      ref={sectionRef}
-      style={{ opacity, scale, position: "relative" }}
-      className="relative w-full py-20 md:py-32 lg:py-40 overflow-hidden flex items-center justify-center min-h-[70vh]"
-    >
+    <div ref={sectionRef} style={{ position: "relative" }}>
+      <motion.section
+        style={{ opacity, scale }}
+        className="relative w-full py-20 md:py-32 lg:py-40 overflow-hidden flex items-center justify-center min-h-[70vh]"
+      >
       <div className="absolute inset-0 z-0">
         <BackgroundPaths />
         <div className="absolute inset-0 bg-background/20" />
@@ -193,7 +193,7 @@ export function Hero() {
 
             <TagItem
               text="Own it !"
-              link="/ownership"
+              link="/calculators"
               message="Make informed decisions and turn your dream into reality."
             />
             <span className="hidden md:inline text-muted-foreground">·</span>
@@ -207,5 +207,6 @@ export function Hero() {
         </div>
       </div>
     </motion.section>
+    </div>
   );
 }

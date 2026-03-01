@@ -127,3 +127,20 @@ create policy "Allow anon all for migration" on public.user_profiles for all to 
 create policy "Users can select own profile" on public.user_profiles for select to authenticated using (auth.uid() = id);
 create policy "Users can insert own profile" on public.user_profiles for insert to authenticated with check (auth.uid() = id);
 create policy "Users can update own profile" on public.user_profiles for update to authenticated using (auth.uid() = id) with check (auth.uid() = id);
+
+-- 9. Reels (home page video reels; video_path = Cloudinary public_id e.g. reels/canary or Supabase path)
+create table if not exists public.reels (
+  id text primary key,
+  project_name text not null default '',
+  config text default '',
+  location text default '',
+  instagram_url text default '',
+  video_path text not null default '',
+  cloudinary_version text,
+  price text,
+  sort_order int not null default 0,
+  created_at timestamptz default now()
+);
+alter table public.reels enable row level security;
+create policy "Allow anon read reels" on public.reels for select to anon using (true);
+create policy "Allow anon all for migration reels" on public.reels for all to anon using (true) with check (true);
