@@ -764,17 +764,17 @@ export type UpsertProfileResult =
   | { success: false; error: string };
 
 export async function upsertProfile(row: UserProfileUpsert): Promise<UpsertProfileResult> {
-  const payload = {
-    id: row.id,
-    ...(row.email !== undefined && { email: row.email?.trim() || null }),
-    ...(row.full_name !== undefined && { full_name: row.full_name?.trim() || null }),
-    ...(row.phone !== undefined && { phone: row.phone?.trim() || null }),
-    ...(row.avatar_url !== undefined && { avatar_url: row.avatar_url?.trim() || null }),
-    ...(row.purpose_of_visit !== undefined && { purpose_of_visit: row.purpose_of_visit?.trim() || null }),
-    updated_at: new Date().toISOString(),
-  };
-  if (!supabaseClient) return { success: false, error: "Backend not configured." };
-  const { data, error } = await supabaseClient.from(USER_PROFILES_TABLE).upsert(payload, { onConflict: "id" }).select().single();
+  if (!supabaseClient) return { success: false, error: "Backend not configured." }
+  // Use RPC so the profile is upserted with auth.uid() server-side, avoiding FK and 409 issues.
+  const { data, error } = await supabaseClient.rpc("upsert_my_profile", {
+    p_phone: row.phone ?? null,
+    p_full_name: row.full_name ?? null,
+    p_email: row.email ?? null,
+    p_avatar_url: row.avatar_url ?? null,
+    p_purpose_of_visit: row.purpose_of_visit ?? null,
+  });
   if (error) return { success: false, error: error.message || "Failed to save profile." };
-  return { success: true, profile: data as UserProfileRow };
+  const profile = Array.isArray(data) ? data[0] : data;
+  if (!profile) return { success: false, error: "No profile returned." };
+  return { success: true, profile: profile as UserProfileRow };
 }
