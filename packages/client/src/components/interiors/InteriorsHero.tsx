@@ -56,7 +56,7 @@ export function InteriorsHero({ onScrollToSection }: InteriorsHeroProps) {
     () => ({
       transform: `translateY(${scrollY * 0.3}px)`,
       opacity: Math.max(0, 1 - scrollY / 500),
-      willChange: scrollY < 500 ? "transform, opacity" : "auto",
+      willChange: scrollY < 500 ? "transform, opacity" : "100px",
     }),
     [scrollY]
   );
