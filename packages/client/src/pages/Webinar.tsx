@@ -49,10 +49,10 @@ const WEBINAR_IMAGES = {
 const WEBINAR: Webinar[] = [
   {
     id: "1",
-    title: "Investment Strategies for 2026",
+    title: "Investment Strategies for 2026 2.0",
     description:
       "A deep dive into real estate market trends and how to maximize your portfolio value in the coming year.",
-    date: "Feb 22, 2026",
+    date: "Mar 08, 2026",
     time: "12:00 PM to 2:00 PM EST",
     speaker: "Prathemesh Mamidwar",
     role: "CoFounder & CEO of Patronage Realtor",
@@ -593,11 +593,11 @@ export function Webinar() {
                       Registration Fee:{" "}
                       <span className="font-bold">
                         <span className="line-through text-red-500 mr-2">₹499</span>
-                        <span className="text-green-600">₹99</span>
+                        <span className="text-green-600">₹0</span>
                       </span>
                     </p>
 
-                    {/* Payment proof upload — required */}
+                    {/* Payment proof upload — required 
                     <div className="space-y-2">
                       <Label>
                         Payment proof (screenshot) <span className="text-destructive">*</span>
@@ -653,7 +653,7 @@ export function Webinar() {
                           Payment proof uploaded. Your slot is booked!
                         </p>
                       )}
-                    </div>
+                    </div> 
 
                     {WEBINAR_PAYMENT_LINK ? (
                       <Button
@@ -677,7 +677,7 @@ export function Webinar() {
                       <p className="text-xs text-center text-muted-foreground">
                         Upload your payment screenshot above to enable the payment link.
                       </p>
-                    )}
+                    )} */}
 
                     <p className="text-xs text-center text-muted-foreground">
                       Can&apos;t scan?{" "}
