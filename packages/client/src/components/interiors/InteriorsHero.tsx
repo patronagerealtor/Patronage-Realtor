@@ -107,7 +107,7 @@ export function InteriorsHero({ onScrollToSection }: InteriorsHeroProps) {
         <p className="text-xl sm:text-2xl md:text-3xl font-semibold text-white/95 mb-4 max-w-2xl mx-auto drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
           <a href="https://www.instagram.com/patronage_realtor?utm_source=qr" target="_blank" rel="noopener noreferrer" className="hover:text-amber-300 transition-colors underline underline-offset-4 decoration-amber-300/50 hover:decoration-amber-300">Patronage</a>
           {" × "}
-          <a href="https://www.instagram.com/soul_and_space_interiorstudio?igsh=MTl5djAwNjRpNWNxcQ==" target="_blank" rel="noopener noreferrer" className="hover:text-amber-300 transition-colors underline underline-offset-4 decoration-amber-300/50 hover:decoration-amber-300">Soul&Space</a>
+          <a href="https://www.instagram.com/soul_space_interiorstudio?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" className="hover:text-amber-300 transition-colors underline underline-offset-4 decoration-amber-300/50 hover:decoration-amber-300">Soul&Space</a>
         </p>
         <p className="text-lg sm:text-xl text-gray-200 mb-8 max-w-2xl mx-auto drop-shadow-[0_1px_4px_rgba(0,0,0,0.3)]">
           Where creativity meets functionality. Let us bring your vision to
