@@ -16,6 +16,7 @@
     "build": "npm --workspace=packages/server run build",
     "build:client": "npm --workspace=packages/client run build",
     "start": "npm --workspace=packages/server run start",
+    "preview": "npm --workspace=packages/server run start",
     "check": "npm run check --workspaces"
   },
   "devDependencies": {
