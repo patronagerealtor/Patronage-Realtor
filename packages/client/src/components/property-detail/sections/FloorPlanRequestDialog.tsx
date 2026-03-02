@@ -5,9 +5,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { env } from "@/config/env";
 
-const CONTACT_FORM_URL =
-  import.meta.env.VITE_CONTACT_FORM_URL ?? "https://forms.gle/oSqrGhasHGWenKNf8";
+const CONTACT_FORM_URL = env.contactFormUrl || "https://forms.gle/oSqrGhasHGWenKNf8";
 
 type FloorPlanRequestDialogProps = {
   open: boolean;

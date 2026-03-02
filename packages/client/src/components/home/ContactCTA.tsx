@@ -1,7 +1,7 @@
 import { ArrowRight } from "lucide-react";
+import { env } from "@/config/env";
 
-const CONTACT_FORM_URL =
-  import.meta.env.VITE_CONTACT_FORM_URL ?? "https://forms.gle/oSqrGhasHGWenKNf8";
+const CONTACT_FORM_URL = env.contactFormUrl || "https://forms.gle/oSqrGhasHGWenKNf8";
 
 export function ContactCTA() {
   return (

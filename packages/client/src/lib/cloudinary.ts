@@ -1,16 +1,12 @@
 /**
  * Cloudinary backend for images, PDFs, and videos. Replaces Supabase Storage.
- * CDN caching is server-side (Cloudinary edge). Set VITE_CLOUDINARY_* in .env.
+ * Uses config/env (VITE_CLOUDINARY_*). No API secret in frontend — unsigned uploads only.
  */
-const cloudName = typeof import.meta?.env?.VITE_CLOUDINARY_CLOUD_NAME === "string"
-  ? import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-  : "";
-const uploadPreset = typeof import.meta?.env?.VITE_CLOUDINARY_UPLOAD_PRESET === "string"
-  ? import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
-  : "";
-const uploadPresetVideo = typeof import.meta?.env?.VITE_CLOUDINARY_UPLOAD_PRESET_VIDEO === "string"
-  ? import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET_VIDEO
-  : uploadPreset;
+import { env } from "@/config/env";
+
+const cloudName = env.cloudinaryCloudName;
+const uploadPreset = env.cloudinaryUploadPreset;
+const uploadPresetVideo = env.cloudinaryUploadPresetVideo || uploadPreset;
 
 const CLOUDINARY_IMAGE_BASE = `https://res.cloudinary.com/${cloudName}/image/upload`;
 const CLOUDINARY_VIDEO_BASE = `https://res.cloudinary.com/${cloudName}/video/upload`;

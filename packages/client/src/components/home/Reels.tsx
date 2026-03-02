@@ -13,7 +13,8 @@ import {
   VolumeX,
   Volume2,
 } from "lucide-react";
-import { getReelPublicUrl, fetchReels, type ReelRow } from "@/lib/supabase";
+import { reelsService } from "@/services/reels";
+import type { ReelRow } from "@/services/reels";
 
 const AUTO_ROTATE_MS = 5000;
 const INITIAL_INDEX = 1;
@@ -51,7 +52,7 @@ export function Reels() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchReels().then((data) => {
+    reelsService.fetchReels().then((data) => {
       if (!cancelled) setReelsList(Array.isArray(data) ? data : []);
     });
     return () => { cancelled = true; };
@@ -270,7 +271,7 @@ export function Reels() {
             const isCenter = index === activeIndex;
             const distance = Math.abs(activeIndex - index);
             const loadVideo = shouldLoad(index, activeIndex);
-            const videoSrc = getReelPublicUrl(reel.videoPath, reel.cloudinaryVersion);
+            const videoSrc = reelsService.getReelPublicUrl(reel.videoPath, reel.cloudinaryVersion);
             const hasVideo = Boolean(loadVideo && videoSrc);
             const showVideo = hasVideo && !failedVideoIndices.has(index);
 

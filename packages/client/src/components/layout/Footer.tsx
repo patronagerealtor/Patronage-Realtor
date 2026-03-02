@@ -11,7 +11,7 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useToast } from "../../hooks/use-toast";
-import { insertNewsletterSubscriber } from "../../lib/supabase";
+import { newsletterService } from "../../services/newsletter";
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -33,7 +33,7 @@ export function Footer() {
       return;
     }
     setNewsletterLoading(true);
-    const result = await insertNewsletterSubscriber(email);
+    const result = await newsletterService.insertNewsletterSubscriber(email);
     setNewsletterLoading(false);
     if (result.success) {
       toast({ title: "Subscribed", description: "You're on the list. We'll keep you updated." });
