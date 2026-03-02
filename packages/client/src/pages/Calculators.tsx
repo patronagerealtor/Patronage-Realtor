@@ -454,9 +454,8 @@ export default function Calculators() {
     rvbHorizon,
   ]);
 
-  // SEO: title and meta description for this page (Vite SPA, no Next.js)
+  // SEO: meta description for this page (site title stays "Patronage Realtor")
   if (typeof document !== "undefined") {
-    document.title = "Home Loan & Property Calculators India 2026";
     let meta = document.querySelector('meta[name="description"]');
     if (!meta) {
       meta = document.createElement("meta");

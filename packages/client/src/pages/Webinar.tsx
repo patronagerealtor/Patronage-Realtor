@@ -13,15 +13,13 @@ import { Calendar, Clock, User, ArrowRight, PlayCircle, Upload, CheckCircle } fr
 import { motion, Variants } from "framer-motion";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
-import { insertWebinarRegistration, uploadWebinarPaymentProof } from "../lib/supabase";
+import { webinarService } from "../services/webinar";
+import { env } from "../config/env";
 import { SupabaseImage } from "../components/shared/SupabaseImage";
 
-// Payment: set VITE_WEBINAR_PAYMENT_LINK in .env to your Razorpay/Stripe payment link
-const WEBINAR_PAYMENT_LINK = import.meta.env.VITE_WEBINAR_PAYMENT_LINK ?? "";
-// Contact form: set VITE_WEBINAR_CONTACT_FORM_URL in .env to override
+const WEBINAR_PAYMENT_LINK = env.webinarPaymentLink || "";
 const WEBINAR_CONTACT_FORM_URL =
-  import.meta.env.VITE_WEBINAR_CONTACT_FORM_URL ??
-  "https://forms.gle/GiW6eTATkvYso2726";
+  env.webinarContactFormUrl || "https://forms.gle/GiW6eTATkvYso2726";
 
 /* -------------------- Types -------------------- */
 type Webinar = {
@@ -32,7 +30,7 @@ type Webinar = {
   time: string;
   speaker: string;
   role: string;
-  category: "Upcoming" | "Most Recent" | "Past Webinar";
+  category: "Upcoming" | "Most Recent" | "Past Webinar" | "Old Webinar";
   image: string;
   /** Optional PDF URL for "Get Presentation" (e.g. in public/webinars/) */
   presentationPdf?: string;
@@ -44,20 +42,22 @@ const WEBINAR_IMAGES = {
   "1": "/webinars/webinar-1.jpg",
   "2": "/webinars/webinar-2.png",
   "3": "/webinars/webinar-3.png",
+  "4": "/webinars/webinar-4.png",
 } as const;
 
 const WEBINAR: Webinar[] = [
   {
     id: "1",
-    title: "Investment Strategies for 2026 2.0",
+    title: "First Home Buying: Myths and Reality 2.0",
     description:
-      "A deep dive into real estate market trends and how to maximize your portfolio value in the coming year.",
-    date: "Mar 08, 2026",
+      "A deep dive into real estate market trends and how to own your dream home.",
+    date: "Feb 22, 2026",
     time: "12:00 PM to 2:00 PM EST",
     speaker: "Prathemesh Mamidwar",
     role: "CoFounder & CEO of Patronage Realtor",
-    category: "Upcoming",
-    image: WEBINAR_IMAGES["1"],
+    category: "Most Recent",
+    image: WEBINAR_IMAGES["4"],
+    presentationPdf: "/webinars/first-home-buying-presentation.pdf",
   },
   {
     id: "2",
@@ -68,7 +68,7 @@ const WEBINAR: Webinar[] = [
     time: "12:00 PM to 2:00 PM EST",
     speaker: "Prathemesh Mamidwar",
     role: "CoFounder & CEO of Patronage Realtor",
-    category: "Most Recent",
+    category: "Past Webinar",
     image: WEBINAR_IMAGES["2"],
     presentationPdf: "/webinars/first-home-buying-presentation.pdf",
   },
@@ -79,9 +79,9 @@ const WEBINAR: Webinar[] = [
       "Learn how to optimize home loans, taxes, and personal finance",
     date: "Oct 25, 2025",
     time: "12:00 PM EST",
-    speaker: "Harshaditya Kabra",
-    role: "Tax Specialist",
-    category: "Past Webinar",
+    speaker: "Prathemesh Mamidwar",
+    role: "CoFounder & CEO of Patronage Realtor",
+    category: "Old Webinar",
     image: WEBINAR_IMAGES["3"],
   },
 ];
@@ -254,7 +254,7 @@ export function Webinar() {
       return;
     }
     setRegisterLoading(true);
-    const result = await insertWebinarRegistration({
+    const result = await webinarService.insertWebinarRegistration({
       name,
       email,
       contact_number: contact,
@@ -281,7 +281,7 @@ export function Webinar() {
     if (!registrationId || !paymentProofFile) return;
     setUploadError(null);
     setUploadLoading(true);
-    const result = await uploadWebinarPaymentProof(registrationId, paymentProofFile);
+    const result = await webinarService.uploadWebinarPaymentProof(registrationId, paymentProofFile);
     setUploadLoading(false);
     if (result.success) {
       setProofUploaded(true);
@@ -573,12 +573,12 @@ export function Webinar() {
                       <a
                         href="/webinars/my-qr.png"
                         download="webinar-registration-qr.png"
-                        className="focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg"
+                        className="focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl overflow-hidden bg-background/60 backdrop-blur-md border border-border/80 shadow-lg p-3"
                       >
                         <img
                           src="/webinars/my-qr.png"
                           alt="Registration QR code"
-                          className="h-48 w-48 object-contain rounded-lg border border-border bg-muted/30 hover:opacity-90 transition-opacity"
+                          className="h-48 w-48 object-contain rounded-lg hover:opacity-90 transition-opacity"
                         />
                       </a>
                       <a

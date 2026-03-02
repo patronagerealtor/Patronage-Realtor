@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { upsertProfile } from "@/lib/supabase";
+import { profileService } from "@/services/profile";
 
 const PURPOSE_OPTIONS = [
   { value: "Real Estate Consultation", label: "Real Estate Consultation" },
@@ -70,7 +70,7 @@ export function PhoneRequiredModal({
       return;
     }
     setSubmitting(true);
-    const result = await upsertProfile({
+    const result = await profileService.upsertProfile({
       id: user.id,
       email: trimmedEmail || null,
       full_name: trimmedName || null,

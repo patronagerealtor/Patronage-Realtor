@@ -44,8 +44,14 @@ export function useAuth(): AuthState {
 
   const logout = async () => {
     setError(null);
-    if (!supabase) return;
+    if (!supabase) {
+      setUser(null);
+      setSession(null);
+      return;
+    }
     await supabase.auth.signOut();
+    setSession(null);
+    setUser(null);
   };
 
   return {

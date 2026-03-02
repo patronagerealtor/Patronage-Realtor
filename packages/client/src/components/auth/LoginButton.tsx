@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Button } from "../ui/button";
-import { supabase } from "../../lib/supabase";
+import { authService } from "../../services/auth";
+import { env } from "../../config/env";
 import { cn } from "../../lib/utils";
 
-const DEFAULT_REDIRECT =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_AFTER_SIGNIN_REDIRECT) || "/";
+const DEFAULT_REDIRECT = env.afterSignInRedirect || "/";
 
 type LoginButtonProps = {
   /** Path to redirect to after successful sign-in (default: VITE_AFTER_SIGNIN_REDIRECT or /) */
@@ -33,26 +33,10 @@ export function LoginButton({
   const [error, setError] = useState<string | null>(null);
 
   async function handleSignIn() {
-    if (!supabase) {
-      const msg = "Supabase is not configured.";
-      setError(msg);
-      onError?.(msg);
-      return;
-    }
     setError(null);
     setLoading(true);
     try {
-      const baseUrl =
-        typeof import.meta !== "undefined" && import.meta.env?.VITE_APP_URL
-          ? String(import.meta.env.VITE_APP_URL).replace(/\/$/, "")
-          : typeof window !== "undefined"
-            ? window.location.origin
-            : "";
-      const redirect = `${baseUrl}${redirectTo.startsWith("/") ? redirectTo : `/${redirectTo}`}`;
-      const { error: signInError } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: redirect },
-      });
+      const { error: signInError } = await authService.signInWithOAuth(redirectTo);
       if (signInError) {
         const isProviderDisabled =
           signInError.message?.toLowerCase().includes("provider is not enabled") ||
