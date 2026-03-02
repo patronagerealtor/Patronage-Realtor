@@ -31,6 +31,7 @@ export default defineConfig({
         ? path.resolve(import.meta.dirname, "../server/dist/public")
         : path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: true,
+    chunkSizeWarningLimit: 1024,
   },
   server: {
     host: "0.0.0.0",
