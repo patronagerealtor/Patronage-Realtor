@@ -251,18 +251,11 @@ export function Header() {
                   Properties
                 </Link>
                 <Link
-                  href="/webinars"
+                  href="/investment"
                   onClick={() => { scrollToTop(); setIsOpen(false); }}
                   className="text-lg font-medium"
                 >
-                  Webinars
-                </Link>
-                <Link
-                  href="/blogs"
-                  onClick={() => { scrollToTop(); setIsOpen(false); }}
-                  className="text-lg font-medium"
-                >
-                  Blogs
+                  Invest
                 </Link>
                 <Link
                   href="/calculators"
@@ -276,7 +269,21 @@ export function Header() {
                   onClick={() => { scrollToTop(); setIsOpen(false); }}
                   className="text-lg font-medium"
                 >
-                  Interiors
+                  Design Studio
+                </Link>
+                <Link
+                  href="/webinars"
+                  onClick={() => { scrollToTop(); setIsOpen(false); }}
+                  className="text-lg font-medium"
+                >
+                  Webinars
+                </Link>
+                <Link
+                  href="/blogs"
+                  onClick={() => { scrollToTop(); setIsOpen(false); }}
+                  className="text-lg font-medium"
+                >
+                  Blogs
                 </Link>
                 <Link
                   href="/about-us"
