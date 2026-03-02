@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import type { UserProfileRow } from "../lib/supabase";
-import { getProfile } from "../lib/supabase";
+import type { UserProfileRow } from "@/services/profile";
+import { profileService } from "@/services/profile";
 
 export type ProfileState = {
   profile: UserProfileRow | null;
@@ -25,7 +25,7 @@ export function useProfile(userId: string | undefined): ProfileState {
       return;
     }
     setLoading(true);
-    const p = await getProfile(userId);
+    const p = await profileService.getProfile(userId);
     setProfile(p);
     setLoading(false);
   }, [userId]);

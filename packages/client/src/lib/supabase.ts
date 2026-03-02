@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import imageCompression from "browser-image-compression";
+import { env } from "@/config/env";
 import {
   isCloudinaryConfigured,
   getReelPublicUrl as cloudinaryGetReelPublicUrl,
@@ -10,12 +11,19 @@ import {
   cloudinaryUploadRaw,
 } from "./cloudinary";
 
-const supabaseUrl = typeof import.meta?.env?.VITE_SUPABASE_2_URL === "string" ? import.meta.env.VITE_SUPABASE_2_URL : "";
-const supabaseAnonKey = typeof import.meta?.env?.VITE_SUPABASE_2_ANON_KEY === "string" ? import.meta.env.VITE_SUPABASE_2_ANON_KEY : "";
+const supabaseUrl = env.supabaseUrl;
+const supabaseAnonKey = env.supabaseAnonKey;
 
+/** Single shared Supabase client. Auth: persisted session + auto token refresh. RLS is enforced server-side. */
 const supabaseClient: SupabaseClient | null =
   supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey)
+    ? createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: true,
+        },
+      })
     : null;
 
 const useCloudinary = isCloudinaryConfigured();
@@ -109,7 +117,7 @@ export async function checkSupabaseConnection(): Promise<SupabaseConnectionResul
   if (!supabaseUrl || !supabaseAnonKey) {
     return {
       connected: false,
-      message: "Missing env: set VITE_SUPABASE_2_URL and VITE_SUPABASE_2_ANON_KEY in .env",
+      message: "Missing env: set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (or VITE_SUPABASE_2_*) in .env",
     };
   }
   if (!supabaseClient) {
@@ -266,7 +274,7 @@ function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
 export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
   if (!supabaseClient) {
     throw new Error(
-      "Supabase is not configured. Set VITE_SUPABASE_2_URL and VITE_SUPABASE_2_ANON_KEY in .env to load properties."
+      "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env to load properties."
     );
   }
   const { data, error } = await supabaseClient

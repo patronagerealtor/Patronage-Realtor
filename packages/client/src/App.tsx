@@ -48,8 +48,8 @@ import { Webinar } from "./pages/Webinar";
 import { LoginPage, ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AuthPhoneGate } from "./components/auth/AuthPhoneGate";
 
-const dataEntryAllowedEmails =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_DATA_ENTRY_ALLOWED_EMAIL) || "";
+import { env } from "./config/env";
+const dataEntryAllowedEmails = env.dataEntryAllowedEmail || "";
 
 function Router() {
   return (

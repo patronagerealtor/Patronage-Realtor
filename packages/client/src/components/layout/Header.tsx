@@ -26,19 +26,24 @@ import {
   NavigationMenuTrigger,
 } from "../ui/navigation-menu";
 
-const CONTACT_FORM_URL =
-  import.meta.env.VITE_CONTACT_FORM_URL ?? "https://forms.gle/oSqrGhasHGWenKNf8";
+import { env } from "../../config/env";
+const CONTACT_FORM_URL = env.contactFormUrl || "https://forms.gle/oSqrGhasHGWenKNf8";
 
 function parseDataEntryAllowedEmails(): string[] {
-  const raw = (typeof import.meta !== "undefined" && import.meta.env?.VITE_DATA_ENTRY_ALLOWED_EMAIL) || "";
+  const raw = env.dataEntryAllowedEmail || "";
   if (!raw.trim()) return [];
   return raw.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
 }
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [location] = useLocation();
+  const [, setLocation] = useLocation();
   const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    setLocation("/");
+  };
   const { profile } = useProfile(user?.id);
   const dataEntryAllowed = parseDataEntryAllowedEmails();
   const canAccessDataEntry =
@@ -67,6 +72,8 @@ export function Header() {
             src="/logo/logo-full.png"
             alt="Patronage Realtor"
             className="h-15 w-auto object-contain"
+            fetchPriority="high"
+            decoding="async"
           />
         </Link>
 
@@ -183,7 +190,7 @@ export function Header() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="cursor-pointer text-destructive focus:text-destructive"
-                  onClick={() => logout()}
+                  onSelect={() => handleLogout()}
                 >
                   <LogOut className="h-4 w-4 mr-2" aria-hidden />
                   Log out
@@ -298,7 +305,7 @@ export function Header() {
                       size="sm"
                       className="w-full gap-2"
                       onClick={() => {
-                        logout();
+                        handleLogout();
                         setIsOpen(false);
                       }}
                     >

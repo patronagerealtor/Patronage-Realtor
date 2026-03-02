@@ -1,10 +1,5 @@
 import type { ImgHTMLAttributes } from "react";
-import {
-  getTransformedImageUrl,
-  getCloudinarySrcSet,
-  isSupabaseStorageUrl,
-  isCloudinaryUrl,
-} from "@/lib/supabase";
+import { imageService } from "@/services/image";
 import { cn } from "@/lib/utils";
 
 export type SupabaseImageProps = ImgHTMLAttributes<HTMLImageElement> & {
@@ -44,25 +39,25 @@ export function SupabaseImage({
   className,
   ...rest
 }: SupabaseImageProps) {
-  const isSupabase = isSupabaseStorageUrl(src);
-  const isCloudinary = isCloudinaryUrl(src);
+  const isSupabase = imageService.isSupabaseStorageUrl(src);
+  const isCloudinary = imageService.isCloudinaryUrl(src);
 
   const applyTransform =
     isSupabase && (transformWidth != null || transformHeight != null || transformQuality != null);
   const finalSrc = applyTransform
-    ? getTransformedImageUrl(src, {
+    ? imageService.getTransformedImageUrl(src, {
         width: transformWidth,
         height: transformHeight,
         quality: transformQuality,
       })
     : isCloudinary
-      ? getTransformedImageUrl(src, {}) // f_auto, q_auto for all Cloudinary images
+      ? imageService.getTransformedImageUrl(src, {})
       : src;
 
   const useSrcSet =
     responsive && isCloudinary && transformWidth != null && transformWidth > 0;
   const srcSet = useSrcSet
-    ? getCloudinarySrcSet(src, {
+    ? imageService.getCloudinarySrcSet(src, {
         maxWidth: transformWidth,
         height: transformHeight,
         quality: transformQuality,

@@ -14,11 +14,9 @@ import {
   type SiteStatsRow,
 } from "../lib/supabase";
 
+import { env } from "../config/env";
 function parseDataEntryAllowedEmails(): string[] {
-  const raw =
-    (typeof import.meta !== "undefined" &&
-      import.meta.env?.VITE_DATA_ENTRY_ALLOWED_EMAIL) ||
-    "";
+  const raw = env.dataEntryAllowedEmail || "";
   if (!raw.trim()) return [];
   return raw
     .split(",")

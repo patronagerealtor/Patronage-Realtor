@@ -1,0 +1,6 @@
+# Allow all crawlers. Override in production if needed.
+User-agent: *
+Allow: /
+
+# Sitemap (replace with your production origin in DEPLOYMENT.md)
+Sitemap: /sitemap.xml

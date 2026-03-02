@@ -1,5 +1,6 @@
 import { Redirect, useLocation } from "wouter";
 import { useAuth } from "../../hooks/useAuth";
+import { env } from "../../config/env";
 import { LoginButton } from "./LoginButton";
 import { Header } from "../layout/Header";
 
@@ -57,8 +58,7 @@ export function ProtectedRoute({ children, loginPath = "/login", allowedEmails: 
   return <>{children}</>;
 }
 
-const DEFAULT_AFTER_SIGNIN =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_AFTER_SIGNIN_REDIRECT) || "/";
+const DEFAULT_AFTER_SIGNIN = env.afterSignInRedirect || "/";
 
 /**
  * Login page: shows LoginButton and redirects to ?redirect= or VITE_AFTER_SIGNIN_REDIRECT after success.
