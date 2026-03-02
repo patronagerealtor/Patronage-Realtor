@@ -40,6 +40,7 @@ async function buildAll() {
   console.log("building client...");
   const clientDir = path.resolve(serverCwd, "..", "client");
   process.chdir(clientDir);
+  process.env.BUILD_FOR_SERVER = "1";
   await viteBuild();
   process.chdir(serverCwd);
 
