@@ -105,7 +105,7 @@ export function Hero() {
             <h1 className="text-5xl md:text-7xl lg:text-7xl font-heading font-bold tracking-tight leading-[1.15]">
               Find a place you will call{" "}
               <span className="relative inline-flex items-center px-1">
-                <span className="inline-block min-w-[9ch] text-center perspective-[800px]">
+                <span className="inline-block min-w-[9ch] text-center perspective-[800px] [transform-style:preserve-3d]">
                   <AnimatePresence mode="wait">
                     <motion.span
                       key={titleNumber}

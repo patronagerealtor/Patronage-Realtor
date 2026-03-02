@@ -481,7 +481,7 @@ const InteriorsPackagesSection = React.memo(function InteriorsPackagesSection(pr
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <Badge className="mb-4" variant="outline">Our Packages</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 font-heading">Choose Your Package</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 font-heading">Luxury Within Reach ~ Starting at JUST ₹3 Lakhs !!!</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Select the package that fits your needs</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
