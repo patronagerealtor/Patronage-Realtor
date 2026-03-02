@@ -159,7 +159,7 @@ export default function AboutUs() {
               </p>
 
               <p className="text-lg text-muted-foreground leading-relaxed">
-                <strong>Prathmesh Mahidwar</strong> later joined the organization, strengthening its strategic direction and shaping its mission of empowering individuals through clarity, education, and informed decision-making.
+                <strong>Prathmesh Mamidwar</strong> later joined the organization, strengthening its strategic direction and shaping its mission of empowering individuals through clarity, education, and informed decision-making.
               </p>
             </div>
 

@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx src/index.ts",
-    "dev:server": "cross-env NODE_ENV=development tsx src/index.ts",
-    "build": "tsx ../../scripts/build.ts",
+    "dev": "npx tsx src/index.ts",
+    "dev:server": "npx cross-env NODE_ENV=development npx tsx src/index.ts",
+    "build": "npx tsx ../../scripts/build.ts",
     "start": "node dist/index.cjs",
     "check": "tsc --noEmit"
   },
@@ -14,5 +14,7 @@
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "tsx": "^4.19.0"
+  }
 }
