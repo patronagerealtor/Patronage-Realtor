@@ -591,7 +591,6 @@ export default function InvestmentPage() {
             <p style={{ fontSize: 15, color: "#666", lineHeight: 1.7, marginBottom: 28 }}>List your asset with our investment division. We connect serious sellers with qualified buyers and provide end-to-end support for commercial and land transactions.</p>
             <div className="flex gap-4 justify-center flex-wrap">
               <a href="https://forms.gle/zU7YFtxo2EZNx71DA" target="_blank" rel="noopener noreferrer" className="cta-btn inline-block no-underline">List My Property</a>
-              <Link href="/investment" className="outline-btn inline-block no-underline">View Listings</Link>
             </div>
           </div>
         </section>
@@ -604,7 +603,6 @@ export default function InvestmentPage() {
             <p className="text-muted-foreground text-sm md:text-base leading-relaxed mb-8">Schedule a free consultation to explore how we can build your real estate portfolio.</p>
             <div className="flex gap-4 justify-center flex-wrap">
               <button className="cta-btn" onClick={() => window.location.href = "https://forms.gle/6d9VTgV8EauLAQK18"}>Schedule a Call</button>
-              <button className="cta-btn inline-block no-underline">Download Brochure</button>
             </div>
           </div>
         </section>
