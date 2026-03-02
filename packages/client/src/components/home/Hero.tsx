@@ -113,12 +113,8 @@ export function Hero() {
                       animate={{ opacity: ENTRY_OPACITY, y: 0 }}
                       exit={{ opacity: 0, y: -24 }}
                       transition={{ duration: 0.5, ease: "easeOut" }}
-                      className="
-                        inline-block
-                        text-transparent bg-clip-text
-                        bg-gradient-to-br from-primary via-primary/80 to-primary/60
-                        font-bold
-                      "
+                      className="inline-block font-bold"
+                      style={{ color: "#133E45" }}
                     >
                       {TITLES[titleNumber]}
                     </motion.span>
