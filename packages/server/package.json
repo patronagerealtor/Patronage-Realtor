@@ -11,6 +11,7 @@
     "check": "tsc --noEmit"
   },
   "dependencies": {
+    "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {}
