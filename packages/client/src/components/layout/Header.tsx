@@ -63,11 +63,13 @@ export function Header() {
   const navLinkClass =
     "relative px-3 py-2 text-sm font-medium transition-colors hover:text-primary after:absolute after:left-0 after:-bottom-1 after:h-[2px] after:w-0 after:bg-primary after:transition-all hover:after:w-full";
 
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 h-16 flex items-center">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 cursor-pointer">
+        <Link href="/" className="flex items-center gap-2 cursor-pointer" onClick={scrollToTop}>
           <img
             src="/logo/logo-full.png"
             alt="Patronage Realtor"
@@ -92,6 +94,7 @@ export function Header() {
                       <Link
                         href="/investment"
                         className="flex flex-col rounded-md bg-secondary p-5 hover:bg-secondary/80 transition-colors"
+                        onClick={scrollToTop}
                       >
                         <MapPin className="h-4 w-4 mb-2" />
                         <span className="font-medium">
@@ -106,6 +109,7 @@ export function Header() {
                       <Link
                         href="/properties"
                         className="flex flex-col rounded-md bg-secondary p-5 hover:bg-secondary/80 transition-colors"
+                        onClick={scrollToTop}
                       >
                         <Search className="h-4 w-4 mb-2" />
                         <span className="font-medium">Explore</span>
@@ -121,37 +125,37 @@ export function Header() {
               {/* ✅ FIXED: Path is now '/webinars' (plural) to match mobile and Route */}
 
               <NavigationMenuItem>
-                <Link href="/calculators" className={navLinkClass}>
+                <Link href="/calculators" className={navLinkClass} onClick={scrollToTop}>
                   Calculators
                 </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link href="/interiors" className={navLinkClass}>
+                <Link href="/interiors" className={navLinkClass} onClick={scrollToTop}>
                   Design Studio
                 </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link href="/webinars" className={navLinkClass}>
+                <Link href="/webinars" className={navLinkClass} onClick={scrollToTop}>
                   Webinars
                 </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link href="/blogs" className={navLinkClass}>
+                <Link href="/blogs" className={navLinkClass} onClick={scrollToTop}>
                   Blogs
                 </Link>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link href="/about-us" className={navLinkClass}>
+                <Link href="/about-us" className={navLinkClass} onClick={scrollToTop}>
                   About Us
                 </Link>
               </NavigationMenuItem>
               {canAccessDataEntry && (
                 <NavigationMenuItem>
-                  <Link href="/data-entry" className={navLinkClass}>
+                  <Link href="/data-entry" className={navLinkClass} onClick={scrollToTop}>
                     Data Entry
                   </Link>
                 </NavigationMenuItem>
@@ -165,7 +169,7 @@ export function Header() {
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="outline" size="sm" className="gap-2" onClick={scrollToTop}>
                   <User className="h-4 w-4" aria-hidden />
                   Profile
                 </Button>
@@ -199,12 +203,12 @@ export function Header() {
             </DropdownMenu>
           ) : (
             <>
-              <Link href="/login">
+              <Link href="/login" onClick={scrollToTop}>
                 <Button variant="ghost" size="sm">
                   Sign in
                 </Button>
               </Link>
-              <Link href="/login">
+              <Link href="/login" onClick={scrollToTop}>
                 <Button variant="default" size="sm">
                   Sign up
                 </Button>
@@ -219,6 +223,7 @@ export function Header() {
               href={CONTACT_FORM_URL}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={scrollToTop}
             >
               Contact Us
             </a>
@@ -229,7 +234,7 @@ export function Header() {
         <div className="md:hidden ml-auto">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" onClick={scrollToTop}>
                 <Menu className="h-6 w-6" />
               </Button>
             </SheetTrigger>
@@ -240,42 +245,42 @@ export function Header() {
               <nav className="flex flex-col gap-4">
                 <Link
                   href="/properties"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => { scrollToTop(); setIsOpen(false); }}
                   className="text-lg font-medium"
                 >
                   Properties
                 </Link>
                 <Link
                   href="/webinars"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => { scrollToTop(); setIsOpen(false); }}
                   className="text-lg font-medium"
                 >
                   Webinars
                 </Link>
                 <Link
                   href="/blogs"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => { scrollToTop(); setIsOpen(false); }}
                   className="text-lg font-medium"
                 >
                   Blogs
                 </Link>
                 <Link
                   href="/calculators"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => { scrollToTop(); setIsOpen(false); }}
                   className="text-lg font-medium"
                 >
                   Calculators
                 </Link>
                 <Link
                   href="/interiors"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => { scrollToTop(); setIsOpen(false); }}
                   className="text-lg font-medium"
                 >
                   Interiors
                 </Link>
                 <Link
                   href="/about-us"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => { scrollToTop(); setIsOpen(false); }}
                   className="text-lg font-medium"
                 >
                   About Us
@@ -283,7 +288,7 @@ export function Header() {
                 {canAccessDataEntry && (
                   <Link
                     href="/data-entry"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => { scrollToTop(); setIsOpen(false); }}
                     className="text-lg font-medium"
                   >
                     Data Entry
@@ -315,12 +320,12 @@ export function Header() {
                   </>
                 ) : (
                   <>
-                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                    <Link href="/login" onClick={() => { scrollToTop(); setIsOpen(false); }}>
                       <Button variant="outline" size="sm" className="w-full">
                         Sign in
                       </Button>
                     </Link>
-                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                    <Link href="/login" onClick={() => { scrollToTop(); setIsOpen(false); }}>
                       <Button variant="default" size="sm" className="w-full">
                         Sign up
                       </Button>
@@ -332,7 +337,7 @@ export function Header() {
                     href={CONTACT_FORM_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => { scrollToTop(); setIsOpen(false); }}
                   >
                     Contact Us
                   </a>
