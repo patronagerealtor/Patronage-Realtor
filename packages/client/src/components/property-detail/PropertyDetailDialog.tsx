@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, Pencil, Share2 } from "lucide-react";
 import type { PropertyRow } from "@/lib/supabase";
-import { insertContactLead } from "@/lib/supabase";
+import { contactService } from "@/services/contact";
 import type { Property } from "@/lib/propertyStore";
 import { toPropertyDetailData } from "./propertyDetailUtils";
 import { OverviewSection } from "./sections/OverviewSection";
@@ -151,7 +151,7 @@ export function PropertyDetailDialog({
 
   const handleContactSubmit = async (payload: { name: string; email: string; phone: string }) => {
     if (!property) return;
-    const result = await insertContactLead({
+    const result = await contactService.insertContactLead({
       name: payload.name,
       email: payload.email,
       phone: payload.phone,
@@ -167,7 +167,7 @@ export function PropertyDetailDialog({
 
   const handleFloorPlanRequest = async (payload: { name: string; email: string; whatsapp: string }) => {
     if (!property) return false;
-    const result = await insertContactLead({
+    const result = await contactService.insertContactLead({
       name: payload.name,
       email: payload.email,
       phone: payload.whatsapp,

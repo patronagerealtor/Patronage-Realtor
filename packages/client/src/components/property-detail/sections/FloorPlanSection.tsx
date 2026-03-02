@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { SupabaseImage } from "@/components/shared/SupabaseImage";
+import { env } from "@/config/env";
 
 export type FloorPlanRequestPayload = {
   name: string;
@@ -53,7 +54,7 @@ export function FloorPlanSection({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const contactFormUrl = import.meta.env.VITE_CONTACT_FORM_URL ?? "https://forms.gle/oSqrGhasHGWenKNf8";
+  const contactFormUrl = env.contactFormUrl || "https://forms.gle/oSqrGhasHGWenKNf8";
 
   // Reset selected index if plans change
   useEffect(() => {
