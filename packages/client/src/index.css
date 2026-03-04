@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Clash+Display:wght@200..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@200..800&family=Clash+Display:wght@200..700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -176,4 +176,9 @@
 .horizontal-scroll > * {
   flex-shrink: 0;
   scroll-snap-align: start;
+}
+
+/* Hero tagline: premium serif on mobile */
+.hero-tagline {
+  font-family: "Cormorant Garamond", serif;
 }

@@ -79,8 +79,8 @@ export function Header() {
           />
         </Link>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex flex-1 justify-center">
+        {/* Desktop Navigation — visible at 1180px and up */}
+        <div className="hidden [@media(min-width:1180px)]:flex flex-1 justify-center">
           <NavigationMenu>
             <NavigationMenuList className="flex gap-6">
               {/* Properties */}
@@ -164,8 +164,8 @@ export function Header() {
           </NavigationMenu>
         </div>
 
-        {/* Right Action */}
-        <div className="hidden md:flex items-center gap-3">
+        {/* Right Action — visible at 1180px and up */}
+        <div className="hidden [@media(min-width:1180px)]:flex items-center gap-3">
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -230,8 +230,8 @@ export function Header() {
           </Button>
         </div>
 
-        {/* Mobile Menu */}
-        <div className="md:hidden ml-auto">
+        {/* Mobile / tablet menu — hamburger visible below 1180px */}
+        <div className="flex [@media(min-width:1180px)]:hidden ml-auto">
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" onClick={scrollToTop}>

@@ -44,7 +44,7 @@ function TagItem({ text, link, message }: TagItemProps) {
     >
       <a
         href={link}
-        className="text-xl md:text-2xl font-heading font-semibold text-foreground hover:text-primary transition-colors block py-2 md:py-0"
+        className="text-sm sm:text-base md:text-2xl font-heading font-semibold text-foreground hover:text-primary transition-colors block py-1 md:py-0 whitespace-nowrap"
       >
         {text}
       </a>
@@ -179,21 +179,33 @@ export function Hero() {
               hidden: {},
               visible: { transition: { staggerChildren: 0.2 } },
             }}
-            className="mt-2 flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 text-center"
+            className="mt-2 flex flex-row flex-nowrap items-center justify-center gap-2 sm:gap-4 md:gap-12 text-center"
           >
             <TagItem
               text="Dream it !"
               link="/properties"
               message="Visualize your perfect home with confidence and clarity."
             />
-            <span className="hidden md:inline text-muted-foreground">·</span>
+            <motion.span
+              variants={tagItemVariants}
+              className="flex-shrink-0 text-muted-foreground text-xs md:text-base"
+              aria-hidden
+            >
+              ·
+            </motion.span>
 
             <TagItem
               text="Own it !"
               link="/calculators"
               message="Make informed decisions and turn your dream into reality."
             />
-            <span className="hidden md:inline text-muted-foreground">·</span>
+            <motion.span
+              variants={tagItemVariants}
+              className="flex-shrink-0 text-muted-foreground text-xs md:text-base"
+              aria-hidden
+            >
+              ·
+            </motion.span>
 
             <TagItem
               text="Style it !"
