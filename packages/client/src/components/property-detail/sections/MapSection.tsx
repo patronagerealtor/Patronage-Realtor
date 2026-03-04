@@ -1,13 +1,36 @@
 import { MapPin } from "lucide-react";
 import type { PropertyDetailData } from "@/types/propertyDetail";
 
-/** Validates and returns embed URL only if it contains google.com/maps. Prevents invalid URLs. */
+/**
+ * Google Maps iframe only accepts the Embed URL (Share → Embed a map).
+ * Share links (e.g. goo.gl/maps, ?cid=...) cause "Invalid 'pb' parameter".
+ * Returns the embed URL if valid, otherwise null so we show a fallback.
+ */
 function buildGoogleEmbedUrl(rawLink?: string | null): string | null {
   if (rawLink == null || typeof rawLink !== "string") return null;
-  const link = rawLink.trim();
+  let link = rawLink.trim();
   if (!link) return null;
-  if (!link.includes("google.com/maps")) return null;
-  return link;
+
+  // If admin pasted full iframe HTML, extract the src
+  const iframeSrcMatch = link.match(/<iframe[^>]+src=["']([^"']+)["']/i);
+  if (iframeSrcMatch?.[1]) link = iframeSrcMatch[1].trim();
+
+  // Must be the embed endpoint with a non-empty pb parameter (required by Google)
+  if (!link.includes("google.com/maps/embed")) return null;
+  try {
+    const url = new URL(link);
+    const pb = url.searchParams.get("pb");
+    if (!pb || pb.length < 10) return null; // pb is typically a long encoded string
+    return link;
+  } catch {
+    return null;
+  }
+}
+
+/** Builds a "Open in Google Maps" search URL from an address string. */
+function mapsSearchUrl(location?: string | null): string {
+  const q = encodeURIComponent((location || "").trim() || "India");
+  return `https://www.google.com/maps/search/?api=1&query=${q}`;
 }
 
 type MapSectionProps = {
@@ -48,9 +71,21 @@ export function MapSection({ data, sectionRef }: MapSectionProps) {
               className="h-full w-full rounded-lg"
             />
           ) : (
-            <div className="flex h-full min-h-[200px] w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+            <div className="flex h-full min-h-[200px] w-full flex-col items-center justify-center gap-3 px-4 text-center text-muted-foreground">
               <MapPin className="h-12 w-12" />
-              <p className="text-sm font-medium">Location Map Coming Soon</p>
+              <p className="text-sm font-medium">
+                {data.google_map_link?.trim()
+                  ? "Invalid map link. Use the embed URL from Google Maps (Share → Embed a map)."
+                  : "Location Map Coming Soon"}
+              </p>
+              <a
+                href={mapsSearchUrl(data.location)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-primary hover:underline"
+              >
+                Open in Google Maps
+              </a>
             </div>
           )}
         </div>
