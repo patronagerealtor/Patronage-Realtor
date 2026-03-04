@@ -19,23 +19,15 @@ import type { ReelRow } from "@/services/reels";
 const AUTO_ROTATE_MS = 5000;
 const INITIAL_INDEX = 1;
 const CARD_TRANSITION = { type: "spring" as const, stiffness: 300, damping: 30 };
-const DRAG_THRESHOLD_PX = 5;
 
 function shouldLoad(index: number, active: number) {
   return Math.abs(index - active) <= 1;
-}
-
-function getClientX(e: MouseEvent | TouchEvent) {
-  return "touches" in e ? e.touches[0].clientX : e.clientX;
 }
 
 export function Reels() {
   const containerRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  const dragStartX = useRef(0);
-  const dragStartScrollLeft = useRef(0);
-  const didDragRef = useRef(false);
 
   const [activeIndex, setActiveIndex] = useState(INITIAL_INDEX);
   const [paused, setPaused] = useState(false);
@@ -43,7 +35,6 @@ export function Reels() {
   const [progress, setProgress] = useState<number[]>([]);
   const [showIcon, setShowIcon] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
   const [reelsList, setReelsList] = useState<ReelRow[]>([]);
   const [failedVideoIndices, setFailedVideoIndices] = useState<Set<number>>(new Set());
 
@@ -172,59 +163,11 @@ export function Reels() {
     setActiveIndex(closest);
   }, []);
 
-  const handlePointerDown = useCallback(
-    (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-      const container = containerRef.current;
-      if (!container) return;
-      const x = "touches" in e ? e.touches[0].clientX : e.clientX;
-      dragStartX.current = x;
-      dragStartScrollLeft.current = container.scrollLeft;
-      didDragRef.current = false;
-      setIsDragging(true);
-
-      const onMove = (moveEvent: MouseEvent | TouchEvent) => {
-        const cx = getClientX(moveEvent);
-        const dx = dragStartX.current - cx;
-        container.scrollLeft = dragStartScrollLeft.current + dx;
-      };
-
-      const onUp = (upEvent: MouseEvent | TouchEvent) => {
-        const cx = getClientX(upEvent);
-        const moved = Math.abs(cx - dragStartX.current);
-        if (moved >= DRAG_THRESHOLD_PX) {
-          didDragRef.current = true;
-          syncActiveIndexFromScroll();
-        }
-        setIsDragging(false);
-        window.removeEventListener("mousemove", onMove);
-        window.removeEventListener("mouseup", onUp);
-        window.removeEventListener("touchmove", onTouchMove);
-        window.removeEventListener("touchend", onUp);
-      };
-
-      const onTouchMove = (moveEvent: TouchEvent) => {
-        moveEvent.preventDefault();
-        onMove(moveEvent);
-      };
-
-      window.addEventListener("mousemove", onMove);
-      window.addEventListener("mouseup", onUp);
-      window.addEventListener("touchmove", onTouchMove, { passive: false });
-      window.addEventListener("touchend", onUp);
-    },
-    [syncActiveIndexFromScroll]
-  );
-
   const handleScroll = useCallback(() => {
-    if (isDragging) return;
     syncActiveIndexFromScroll();
-  }, [isDragging, syncActiveIndexFromScroll]);
+  }, [syncActiveIndexFromScroll]);
 
   const handleCardClick = useCallback((index: number) => {
-    if (didDragRef.current) {
-      didDragRef.current = false;
-      return;
-    }
     setActiveIndex(index);
   }, []);
 
@@ -232,7 +175,7 @@ export function Reels() {
 
   return (
     <section
-      className="w-full py-8 md:py-16 bg-background overflow-hidden"
+      className="w-full py-8 md:py-16 bg-background overflow-hidden touch-pan-y"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -257,16 +200,11 @@ export function Reels() {
           <ChevronRight className="size-5 md:size-6" />
         </Button>
 
-        {/* Scroll area: snap on mobile, seamless scroll */}
+        {/* Scroll area: horizontal touch = reels scroll; vertical touch = page scroll (touch-action). */}
         <div
           ref={containerRef}
           className="flex overflow-x-auto overflow-y-hidden gap-4 md:gap-6 px-14 md:px-16 py-6 md:py-10 min-h-0 scroll-smooth select-none touch-pan-x snap-x snap-mandatory"
-          style={{
-            cursor: isDragging ? "grabbing" : "grab",
-            WebkitOverflowScrolling: "touch",
-          }}
-          onMouseDown={handlePointerDown}
-          onTouchStart={handlePointerDown}
+          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
           onScroll={handleScroll}
         >
           {list.map((reel, index) => {
@@ -287,7 +225,7 @@ export function Reels() {
                   itemsRef.current[index] = el;
                 }}
                 onClick={() => handleCardClick(index)}
-                className="relative shrink-0 w-[280px] max-w-[calc(100vw-5rem)] md:w-[340px] md:max-w-none rounded-2xl md:rounded-3xl bg-black overflow-hidden shadow-xl cursor-pointer aspect-[9/16] snap-center"
+                className="relative shrink-0 w-[280px] max-w-[calc(100vw-5rem)] md:w-[340px] md:max-w-none rounded-2xl md:rounded-3xl bg-black overflow-hidden shadow-xl cursor-pointer aspect-[9/16] snap-center touch-pan-x"
                 style={{ scrollSnapStop: "always" }}
                 animate={{
                   scale: isCenter ? 1.02 : distance === 1 ? 0.92 : 0.85,
@@ -318,7 +256,7 @@ export function Reels() {
                       e.stopPropagation();
                     }}
                     onTimeUpdate={() => handleTimeUpdate(index)}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover touch-pan-x"
                   />
                 ) : loadVideo ? (
                   <div

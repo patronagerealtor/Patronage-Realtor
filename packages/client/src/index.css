@@ -47,57 +47,40 @@
 
   --font-sans: 'League Spartan', sans-serif;
   --font-heading: 'League Spartan', sans-serif;
-  
-
 }
+
 
 /* WIREFRAME THEME - GRAYSCALE ONLY */
 :root {
   --background: 0 0% 100%;
-  /* White */
   --foreground: 0 0% 10%;
-  /* Nearly Black */
 
   --card: 0 0% 100%;
-  /* White */
   --card-foreground: 0 0% 10%;
-  /* Nearly Black */
 
   --popover: 0 0% 100%;
-  /* White */
   --popover-foreground: 0 0% 10%;
-  /* Nearly Black */
 
   --primary: 0 0% 10%;
-  /* Dark Gray/Black */
   --primary-foreground: 0 0% 98%;
-  /* White */
 
   --secondary: 0 0% 90%;
-  /* Light Gray */
   --secondary-foreground: 0 0% 10%;
-  /* Dark Gray */
 
   --muted: 0 0% 96%;
-  /* Very Light Gray */
   --muted-foreground: 0 0% 45%;
-  /* Mid Gray */
 
   --accent: 0 0% 90%;
-  /* Light Gray for interactions */
   --accent-foreground: 0 0% 10%;
 
   --destructive: 0 0% 40%;
-  /* Dark Gray for errors in wireframe */
   --destructive-foreground: 0 0% 98%;
 
   --border: 0 0% 85%;
-  /* Light Gray Border */
   --input: 0 0% 85%;
   --ring: 0 0% 10%;
 
   --radius: 0.25rem;
-  /* Slightly squared off for wireframe look */
 
   --sidebar: 0 0% 98%;
   --sidebar-foreground: 0 0% 10%;
@@ -109,8 +92,10 @@
   --sidebar-ring: 0 0% 10%;
 }
 
+
+/* DARK MODE */
+
 .dark {
-  /* INVERTED WIREFRAME */
   --background: 0 0% 10%;
   --foreground: 0 0% 98%;
 
@@ -140,13 +125,23 @@
   --ring: 0 0% 80%;
 }
 
+
+/* BASE STYLES */
+
 @layer base {
+
+  /* GLOBAL FONT SIZE SCALE */
+  html {
+    font-size: 18 px;   /* default is 16px */
+  }
+
   * {
     @apply border-border;
   }
 
   body {
     font-family: var(--font-sans), 'League Spartan', sans-serif;
+    line-height: 1.6;
     @apply antialiased bg-background text-foreground;
   }
 
@@ -159,4 +154,5 @@
     font-family: var(--font-heading), 'League Spartan', sans-serif;
     @apply tracking-tight;
   }
+
 }
