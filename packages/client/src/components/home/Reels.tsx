@@ -13,6 +13,7 @@ import {
   VolumeX,
   Volume2,
 } from "lucide-react";
+import { HorizontalScroll } from "@/components/ui/HorizontalScroll";
 import { reelsService } from "@/services/reels";
 import type { ReelRow } from "@/services/reels";
 
@@ -175,7 +176,7 @@ export function Reels() {
 
   return (
     <section
-      className="w-full py-8 md:py-16 bg-background overflow-hidden touch-pan-y"
+      className="w-full py-8 md:py-16 bg-background overflow-x-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -200,11 +201,9 @@ export function Reels() {
           <ChevronRight className="size-5 md:size-6" />
         </Button>
 
-        {/* Scroll area: horizontal touch = reels scroll; vertical touch = page scroll (touch-action). */}
-        <div
+        <HorizontalScroll
           ref={containerRef}
-          className="flex overflow-x-auto overflow-y-hidden gap-4 md:gap-6 px-14 md:px-16 py-6 md:py-10 min-h-0 scroll-smooth select-none touch-pan-x snap-x snap-mandatory"
-          style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-x" }}
+          className="gap-4 md:gap-6 px-14 md:px-16 py-6 md:py-10 min-h-0 select-none"
           onScroll={handleScroll}
         >
           {list.map((reel, index) => {
@@ -225,7 +224,7 @@ export function Reels() {
                   itemsRef.current[index] = el;
                 }}
                 onClick={() => handleCardClick(index)}
-                className="relative shrink-0 w-[280px] max-w-[calc(100vw-5rem)] md:w-[340px] md:max-w-none rounded-2xl md:rounded-3xl bg-black overflow-hidden shadow-xl cursor-pointer aspect-[9/16] snap-center touch-pan-x"
+                className="relative shrink-0 w-[280px] max-w-[calc(100vw-5rem)] md:w-[340px] md:max-w-none rounded-2xl md:rounded-3xl bg-black overflow-hidden shadow-xl cursor-pointer aspect-[9/16] snap-center"
                 style={{ scrollSnapStop: "always" }}
                 animate={{
                   scale: isCenter ? 1.02 : distance === 1 ? 0.92 : 0.85,
@@ -256,7 +255,7 @@ export function Reels() {
                       e.stopPropagation();
                     }}
                     onTimeUpdate={() => handleTimeUpdate(index)}
-                    className="w-full h-full object-cover touch-pan-x"
+                    className="w-full h-full object-cover"
                   />
                 ) : loadVideo ? (
                   <div
@@ -357,7 +356,7 @@ export function Reels() {
               </motion.div>
             );
           })}
-        </div>
+        </HorizontalScroll>
       </div>
     </section>
   );

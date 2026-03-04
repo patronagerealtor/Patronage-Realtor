@@ -1,6 +1,7 @@
 import { MapPin } from "lucide-react";
 import type { PropertyDetailData } from "@/types/propertyDetail";
 import { getDisplayPrice } from "@/lib/formatIndianPrice";
+import { HorizontalScroll } from "@/components/ui/HorizontalScroll";
 
 export type SimilarPropertyItem = {
   id: number | string;
@@ -67,7 +68,7 @@ export function SimilarSection({
         </h2>
 
         {list.length > 0 ? (
-          <div className="mt-6 flex gap-4 overflow-x-auto pb-2 scroll-smooth md:mt-8">
+          <HorizontalScroll className="mt-6 pb-2 md:mt-8">
             {list.map((p) => (
               <SimilarCard
                 key={p.id}
@@ -75,7 +76,7 @@ export function SimilarSection({
                 onClick={onCardClick ? () => onCardClick(p.id) : undefined}
               />
             ))}
-          </div>
+          </HorizontalScroll>
         ) : (
           <p className="mt-6 text-sm text-muted-foreground">
             No similar properties available.

@@ -179,9 +179,6 @@ export default function InvestmentPage() {
 
         .reel-thumb{transition:transform .4s;}
 
-        .reels-track{display:flex;gap:20px;overflow-x:auto;scroll-behavior:smooth;padding-bottom:12px;scrollbar-width:none;}
-        .reels-track::-webkit-scrollbar{display:none;}
-
         .scroll-btn{background:#111;color:#fff;border:none;width:44px;height:44px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0;}
         .scroll-btn:hover{background:#444;}
 

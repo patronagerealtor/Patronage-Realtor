@@ -133,6 +133,7 @@
   /* GLOBAL FONT SIZE SCALE */
   html {
     font-size: 18 px;   /* default is 16px */
+    scroll-behavior: smooth;
   }
 
   * {
@@ -155,4 +156,17 @@
     @apply tracking-tight;
   }
 
+}
+
+/* Shared horizontal scroll: vertical page scroll on mobile, horizontal swipe for strip */
+.horizontal-scroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+.horizontal-scroll > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
 }
