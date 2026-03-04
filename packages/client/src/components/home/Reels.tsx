@@ -224,7 +224,7 @@ export function Reels() {
                   itemsRef.current[index] = el;
                 }}
                 onClick={() => handleCardClick(index)}
-                className="relative shrink-0 w-[280px] max-w-[calc(100vw-5rem)] md:w-[340px] md:max-w-none rounded-2xl md:rounded-3xl bg-black overflow-hidden shadow-xl cursor-pointer aspect-[9/16] snap-center"
+                className="relative shrink-0 min-w-[280px] w-[280px] md:w-[340px] rounded-2xl md:rounded-3xl bg-black overflow-hidden shadow-xl cursor-pointer aspect-[9/16] snap-center"
                 style={{ scrollSnapStop: "always" }}
                 animate={{
                   scale: isCenter ? 1.02 : distance === 1 ? 0.92 : 0.85,

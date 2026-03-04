@@ -10,7 +10,7 @@ export const HorizontalScroll = forwardRef<HTMLDivElement, HorizontalScrollProps
     return (
       <div
         ref={ref}
-        className={`horizontal-scroll flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory ${className ?? ""}`}
+        className={`horizontal-scroll w-full scroll-smooth ${className ?? ""}`}
         {...props}
       >
         {children}
