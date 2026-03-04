@@ -66,10 +66,10 @@ export function Header() {
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 h-16 flex items-center">
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-[65px]">
+      <div className="w-full max-w-full mx-auto px-4 h-full flex items-center">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 cursor-pointer" onClick={scrollToTop}>
+        <Link href="/" className="flex items-center gap-2 cursor-pointer shrink-0 -ml-0.5" onClick={scrollToTop}>
           <img
             src="/logo/logo-full.png"
             alt="Patronage Realtor"
@@ -204,12 +204,12 @@ export function Header() {
           ) : (
             <>
               <Link href="/login" onClick={scrollToTop}>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" className="min-h-9 px-4 py-2">
                   Sign in
                 </Button>
               </Link>
               <Link href="/login" onClick={scrollToTop}>
-                <Button variant="default" size="sm">
+                <Button variant="default" className="min-h-9 px-4 py-2">
                   Sign up
                 </Button>
               </Link>
