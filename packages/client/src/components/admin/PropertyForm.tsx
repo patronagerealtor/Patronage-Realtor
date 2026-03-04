@@ -522,10 +522,10 @@ export function PropertyForm({
             type="text"
             value={googleMapLink}
             onChange={(e) => setGoogleMapLink(e.target.value)}
-            placeholder="Paste Google Maps Embed Link"
+            placeholder="https://www.google.com/maps/embed?pb=..."
           />
           <p className="text-xs text-muted-foreground">
-            Optional. Use Share → Embed a map in Google Maps and paste the iframe src URL.
+            Optional. In Google Maps: Share → Embed a map → copy the iframe <strong>src</strong> URL only (must contain /maps/embed?pb=). Do not use a normal share link or you’ll get “Invalid pb parameter”.
           </p>
         </div>
       </Card>

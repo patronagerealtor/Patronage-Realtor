@@ -135,7 +135,7 @@ export default function Calculators() {
   });
 
   // --- 3. Rent vs Buy State ---
-  const [rvbRent, setRvbRent] = useState(20000);
+  const [rvbRent, setRvbRent] = useState(15000);
   const [rvbPrice, setRvbPrice] = useState(5000000);
   const [rvbEmi, setRvbEmi] = useState(35000);
   const [rvbHorizon, setRvbHorizon] = useState(10);
