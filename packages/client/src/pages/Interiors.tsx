@@ -40,6 +40,14 @@ import {
 import { env } from "../config/env";
 const CONTACT_FORM_URL = env.contactFormUrl || "https://forms.gle/oSqrGhasHGWenKNf8";
 
+/** Resolve public asset URLs for hosted base paths (e.g. GitHub Pages). */
+function assetUrl(path: string): string {
+  const base = (typeof import.meta !== "undefined" && import.meta.env?.BASE_URL) || "/";
+  const p = path.startsWith("/") ? path : `/${path}`;
+  if (base === "/" || base === "") return p;
+  return base.replace(/\/$/, "") + p;
+}
+
 interface Package {
   id: string;
   name: string;
@@ -395,14 +403,42 @@ const interiorTypes: InteriorType[] = [
   },
 ];
 
+// Modern Living Room — all images from public/interiors/LivingRoom (used in the popup)
+const livingRoomImages: DesignImage[] = [
+  { id: "lr-1", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/39c6b823-7503-440e-9946-04f8cafaa8a0.jpg") },
+  { id: "lr-2", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/78f91f89-485f-4255-bc3d-70c2fa83b50d.jpg") },
+  { id: "lr-3", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/38c2a80a-bc34-4270-9365-7ee46fb9657a.jpg") },
+  { id: "lr-4", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/41fbe49a-f9e5-42bb-85ae-e92989d9216d.jpg") },
+  { id: "lr-5", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/aa609f0a-1c2a-4624-a2a6-b7581d47a7ce.jpg") },
+  { id: "lr-6", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/026bcd4d-91be-4ddf-8b81-76bb42179477.jpg") },
+  { id: "lr-7", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/7d4b42a9-358a-4b7f-8092-b43372689008.jpg") },
+  { id: "lr-8", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/14e02a96-7d8a-4a0a-b57a-7993ed11b26a.jpg") },
+  { id: "lr-9", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/de1d2217-4599-47fa-8283-a6a11a16421d.jpg") },
+  { id: "lr-10", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/c0f328df-e403-42c2-8832-f03c642a99d6.jpg") },
+  { id: "lr-11", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/18db0288-b60f-4c81-83cd-b81a5db7a37e.jpg") },
+  { id: "lr-12", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/97baf277-1a80-49e1-8cae-b0e616659352.jpg") },
+  { id: "lr-13", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/c912feb5-5aba-4ffb-bd16-0a4401fed525.jpg") },
+  { id: "lr-14", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/312d5644-ed32-4d35-ae61-5352001912eb.jpg") },
+  { id: "lr-15", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/75a63945-b794-456e-9cd2-9781dd6961c6.jpg") },
+  { id: "lr-16", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/af5ae335-c176-43e6-b2bb-3b1264c623b0.jpg") },
+  { id: "lr-17", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/64e0330a-1622-4510-8d59-1930f05b2a5d.jpg") },
+  { id: "lr-18", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/6ee4cb01-ffb1-4047-8ca9-7f638bcbe4c5.jpg") },
+  { id: "lr-19", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/46db0e2e-3a4c-497d-ba48-76dff403cbda.jpg") },
+  { id: "lr-20", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/b04fafff-3d4e-4c55-8352-29be9f3f4fe0.jpg") },
+  { id: "lr-21", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/c5819a6d-a0e9-4844-bf39-67856f847f72.jpg") },
+  { id: "lr-22", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/d72d7cdf-c80d-4d45-954b-88aa74b5935e.jpg") },
+  { id: "lr-23", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/25b872f5-b1e8-46ae-92ca-2838d5dc472d.jpg") },
+  { id: "lr-24", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/0570fc51-3b42-4308-b2e0-0154b075434c.jpg") },
+  { id: "lr-25", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/ecb14911-77da-454e-badc-d6d1f2cea8dc.jpg") },
+  { id: "lr-26", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/6a4b875c-f309-4b1f-aafd-cd1fa7404d06.jpg") },
+  { id: "lr-27", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/b3ce8716-ade2-41d9-930e-5ced8c99380c.jpg") },
+  { id: "lr-28", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/1f0f1bcc-9c18-47b8-9c80-8df3d46f2e17.jpg") },
+  { id: "lr-29", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/fe9f8a0b-c6af-4107-8ec9-c0e20962c3b1.jpg") },
+];
+
 const designImages: DesignImage[] = [
-  {
-    id: "1",
-    title: "Modern Living Room",
-    category: "living",
-    image:
-      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop",
-  },
+  // Modern Living Room (single card in the grid; popup shows all via livingRoomImages)
+  { id: "1", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/39c6b823-7503-440e-9946-04f8cafaa8a0.jpg") },
   {
     id: "2",
     title: "Luxury Bedroom",
@@ -884,13 +920,19 @@ export default function Interiors() {
   const handleInteriorTypeClick = useCallback((categoryId: string) => {
     const el = document.getElementById("gallery");
     if (el) el.scrollIntoView({ behavior: "smooth" });
-    const images = designImages.filter((img) => img.category === categoryId);
+    const images =
+      categoryId === "living"
+        ? livingRoomImages
+        : designImages.filter((img) => img.category === categoryId);
     const toShow = images.length > 0 ? images : designImages;
     setTimeout(() => setGalleryPopupImages(toShow), 450);
   }, []);
 
   const handleImageClick = useCallback((category: string) => {
-    const images = designImages.filter((img) => img.category === category);
+    const images =
+      category === "living"
+        ? livingRoomImages
+        : designImages.filter((img) => img.category === category);
     setGalleryPopupImages(images.length > 0 ? images : designImages);
   }, []);
 
