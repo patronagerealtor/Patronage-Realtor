@@ -268,8 +268,8 @@ const packageByBhk: Record<string, PackageConfig> = {
     },
     },
     postInstallation: [
-      "9 Months Maintenance",
-      "9 Months Support",
+      "6 Months Maintenance",
+      "6 Months Support",
       "Kitchen Appliances (Client Choice: Mixer-Grinder/Water Purifier)",
     ],
   },
@@ -363,8 +363,8 @@ const packageByBhk: Record<string, PackageConfig> = {
     },
     },
     postInstallation: [
-      "18 Months Maintenance",
-      "18 Months Support",
+      "6 Months Maintenance",
+      "6 Months Support",
       "Surprise Gift",
     ],
   },
@@ -396,10 +396,10 @@ const interiorTypes: InteriorType[] = [
     description: "Luxurious bathroom interiors",
   },
   {
-    id: "lighting",
-    name: "Lighting",
+    id: "storage",
+    name: "Storage Under Staircase",
     icon: <Lamp className="w-8 h-8" />,
-    description: "Ambient lighting solutions",
+    description: "Smart storage under staircase",
   },
 ];
 
@@ -436,6 +436,83 @@ const livingRoomImages: DesignImage[] = [
   { id: "lr-29", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/fe9f8a0b-c6af-4107-8ec9-c0e20962c3b1.jpg") },
 ];
 
+// Luxury Bedroom — all images from public/interiors/Bedroom (used in the popup)
+const bedroomImages: DesignImage[] = [
+  { id: "br-1", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/803e6d1e-41ba-4a9b-a890-1d7a2802a699.jpg") },
+  { id: "br-2", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/26de277a-2d98-4f09-8529-7cef43773064.jpg") },
+  { id: "br-3", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/57786595-1dfa-4a21-851e-e92a8772fb3c.jpg") },
+  { id: "br-4", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/650922c4-07bc-4192-b3fe-76fbb353bdda.jpg") },
+  { id: "br-5", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/6df5287f-a30c-4cc2-bf90-f3ea95980ada.jpg") },
+  { id: "br-6", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/ade20db6-b4a1-4384-aade-355ec0072413.jpg") },
+  { id: "br-7", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/d25cca5f-e963-4748-9e13-00b10523a1d2.jpg") },
+  { id: "br-8", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/40f79fd6-e16f-4e79-9aa0-efe4300706b6.jpg") },
+  { id: "br-9", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/f8648fc1-da9d-4efb-918d-a69c6f4456a1.jpg") },
+  { id: "br-10", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/d2305fa2-71ab-4d5a-b253-46e6065cba97.jpg") },
+  { id: "br-11", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/62b00f34-cde8-436a-ad31-9f8821d78d4a.jpg") },
+  { id: "br-12", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/1cfaa05a-5c66-4ca8-a92f-a9ea86e010df.jpg") },
+  { id: "br-13", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/09695180-f271-48c2-9b5d-166f1d9afda6.jpg") },
+  { id: "br-14", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/aa26645e-e2c8-4b0f-9872-bcbfcb757f4d.jpg") },
+  { id: "br-15", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/1922ec6c-7e1b-4c18-b05f-0595282fe2f4.jpg") },
+  { id: "br-16", title: "Luxury Bedroom", category: "bedroom", image: assetUrl("/interiors/Bedroom/6a35c729-5198-4f20-8a83-14e2ca25ec8a.jpg") },
+];
+
+// Contemporary Kitchen — all images from public/interiors/Kitchen_images (used in the popup)
+const kitchenImages: DesignImage[] = [
+  { id: "kt-1", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/7e212246-8ddd-4323-944a-1adf3921df7f.jpg") },
+  { id: "kt-2", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/82e2f44c-52cc-44d8-8f2d-8e11670d9ee8.jpg") },
+  { id: "kt-3", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/c7aeeeac-e300-413e-8ac3-efb0125c47af.jpg") },
+  { id: "kt-4", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/eb6ec706-bb78-477c-b34b-f7c10f3a2363.jpg") },
+  { id: "kt-5", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/088f6d0d-16f7-4de2-b3f5-77457d7de41d.jpg") },
+  { id: "kt-6", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/286b53cc-ef76-4baf-9298-8e3f39b00950.jpg") },
+  { id: "kt-7", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/c7aeeeac-e300-413e-8ac3-efb0125c47af(1).jpg") },
+  { id: "kt-8", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/0e437133-eeea-4034-9e37-a67ae5d123e6.jpg") },
+  { id: "kt-9", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/672a47a6-bc5b-4736-9aba-560c53f72f44.jpg") },
+  { id: "kt-10", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/0e8af338-e6e4-406c-8311-d44f0fd0b476.jpg") },
+  { id: "kt-11", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/0ddf1a33-266e-4014-bec0-3eed9d36db9c.jpg") },
+  { id: "kt-12", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/41875487-979d-4902-8695-5d80f3361c6b.jpg") },
+  { id: "kt-13", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/03f6f126-def5-4a95-83e6-141395397502.jpg") },
+  { id: "kt-14", title: "Contemporary Kitchen", category: "kitchen", image: assetUrl("/interiors/Kitchen_images/6567abea-68dc-4d58-a937-fbe6d7e99e14.jpg") },
+];
+
+// Elegant Bathroom — all images from public/interiors/Bathroom (used in the popup)
+const bathroomImages: DesignImage[] = [
+  { id: "ba-1", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/7f4475ba-f3af-423a-b292-5c156dcb9440.jpg") },
+  { id: "ba-2", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/e7411768-0e0c-44ef-9802-12ad83e477d1.jpg") },
+  { id: "ba-3", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/354d3976-b0d9-47c0-89a5-35528cfe859e.jpg") },
+  { id: "ba-4", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/f2b66058-db29-454c-8a33-06638baee7ea.jpg") },
+  { id: "ba-5", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/f57c9cbd-2be7-4a89-8172-f1cf0b46454b.jpg") },
+  { id: "ba-6", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/1002ba07-ae2a-44b0-a5be-42567b51840e.jpg") },
+  { id: "ba-7", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/2c7c4f40-8c63-49d3-8cdb-c91112ff0568.jpg") },
+  { id: "ba-8", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/3f01754f-faec-4c97-9e20-de721671850e.jpg") },
+  { id: "ba-9", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/44e0999b-ac62-4fe9-8bfd-c2584bf150a0.jpg") },
+  { id: "ba-10", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/064523d4-c3ff-43f3-ac9f-da699c3c7434.jpg") },
+  { id: "ba-11", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/2c1ce441-b367-4148-8963-8e4393c9b3ec.jpg") },
+  { id: "ba-12", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/307ecd2a-05df-4f28-9007-423255cb16f6.jpg") },
+  { id: "ba-13", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/77c1e090-eebe-4a07-9e8a-885b66fc580f.jpg") },
+  { id: "ba-14", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/bf381c2b-4d7c-4dca-895e-d4c4541b0b73.jpg") },
+  { id: "ba-15", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/ec39d9e4-cc44-4b49-a614-3c1cf7d86b64.jpg") },
+  { id: "ba-16", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/06710a85-19f8-4e66-91e8-fd2be177a413.jpg") },
+  { id: "ba-17", title: "Elegant Bathroom", category: "bathroom", image: assetUrl("/interiors/Bathroom/7765ca6a-f133-4df0-b43b-ccef67189cff.jpg") },
+];
+
+// Storage Under Staircase — all images from public/interiors/Storage_Under_Staircase (used in the popup)
+const storageImages: DesignImage[] = [
+  { id: "st-14", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/884bfbea-e9af-4a41-885c-de839595427c.jpg") },
+  { id: "st-1", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/81292848-5365-48e8-af0e-43de71f8458d.jpg") },
+  { id: "st-2", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/9509ccbf-46a9-47f4-a57b-86c68da3695c.jpg") },
+  { id: "st-3", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/2b6d66f4-24b1-4e00-9ed7-916f49cafef2.jpg") },
+  { id: "st-4", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/7df53900-7c47-4d88-8676-34bb3603b4e6.jpg") },
+  { id: "st-5", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/c5086727-ad7a-4e5b-8cf2-7fb2e3810ceb.jpg") },
+  { id: "st-6", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/cf06f146-11aa-4828-808c-588636e469f3.jpg") },
+  { id: "st-7", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/e803b733-6345-43db-ac68-a739e5e7792a.jpg") },
+  { id: "st-8", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/fa162bfa-acd4-4af5-9655-96336b2c7357.jpg") },
+  { id: "st-9", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/275d8401-915f-47e8-82af-f3af64bda0df.jpg") },
+  { id: "st-10", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/69555065-d421-4d01-82f2-37030b845bc0.jpg") },
+  { id: "st-11", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/b7b3bf15-5d2e-45e1-bfe7-bc0d399eb113.jpg") },
+  { id: "st-12", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/1d2987c9-f262-482d-b433-85ff6326330f.jpg") },
+  { id: "st-13", title: "Storage Under Staircase", category: "storage", image: assetUrl("/interiors/Storage_Under_Staircase/494291ca-fbe1-49a9-9317-56b3bbe31516.jpg") },
+];
+
 const designImages: DesignImage[] = [
   // Modern Living Room (single card in the grid; popup shows all via livingRoomImages)
   { id: "1", title: "Modern Living Room", category: "living", image: assetUrl("/interiors/LivingRoom/39c6b823-7503-440e-9946-04f8cafaa8a0.jpg") },
@@ -443,22 +520,19 @@ const designImages: DesignImage[] = [
     id: "2",
     title: "Luxury Bedroom",
     category: "bedroom",
-    image:
-      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=800&h=600&fit=crop",
+    image: assetUrl("/interiors/Bedroom/803e6d1e-41ba-4a9b-a890-1d7a2802a699.jpg"),
   },
   {
     id: "3",
     title: "Contemporary Kitchen",
     category: "kitchen",
-    image:
-      "https://images.unsplash.com/photo-1556912173-3bb406ef7e77?w=800&h=600&fit=crop",
+    image: assetUrl("/interiors/Kitchen_images/c7aeeeac-e300-413e-8ac3-efb0125c47af.jpg"),
   },
   {
     id: "4",
     title: "Elegant Bathroom",
     category: "bathroom",
-    image:
-      "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&h=600&fit=crop",
+    image: assetUrl("/interiors/Bathroom/7f4475ba-f3af-423a-b292-5c156dcb9440.jpg"),
   },
   {
     id: "5",
@@ -469,12 +543,15 @@ const designImages: DesignImage[] = [
   },
   {
     id: "6",
-    title: "Cozy Dining",
-    category: "dining",
-    image:
-      "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800&h=600&fit=crop",
+    title: "Storage Under Staircase",
+    category: "storage",
+    image: assetUrl("/interiors/Storage_Under_Staircase/884bfbea-e9af-4a41-885c-de839595427c.jpg"),
   },
 ];
+
+const galleryBadgeLabel = (category: string) =>
+  category === "storage" ? "Storage Under Staircase" : category;
+
 
 const whyChooseUs: WhyChooseItem[] = [
   {
@@ -780,7 +857,7 @@ const InteriorsGallerySection = React.memo(function InteriorsGallerySection(prop
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <Badge className="mb-2">{image.category}</Badge>
+                    <Badge className="mb-2">{galleryBadgeLabel(image.category)}</Badge>
                     <h3 className="text-white text-xl font-bold">{image.title}</h3>
                   </div>
                 </div>
@@ -923,6 +1000,14 @@ export default function Interiors() {
     const images =
       categoryId === "living"
         ? livingRoomImages
+        : categoryId === "bedroom"
+          ? bedroomImages
+          : categoryId === "kitchen"
+            ? kitchenImages
+            : categoryId === "bathroom"
+              ? bathroomImages
+              : categoryId === "storage"
+                ? storageImages
         : designImages.filter((img) => img.category === categoryId);
     const toShow = images.length > 0 ? images : designImages;
     setTimeout(() => setGalleryPopupImages(toShow), 450);
@@ -932,6 +1017,14 @@ export default function Interiors() {
     const images =
       category === "living"
         ? livingRoomImages
+        : category === "bedroom"
+          ? bedroomImages
+          : category === "kitchen"
+            ? kitchenImages
+            : category === "bathroom"
+              ? bathroomImages
+              : category === "storage"
+                ? storageImages
         : designImages.filter((img) => img.category === category);
     setGalleryPopupImages(images.length > 0 ? images : designImages);
   }, []);
