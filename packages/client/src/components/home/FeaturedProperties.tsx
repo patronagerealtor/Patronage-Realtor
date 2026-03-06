@@ -11,6 +11,7 @@ import { cn } from "../../lib/utils";
 import { MapPin, ArrowRight, Building2, Home, CalendarDays, Ruler } from "lucide-react";
 import { useProperties } from "../../hooks/use-properties";
 import type { PropertyRow } from "../../lib/supabase";
+import type { Property } from "../../lib/propertyStore";
 import { getDisplayPrice } from "../../lib/formatIndianPrice";
 
 /** Deterministic hash from string (for daily seed). Same date => same featured set. */
@@ -40,7 +41,7 @@ function getDailyFeatured(properties: PropertyRow[], count: number): PropertyRow
 export function FeaturedProperties() {
   const { properties } = useProperties();
   const featured = useMemo(() => getDailyFeatured(properties, 3), [properties]);
-  const [detailProperty, setDetailProperty] = useState<PropertyRow | null>(null);
+  const [detailProperty, setDetailProperty] = useState<PropertyRow | Property | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
   const openDetail = (property: PropertyRow) => {
@@ -104,10 +105,10 @@ export function FeaturedProperties() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="flex"
+            className="flex min-w-0 w-full"
           >
             <Card
-              className="overflow-hidden group border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col h-full min-h-[560px]"
+              className="w-full overflow-hidden group border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer flex flex-col h-full min-h-[560px]"
               onClick={() => openDetail(property)}
               role="button"
               tabIndex={0}
