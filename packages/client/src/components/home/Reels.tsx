@@ -37,6 +37,7 @@ export function Reels() {
   const [showIcon, setShowIcon] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean[]>([]);
   const [reelsList, setReelsList] = useState<ReelRow[]>([]);
+  const [reelsLoaded, setReelsLoaded] = useState(false);
   const [failedVideoIndices, setFailedVideoIndices] = useState<Set<number>>(new Set());
 
   const list = reelsList;
@@ -48,7 +49,15 @@ export function Reels() {
   useEffect(() => {
     let cancelled = false;
     reelsService.fetchReels().then((data) => {
-      if (!cancelled) setReelsList(Array.isArray(data) ? data : []);
+      if (!cancelled) {
+        setReelsList(Array.isArray(data) ? data : []);
+        setReelsLoaded(true);
+      }
+    }).catch(() => {
+      if (!cancelled) {
+        setReelsList([]);
+        setReelsLoaded(true);
+      }
     });
     return () => {
       cancelled = true;
@@ -172,8 +181,6 @@ export function Reels() {
     setActiveIndex(index);
   }, []);
 
-  if (list.length === 0) return null;
-
   return (
     <section
       className="w-full py-8 md:py-16 bg-background overflow-x-hidden"
@@ -181,6 +188,18 @@ export function Reels() {
       onMouseLeave={() => setPaused(false)}
     >
       <div className="relative w-full max-w-[100vw]">
+        {!reelsLoaded && (
+          <div className="flex items-center justify-center px-14 md:px-16 py-12 md:py-16 min-h-[280px] text-muted-foreground">
+            Loading reels…
+          </div>
+        )}
+        {reelsLoaded && list.length === 0 && (
+          <div className="flex items-center justify-center px-14 md:px-16 py-12 md:py-16 min-h-[280px] text-muted-foreground">
+            No reels to show yet.
+          </div>
+        )}
+        {list.length === 0 ? null : (
+          <>
         {/* Nav: compact on mobile, larger on desktop */}
         <Button
           variant="ghost"
@@ -357,6 +376,8 @@ export function Reels() {
             );
           })}
         </HorizontalScroll>
+          </>
+        )}
       </div>
     </section>
   );

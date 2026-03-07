@@ -66,8 +66,8 @@ The app **fails fast** in production if `VITE_SUPABASE_URL` and `VITE_SUPABASE_A
 4. **CORS or auth errors with Supabase**  
    In Supabase, add your production domain (and Cloudflare proxy URL if different) to allowed origins. No Cloudflare-specific code is required in the app.
 
-5. **Sitemap / SEO**  
-   Update `packages/client/public/sitemap.xml` so `<loc>` values use your production origin (e.g. `https://yourdomain.com/...`). The app sets document title and meta description via `seo/usePageMeta`; ensure no `noindex` is added by mistake.
+5. **Sitemap / SEO**
+   The sitemap at `packages/client/public/sitemap.xml` uses `https://patronagerealtor.in`; update it if you deploy under a different domain. The app sets document title and meta description via `seo/usePageMeta`; ensure no `noindex` is added by mistake.
 
 ## One-click deploy
 
