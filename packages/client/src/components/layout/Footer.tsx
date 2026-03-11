@@ -233,18 +233,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-border/50 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground">
-          <p>&copy; 2026 Patronage.co. All rights reserved.</p>
-          <div className="flex gap-6">
-            <a href="/terms" className="hover:text-foreground">
-              Terms
-            </a>
-            <a href="/privacy" className="hover:text-foreground">
-              Privacy
-            </a>
-            <a href="/cookies" className="hover:text-foreground">
-              Cookies
-            </a>
-          </div>
+          <p>&copy; 2026 Patronage Realtor. All rights reserved.</p>
         </div>
       </div>
     </footer>
