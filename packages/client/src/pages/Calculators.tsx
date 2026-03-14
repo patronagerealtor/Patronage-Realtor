@@ -390,10 +390,10 @@ export default function Calculators() {
   }, [eligIncome, eligEmi, eligTenure, eligInterestRate, costPrice, costPropertyStatus, costPerSqft, costArea, costMaintenanceYears, registrationCost, advocateCost, costGender, rvbRent, rvbPrice, rvbEmi, rvbHorizon]);
 
   const seoTitleMap: Record<CalculatorTab, string> = {
-    "smart-emi": "Patronage Realtor - Home Loan EMI Calculator",
-    "rent-vs-buy": "Patronage Realtor - Rent vs Buy Calculator",
-    "eligibility": "Patronage Realtor - Home Loan Eligibility Calculator",
-    "ownership": "Patronage Realtor - Home Ownership Cost Calculator",
+    "smart-emi": "Patronage Realtor",
+    "rent-vs-buy": "Patronage Realtor",
+    "eligibility": "Patronage Realtor",
+    "ownership": "Patronage Realtor",
   };
 
   const seoDescriptionMap: Record<CalculatorTab, string> = {
@@ -499,6 +499,10 @@ export default function Calculators() {
 
   useCanonical(location || "/calculators");
 
+  useEffect(() => {
+    document.title = "Patronage Realtor";
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Header />
@@ -506,10 +510,7 @@ export default function Calculators() {
       <main className="container mx-auto px-4 py-8 flex-grow">
         <div className="max-w-4xl mx-auto text-center mb-8">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-2">
-            {activeTab === "smart-emi" && "Home Loan EMI Calculator"}
-            {activeTab === "rent-vs-buy" && "Rent vs Buy Calculator"}
-            {activeTab === "eligibility" && "Home Loan Eligibility Calculator"}
-            {activeTab === "ownership" && "Home Ownership Cost Calculator"}
+            Patronage Realtor
           </h1>
           <p className="text-xl text-muted-foreground">
             Tools to make smarter home buying decisions
