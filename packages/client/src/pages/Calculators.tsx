@@ -390,10 +390,10 @@ export default function Calculators() {
   }, [eligIncome, eligEmi, eligTenure, eligInterestRate, costPrice, costPropertyStatus, costPerSqft, costArea, costMaintenanceYears, registrationCost, advocateCost, costGender, rvbRent, rvbPrice, rvbEmi, rvbHorizon]);
 
   const seoTitleMap: Record<CalculatorTab, string> = {
-    "smart-emi": "Home Loan EMI Calculator - Smart EMI Planner",
-    "rent-vs-buy": "Rent vs Buy Calculator - Home vs Renting in India",
-    "eligibility": "Home Loan Eligibility Calculator - Check Loan Eligibility",
-    "ownership": "Home Ownership Cost Calculator - Stamp Duty, GST & Charges",
+    "smart-emi": "Patronage Realtor - Home Loan EMI Calculator",
+    "rent-vs-buy": "Patronage Realtor - Rent vs Buy Calculator",
+    "eligibility": "Patronage Realtor - Home Loan Eligibility Calculator",
+    "ownership": "Patronage Realtor - Home Ownership Cost Calculator",
   };
 
   const seoDescriptionMap: Record<CalculatorTab, string> = {
