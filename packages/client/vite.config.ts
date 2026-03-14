@@ -14,18 +14,22 @@ function indexNowKeyFilePlugin() {
   return {
     name: "indexnow-key-file",
     writeBundle(options: { dir?: string }) {
-      const key = process.env.INDEXNOW_KEY;
-      if (!key || typeof key !== "string") return;
-      const trimmed = key.trim();
-      if (trimmed.length < 8 || trimmed.length > 128 || !/^[a-zA-Z0-9-]+$/.test(trimmed)) {
-        console.warn("[indexnow-key-file] INDEXNOW_KEY invalid (8–128 alphanumeric/hyphen chars); skipping key file.");
-        return;
+      try {
+        const key = process.env.INDEXNOW_KEY;
+        if (!key || typeof key !== "string") return;
+        const trimmed = key.trim();
+        if (trimmed.length < 8 || trimmed.length > 128 || !/^[a-zA-Z0-9-]+$/.test(trimmed)) {
+          console.warn("[indexnow-key-file] INDEXNOW_KEY invalid (8–128 alphanumeric/hyphen chars); skipping key file.");
+          return;
+        }
+        const outDir = options.dir;
+        if (!outDir) return;
+        const keyPath = path.join(outDir, `${trimmed}.txt`);
+        writeFileSync(keyPath, trimmed, "utf8");
+        console.log("[indexnow-key-file] Wrote", keyPath);
+      } catch (e) {
+        console.warn("[indexnow-key-file] Could not write key file:", e);
       }
-      const outDir = options.dir;
-      if (!outDir) return;
-      const keyPath = path.join(outDir, `${trimmed}.txt`);
-      writeFileSync(keyPath, trimmed, "utf8");
-      console.log("[indexnow-key-file] Wrote", keyPath);
     },
   };
 }
