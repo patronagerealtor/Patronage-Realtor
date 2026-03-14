@@ -5,6 +5,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "./components/ui/toaster";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { MotionConfig } from "framer-motion";
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/react"
 class AppErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null };
 
@@ -70,6 +72,10 @@ function Router() {
       <Route path="/interiors" component={Interiors} />
       <Route path="/about-us" component={AboutUs} />
       <Route path="/calculators" component={Calculators} />
+      <Route path="/calculators/home-loan-emi-calculator" component={Calculators} />
+      <Route path="/calculators/rent-vs-buy" component={Calculators} />
+      <Route path="/calculators/home-loan-eligibility" component={Calculators} />
+      <Route path="/calculators/ownership-cost" component={Calculators} />
       <Route path="/login" component={LoginPage} />
       <Route path="/data-entry">
         {() => (
@@ -90,6 +96,8 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <Toaster />
+            <Analytics />
+            <SpeedInsights />
             <AuthPhoneGate>
               <Router />
             </AuthPhoneGate>

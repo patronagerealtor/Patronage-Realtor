@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node ../../node_modules/vite/bin/vite.js dev --port 5000",
     "build": "node ../../node_modules/vite/bin/vite.js build",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "preview": "node ../../node_modules/vite/bin/vite.js preview"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -41,6 +42,8 @@
     "@react-three/fiber": "^9.5.0",
     "@supabase/supabase-js": "^2.47.0",
     "@tanstack/react-query": "^5.60.5",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

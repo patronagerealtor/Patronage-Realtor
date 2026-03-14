@@ -17,6 +17,7 @@ import {
   saveProperties,
   type Property,
 } from "../lib/propertyStore";
+import { notifyIndexNowPropertyChange } from "../lib/indexnow";
 import { useCallback, useMemo } from "react";
 import { useEffect, useState } from "react";
 
@@ -180,8 +181,9 @@ export function useDataEntryProperties() {
       await insertPropertyBackend(id, { ...payload, id });
       return id;
     },
-    onSuccess: () => {
+    onSuccess: (_data, { payload, id }) => {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
+      notifyIndexNowPropertyChange(id, payload?.slug as string | null | undefined);
     },
   });
 
@@ -196,8 +198,9 @@ export function useDataEntryProperties() {
       if (!useSupabase) throw new Error("Backend not configured");
       await updatePropertyBackend(id, payload);
     },
-    onSuccess: () => {
+    onSuccess: (_data, { id, payload }) => {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
+      notifyIndexNowPropertyChange(id, payload?.slug as string | null | undefined);
     },
   });
 
@@ -212,8 +215,9 @@ export function useDataEntryProperties() {
       if (!useSupabase) throw new Error("Backend not configured");
       await upsertPropertyBackend(id, payload);
     },
-    onSuccess: () => {
+    onSuccess: (_data, { id, payload }) => {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
+      notifyIndexNowPropertyChange(id, payload?.slug as string | null | undefined);
     },
   });
 
@@ -222,8 +226,9 @@ export function useDataEntryProperties() {
       if (!useSupabase) throw new Error("Backend not configured");
       await deletePropertyBackend(id);
     },
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ["properties"] });
+      notifyIndexNowPropertyChange(id, null);
     },
   });
 

@@ -46,6 +46,19 @@ export const env = {
   get googleClientId(): string {
     return get("VITE_GOOGLE_CLIENT_ID");
   },
+  /** Site domain for IndexNow (e.g. patronagerealtor.in). Used when building canonical URLs. Falls back to appUrl host. */
+  get siteDomain(): string {
+    const domain = get("VITE_SITE_DOMAIN");
+    if (domain) return domain;
+    const url = get("VITE_APP_URL");
+    if (!url) return "";
+    try {
+      const u = new URL(url);
+      return u.hostname || "";
+    } catch {
+      return "";
+    }
+  },
   get isDev(): boolean {
     return get("MODE") === "development" || import.meta.env?.DEV === true;
   },
