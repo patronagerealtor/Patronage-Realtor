@@ -7,7 +7,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { Footer } from "../components/layout/Footer";
 import { Header } from "../components/layout/Header";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
@@ -35,7 +35,6 @@ import { formatIndianPrice, getDisplayPrice } from "../lib/formatIndianPrice";
 import { PlaceholderImage } from "../components/shared/PlaceholderImage";
 import { SupabaseImage } from "../components/shared/SupabaseImage";
 import { PropertyDetailDialog } from "../components/property-detail/PropertyDetailDialog";
-import { usePageMeta, useCanonical } from "../seo/usePageMeta";
 import {
   Accordion,
   AccordionContent,
@@ -66,35 +65,13 @@ const COLORS = {
 
 const RELATED_PROPERTY_MARGIN_RUPEE = 500000; // ±5 Lakh (in rupees)
 
-type CalculatorTab = "smart-emi" | "rent-vs-buy" | "eligibility" | "ownership";
-
-function getTabFromPath(pathname: string): CalculatorTab {
-  if (pathname.startsWith("/calculators/rent-vs-buy")) return "rent-vs-buy";
-  if (pathname.startsWith("/calculators/home-loan-eligibility")) return "eligibility";
-  if (pathname.startsWith("/calculators/ownership-cost")) return "ownership";
-  return "smart-emi";
-}
-
-function getPathForTab(tab: CalculatorTab): string {
-  switch (tab) {
-    case "rent-vs-buy":
-      return "/calculators/rent-vs-buy";
-    case "eligibility":
-      return "/calculators/home-loan-eligibility";
-    case "ownership":
-      return "/calculators/ownership-cost";
-    case "smart-emi":
-    default:
-      return "/calculators/home-loan-emi-calculator";
-  }
-}
-
+/** Get property price in lakhs for comparison. Uses price_value; then price_min/price_max; fallback: parse price string. */
 function getPriceInLakhs(p: PropertyRow): number | null {
   const pv = p.price_value != null ? Number(p.price_value) : null;
   if (pv != null && !Number.isNaN(pv)) {
     if (pv >= 100000) return pv / 1e5;
     if (pv >= 100) return pv;
-    if (pv >= 1) return pv * 100;
+    if (pv >= 1) return pv * 100; // crore
     return pv;
   }
   if (p.price_min != null && p.price_max != null) {
@@ -121,16 +98,10 @@ function getPriceInLakhs(p: PropertyRow): number | null {
 }
 
 export default function Calculators() {
-  const [location, navigate] = useLocation();
-  const [activeTab, setActiveTab] = useState<CalculatorTab>(() => getTabFromPath(location));
+  const [activeTab, setActiveTab] = useState("smart-emi");
   const { properties } = useProperties();
   const [detailProperty, setDetailProperty] = useState<PropertyRow | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
-
-  useEffect(() => {
-    const next = getTabFromPath(location);
-    setActiveTab(next);
-  }, [location]);
 
   // --- 1. Loan Eligibility State ---
   const [eligIncome, setEligIncome] = useState(100000);
@@ -145,7 +116,8 @@ export default function Calculators() {
 
   // --- 2. Ownership Cost State ---
   const [costPrice, setCostPrice] = useState(5000000);
-  const [costPropertyStatus, setCostPropertyStatus] = useState("under-construction");
+  const [costPropertyStatus, setCostPropertyStatus] =
+    useState("under-construction");
   const [costGender, setCostGender] = useState<"male" | "female">("male");
   const [costPerSqft, setCostPerSqft] = useState(0);
   const [costArea, setCostArea] = useState(0);
@@ -213,6 +185,7 @@ export default function Calculators() {
     purchaseVerdict: "Affordable",
   });
 
+  // Helper to handle currency inputs safely
   const handleCurrencyInput = (val: string, setter: (v: number) => void) => {
     const cleanVal = val.replace(/[^0-9.]/g, "");
     const numberVal = parseFloat(cleanVal);
@@ -274,11 +247,18 @@ export default function Calculators() {
 
     const rate = eligRateNum / 12 / 100;
     const months = eligTenure * 12;
+
     const disposableIncome = Math.max(0, eligIncome - eligEmi);
 
     const safeMonthlyEmi = Math.max(0, disposableIncome * 0.4);
     const maxEmi = Math.max(0, disposableIncome * 0.5);
-    const maxAffordableLoan = safeMonthlyEmi > 0 ? safeMonthlyEmi * ((Math.pow(1 + rate, months) - 1) / (rate * Math.pow(1 + rate, months))) : 0;
+
+    const maxAffordableLoan =
+      safeMonthlyEmi > 0
+        ? safeMonthlyEmi *
+          ((Math.pow(1 + rate, months) - 1) /
+            (rate * Math.pow(1 + rate, months)))
+        : 0;
 
     setEligResults({
       loanAmount: Math.round(maxAffordableLoan),
@@ -297,9 +277,20 @@ export default function Calculators() {
 
     const stampDutyRate = costGender === "female" ? 0.06 : 0.07;
     const stampDuty = basePrice * stampDutyRate;
-    const gst = costPropertyStatus === "under-construction" ? basePrice * 0.05 : 0;
+
+    const gst =
+      costPropertyStatus === "under-construction" ? basePrice * 0.05 : 0;
+
     const tds = basePrice * 0.01;
-    const total = basePrice + stampDuty + gst + tds + maintenance + registrationCost + advocateCost;
+
+    const total =
+      basePrice +
+      stampDuty +
+      gst +
+      tds +
+      maintenance +
+      registrationCost +
+      advocateCost;
 
     setCostResults({
       stampDuty: Math.round(stampDuty),
@@ -317,7 +308,12 @@ export default function Calculators() {
     let totalBuyingOutflow = 0;
     let currentRent = rvbRent;
     let breakEvenYear = -1;
-    const graphData: { year: number; Rent: number; EMI: number; AssetValue: number; }[] = [];
+    const graphData: {
+      year: number;
+      Rent: number;
+      EMI: number;
+      AssetValue: number;
+    }[] = [];
 
     for (let i = 1; i <= rvbHorizon; i++) {
       totalRentOutflow += currentRent * 12;
@@ -326,6 +322,7 @@ export default function Calculators() {
       if (breakEvenYear === -1 && totalRentOutflow >= totalBuyingOutflow) {
         breakEvenYear = i;
       }
+
       const houseFutureValue = rvbPrice * Math.pow(1.07, i);
 
       graphData.push({
@@ -359,7 +356,13 @@ export default function Calculators() {
 
   const calculateSmartEmi = () => {
     const smartRateNum = parseFloat(smartInterestRate) || 0;
-    if (smartLoanAmount <= 0 || smartRateNum <= 0 || smartTenure <= 0 || smartIncome <= 0) return;
+    if (
+      smartLoanAmount <= 0 ||
+      smartRateNum <= 0 ||
+      smartTenure <= 0 ||
+      smartIncome <= 0
+    )
+      return;
 
     const rate = smartRateNum / 12 / 100;
     const months = smartTenure * 12;
@@ -371,6 +374,7 @@ export default function Calculators() {
 
     const totalPayment = emi * months;
     const totalInterest = totalPayment - smartLoanAmount;
+
     const totalEmiLoad = emi + smartExistingEmi;
     const ratio = (totalEmiLoad / smartIncome) * 100;
 
@@ -380,7 +384,13 @@ export default function Calculators() {
 
     const disposableIncome = smartIncome - smartExistingEmi;
     const safeMonthlyEmi = Math.max(0, disposableIncome * 0.4);
-    const maxAffordableLoan = safeMonthlyEmi > 0 ? safeMonthlyEmi * ((Math.pow(1 + rate, months) - 1) / (rate * Math.pow(1 + rate, months))) : 0;
+
+    const maxAffordableLoan =
+      safeMonthlyEmi > 0
+        ? safeMonthlyEmi *
+          ((Math.pow(1 + rate, months) - 1) /
+            (rate * Math.pow(1 + rate, months)))
+        : 0;
 
     let verdict = "Affordable";
     if (emi > disposableIncome * 0.5) verdict = "Risky";
@@ -471,7 +481,6 @@ export default function Calculators() {
   // Related properties: price within Property Price ± 5 Lakh
   const totalBudgetRupees = smartPropertyPrice;
   const totalBudgetLakhs = totalBudgetRupees / 1e5;
-  
   const relatedProperties = useMemo(() => {
     if (totalBudgetRupees <= 0) return [];
     const minL = Math.max(0, totalBudgetLakhs - 5);
@@ -528,7 +537,7 @@ export default function Calculators() {
       <main className="container mx-auto px-4 py-8 flex-grow">
         <div className="max-w-4xl mx-auto text-center mb-8">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-2">
-            Patronage Realtor
+            Home Loan & Property Calculators for Smart Buyers in India (2026)
           </h1>
           <p className="text-xl text-muted-foreground">
             Tools to make smarter home buying decisions
@@ -536,16 +545,9 @@ export default function Calculators() {
         </div>
 
         <Tabs
-          value={activeTab}
+          defaultValue="smart-emi"
           className="max-w-6xl mx-auto w-full"
-          onValueChange={(val) => {
-            const tab = val as CalculatorTab;
-            setActiveTab(tab);
-            const nextPath = getPathForTab(tab);
-            if (location !== nextPath) {
-              navigate(nextPath);
-            }
-          }}
+          onValueChange={setActiveTab}
         >
           <div
             id="calculators-tabs"
@@ -587,7 +589,8 @@ export default function Calculators() {
               TAB 1: SMART EMI PLANNER (UPDATED)
           ============================================================ */}
           <TabsContent value="smart-emi">
-          <div className="grid lg:grid-cols-12 gap-6 lg:items-stretch">
+            <div className="grid lg:grid-cols-12 gap-6">
+
               {/* --- INPUT PANEL --- */}
               <Card className="lg:col-span-5 p-6 space-y-6 border-t-4 border-t-primary flex flex-col">
               <div className="space-y-4 flex-1 flex flex-col justify-between">
@@ -801,24 +804,24 @@ export default function Calculators() {
                       {formatCurrency(smartResults.monthlyEmi)}
                     </p>
 
-                      <p className="text-sm text-muted-foreground uppercase tracking-wider mt-4">
-                        Risk Level
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span
-                          className={`text-xs font-bold px-2 py-1 rounded-full ${
-                            smartResults.riskLevel === "Safe"
-                              ? "bg-green-200 text-green-800"
-                              : "bg-red-200 text-red-800"
-                          }`}
-                        >
-                          {smartResults.riskLevel}
-                        </span>
-                        <span className="text-sm font-medium">
-                          EMI is {smartResults.emiToIncomeRatio}% of Income
-                        </span>
-                      </div>
+                    <p className="text-sm text-muted-foreground uppercase tracking-wider mt-4">
+                      Risk Level
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span
+                        className={`text-xs font-bold px-2 py-1 rounded-full ${
+                          smartResults.riskLevel === "Safe"
+                            ? "bg-green-200 text-green-800"
+                            : "bg-red-200 text-red-800"
+                        }`}
+                      >
+                        {smartResults.riskLevel}
+                      </span>
+                      <span className="text-sm font-medium">
+                        EMI is {smartResults.emiToIncomeRatio}% of Income
+                      </span>
                     </div>
+                  </div>
 
                   <div className="space-y-3 mt-6 pt-6 border-t border-dashed border-gray-300 dark:border-gray-700">
                     <div className="flex justify-between items-center">
@@ -834,7 +837,7 @@ export default function Calculators() {
 
                 {/* Prepayment Impact Card — full width, shown only when prepayment > 0 */}
                 {smartLumpSumPrepayment > 0 && smartLumpSumPrepayment < smartLoanAmount && (
-                  <Card className="md:col-span-2 p-5 border-t-4 border-t-green-500 bg-green-50/40 dark:bg-green-900/10">
+                  <Card className="md:col-span-2 p-6 border-t-4 border-t-green-500 bg-green-50/40 dark:bg-green-900/10">
                     <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                       Prepayment Impact
                     </h3>
@@ -880,7 +883,7 @@ export default function Calculators() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mt-4 pt-2 border-t border-green-200 dark:border-green-800">
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-green-200 dark:border-green-800">
   <p className="text-sm font-bold text-muted-foreground">
     {smartPrepaymentAfterYears === 0
       ? "Prepayment applied at start of loan"
@@ -1040,9 +1043,9 @@ export default function Calculators() {
                     <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
                       <p className="mb-2">The calculator assigns a risk level based on your EMI:</p>
                       <ul className="list-disc pl-5 space-y-1">
-                        <li><strong>Safe</strong> - EMI is comfortably within limits</li>
-                        <li><strong>Moderate</strong> - EMI is manageable but leaves less room for savings</li>
-                        <li><strong>High Risk</strong> - EMI is too high and may cause financial stress</li>
+                        <li><strong>Safe</strong> – EMI is comfortably within limits</li>
+                        <li><strong>Moderate</strong> – EMI is manageable but leaves less room for savings</li>
+                        <li><strong>High Risk</strong> – EMI is too high and may cause financial stress</li>
                       </ul>
                     </AccordionContent>
                   </AccordionItem>
@@ -1080,7 +1083,7 @@ export default function Calculators() {
                   </AccordionItem>
                 </Accordion>
               </div>
-            </div>
+            </Card>
           </TabsContent>
 
           {/* ============================================================
@@ -1424,7 +1427,7 @@ export default function Calculators() {
                   </AccordionItem>
                 </Accordion>
               </div>
-            </div>
+            </Card>
           </TabsContent>
 
           {/* ============================================================
@@ -1673,7 +1676,7 @@ export default function Calculators() {
                   </AccordionItem>
                 </Accordion>
               </div>
-            </div>
+            </Card>
           </TabsContent>
         </Tabs>
 
@@ -1795,9 +1798,7 @@ export default function Calculators() {
           }}
         />
       </main>
-
       <Footer />
-
       <PropertyDetailDialog
         property={detailProperty}
         open={detailOpen}
