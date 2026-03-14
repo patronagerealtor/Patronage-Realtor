@@ -29,6 +29,9 @@ Set these in **Vercel** (Project → Settings → Environment Variables). Use **
 | `VITE_CONTACT_FORM_URL` | No | Override for contact / CTA links |
 | `VITE_WEBINAR_PAYMENT_LINK` | No | Webinar payment link |
 | `VITE_WEBINAR_CONTACT_FORM_URL` | No | Webinar contact form override |
+| `INDEXNOW_KEY` | No | IndexNow API key: 8–128 chars, alphanumeric (a-z, A-Z, 0-9) and optionally hyphens (-). Set in **Build** and **Runtime** so the key file is generated and the API route can submit URLs to Bing. |
+| `SITE_DOMAIN` | No | Domain for IndexNow (e.g. `patronagerealtor.in`). Used by the `/api/indexnow` serverless function. |
+| `VITE_SITE_DOMAIN` | No | Optional override for canonical URL host in the client (defaults to host from `VITE_APP_URL`). |
 
 Legacy names `VITE_SUPABASE_2_URL` and `VITE_SUPABASE_2_ANON_KEY` are still supported if set instead of the names above.
 
@@ -68,6 +71,10 @@ The app **fails fast** in production if `VITE_SUPABASE_URL` and `VITE_SUPABASE_A
 
 5. **Sitemap / SEO**
    The sitemap at `packages/client/public/sitemap.xml` uses `https://patronagerealtor.in`; update it if you deploy under a different domain. The app sets document title and meta description via `seo/usePageMeta`; ensure no `noindex` is added by mistake.
+
+6. **IndexNow (Bing)**  
+   When `INDEXNOW_KEY` and `SITE_DOMAIN` are set, the build emits `{INDEXNOW_KEY}.txt` at the site root and the `/api/indexnow` serverless function forwards URL submissions to Bing. Property create/update/delete in Data Entry trigger asynchronous IndexNow submissions. Ensure the key file is reachable at `https://<your-domain>/{key}.txt`.  
+   **Hooks:** IndexNow is triggered from `packages/client/src/hooks/useDataEntryProperties.ts` in the `onSuccess` callbacks of `insertMutation`, `updateMutation`, `upsertMutation`, and `deleteMutation` (each calls `notifyIndexNowPropertyChange` so the property URL and the listing URL are submitted without blocking the UI).
 
 ## One-click deploy
 
