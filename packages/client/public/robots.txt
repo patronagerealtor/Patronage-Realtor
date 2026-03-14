@@ -1,6 +1,14 @@
-# Allow all crawlers. Override in production if needed.
+# Allow all standard crawlers
 User-agent: *
 Allow: /
+
+# Block backend API routes
+Disallow: /api/
+
+# Block admin, data entry, and private routes
+Disallow: /admin/
+Disallow: /data-entry
+Disallow: /investment/insert
 
 # Sitemap (absolute URL for crawlers)
 Sitemap: https://patronagerealtor.in/sitemap.xml
