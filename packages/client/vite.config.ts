@@ -6,7 +6,8 @@ import { writeFileSync } from "fs";
 import { metaImagesPlugin } from "./vite-plugin-meta-images";
 
 /**
- * Writes the IndexNow key file at site root so Bing can verify ownership.
+ * IndexNow key file: host a UTF-8 file at the root of your website at https://<your-domain>/<key>.txt
+ * whose contents are exactly the key. This plugin writes that file at build time so Bing can verify ownership.
  * Key must be 8–128 chars: alphanumeric (a-z, A-Z, 0-9) and optionally hyphens (-).
  * Set INDEXNOW_KEY at build time (e.g. in Vercel Build env) to generate the file.
  */

@@ -72,6 +72,10 @@ function Router() {
       <Route path="/interiors" component={Interiors} />
       <Route path="/about-us" component={AboutUs} />
       <Route path="/calculators" component={Calculators} />
+      <Route path="/calculators/home-loan-emi-calculator" component={Calculators} />
+      <Route path="/calculators/rent-vs-buy" component={Calculators} />
+      <Route path="/calculators/home-loan-eligibility" component={Calculators} />
+      <Route path="/calculators/ownership-cost" component={Calculators} />
       <Route path="/login" component={LoginPage} />
       <Route path="/data-entry">
         {() => (
