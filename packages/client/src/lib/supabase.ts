@@ -279,7 +279,7 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
   }
   console.time('Supabase_Properties_Query');
 
-  // Fetch main properties data
+  // Fetch main properties data - minimal columns for initial load
   console.time('Properties_Query');
   const { data: propertiesData, error: propertiesError } = await supabaseClient
     .from(PROPERTIES_TABLE)
@@ -288,32 +288,21 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
       id,
       title,
       location,
-      address,
-      developer,
-      property_type,
+      price_value,
+      price_min,
+      price_max,
       beds,
       baths,
       sqft,
       construction_status,
       created_at,
       city,
-      possession_date,
-      bhk_type,
-      possession_by,
-      latitude,
-      longitude,
-      google_map_link,
-      price_value,
-      price_min,
-      price_max,
       slug,
-      description,
-      rera_applicable,
-      rera_number
+      description
     `
     )
     .order("created_at", { ascending: false })
-    .limit(12);
+    .limit(8); // Further reduced to 8 for testing
   console.timeEnd('Properties_Query');
 
   if (propertiesError) {
