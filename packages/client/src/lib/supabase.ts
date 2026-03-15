@@ -271,7 +271,22 @@ function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
   };
 }
 
+// Cache for properties data
+let propertiesCache: { data: PropertyRow[]; timestamp: number } | null = null;
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+
+export function clearPropertiesCache() {
+  propertiesCache = null;
+  console.log('Properties cache cleared');
+}
+
 export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
+  // Check cache first
+  if (propertiesCache && (Date.now() - propertiesCache.timestamp) < CACHE_DURATION) {
+    console.log('Returning cached properties data');
+    return propertiesCache.data;
+  }
+
   if (!supabaseClient) {
     throw new Error(
       "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env to load properties."
@@ -279,119 +294,127 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
   }
   console.time('Supabase_Properties_Query');
 
-  // Fetch main properties data - minimal columns for initial load
-  console.time('Properties_Query');
-  const { data: propertiesData, error: propertiesError } = await supabaseClient
-    .from(PROPERTIES_TABLE)
-    .select(
-      `
-      id,
-      title,
-      location,
-      price_value,
-      price_min,
-      price_max,
-      beds,
-      baths,
-      sqft,
-      construction_status,
-      created_at,
-      city,
-      slug,
-      description
-    `
-    )
-    .order("created_at", { ascending: false })
-    .limit(8); // Further reduced to 8 for testing
-  console.timeEnd('Properties_Query');
-
-  if (propertiesError) {
-    console.error("[Supabase] fetch properties error:", propertiesError);
-    throw new Error(propertiesError.message || "Failed to load properties from database.");
-  }
-
-  if (!propertiesData || propertiesData.length === 0) {
-    console.timeEnd('Supabase_Properties_Query');
-    return [];
-  }
-
-  const propertyIds = propertiesData.map(p => p.id);
-
-  // Fetch related data in parallel - simplified queries without nested selects
-  console.time('Related_Data_Queries');
-  const [imagesResult, propertyAmenitiesResult] = await Promise.all([
-    supabaseClient
-      .from('property_images')
-      .select('property_id, image_url, sort_order')
-      .in('property_id', propertyIds),
-    supabaseClient
-      .from('property_amenities')
-      .select('property_id, amenity_id')
-      .in('property_id', propertyIds)
-  ]);
-
-  // Get unique amenity IDs and fetch amenities details
-  const amenityIds = [...new Set((propertyAmenitiesResult.data || []).map(pa => pa.amenity_id))];
-  const amenitiesResult = amenityIds.length > 0 ? await supabaseClient
-    .from('amenities')
-    .select('id, name, icon')
-    .in('id', amenityIds) : { data: [], error: null };
-
-  console.timeEnd('Related_Data_Queries');
-
-  console.timeEnd('Supabase_Properties_Query');
-
-  if (imagesResult.error) {
-    console.error("[Supabase] fetch images error:", imagesResult.error);
-  }
-  if (propertyAmenitiesResult.error) {
-    console.error("[Supabase] fetch property amenities error:", propertyAmenitiesResult.error);
-  }
-  if (amenitiesResult.error) {
-    console.error("[Supabase] fetch amenities error:", amenitiesResult.error);
-  }
-
-  // Combine the data
-  const imagesMap = new Map<string, PropertyImageRow[]>();
-  const amenitiesMap = new Map<string, { id: string; name: string; icon: string }[]>();
-
-  // Group images by property_id
-  (imagesResult.data || []).forEach(img => {
-    if (!imagesMap.has(img.property_id)) {
-      imagesMap.set(img.property_id, []);
-    }
-    imagesMap.get(img.property_id)!.push({
-      image_url: img.image_url,
-      sort_order: img.sort_order
+  try {
+    // Use direct fetch to bypass Supabase client overhead
+    console.time('Properties_Query');
+    const mainQueryUrl = `${supabaseUrl}/rest/v1/${PROPERTIES_TABLE}?select=id,title,location,price_value,price_min,price_max,beds,baths,sqft,construction_status,created_at,city,slug,description&order=created_at.desc`;
+    const response = await fetch(mainQueryUrl, {
+      headers: {
+        'apikey': supabaseAnonKey,
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=300', // 5 minute browser cache
+      },
     });
-  });
 
-  // Create amenities lookup map
-  const amenitiesLookup = new Map<string, { id: string; name: string; icon: string }>();
-  (amenitiesResult.data || []).forEach(amenity => {
-    amenitiesLookup.set(amenity.id, amenity);
-  });
-
-  // Group amenities by property_id
-  (propertyAmenitiesResult.data || []).forEach(pa => {
-    const amenity = amenitiesLookup.get(pa.amenity_id);
-    if (amenity) {
-      if (!amenitiesMap.has(pa.property_id)) {
-        amenitiesMap.set(pa.property_id, []);
-      }
-      amenitiesMap.get(pa.property_id)!.push(amenity);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-  });
 
-  // Map to PropertyRow format
-  const rows = propertiesData.map(p => {
-    const row = p as PropertiesTableRow;
-    row.property_images = imagesMap.get(row.id!) || null;
-    row.property_amenities = amenitiesMap.get(row.id!)?.map(a => ({ amenities: a })) || null;
-    return row;
-  });
+    const propertiesData = await response.json();
+    console.timeEnd('Properties_Query');
 
-  return rows.map((r) => toPropertyRow(r)).filter((r): r is PropertyRow => r != null);
+    if (!propertiesData || propertiesData.length === 0) {
+      console.timeEnd('Supabase_Properties_Query');
+      return [];
+    }
+
+    const propertyIds = propertiesData.map((p: any) => p.id);
+
+    // Fetch related data using direct fetch
+    console.time('Related_Data_Queries');
+    const [imagesResponse, propertyAmenitiesResponse] = await Promise.all([
+      fetch(`${supabaseUrl}/rest/v1/property_images?select=property_id,image_url,sort_order&property_id=in.(${propertyIds.join(',')})`, {
+        headers: {
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'Content-Type': 'application/json',
+          'Cache-Control': 'public, max-age=300',
+        },
+      }),
+      fetch(`${supabaseUrl}/rest/v1/property_amenities?select=property_id,amenity_id&property_id=in.(${propertyIds.join(',')})`, {
+        headers: {
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'Content-Type': 'application/json',
+          'Cache-Control': 'public, max-age=300',
+        },
+      })
+    ]);
+
+    const [imagesData, propertyAmenitiesData] = await Promise.all([
+      imagesResponse.ok ? imagesResponse.json() : [],
+      propertyAmenitiesResponse.ok ? propertyAmenitiesResponse.json() : []
+    ]);
+
+    // Get unique amenity IDs and fetch amenities
+    const amenityIds = [...new Set((propertyAmenitiesData || []).map((pa: any) => pa.amenity_id))];
+    const amenitiesData = amenityIds.length > 0
+      ? await fetch(`${supabaseUrl}/rest/v1/amenities?select=id,name,icon&id=in.(${amenityIds.join(',')})`, {
+          headers: {
+            'apikey': supabaseAnonKey,
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+            'Content-Type': 'application/json',
+            'Cache-Control': 'public, max-age=300',
+          },
+        }).then(r => r.ok ? r.json() : [])
+      : [];
+
+    console.timeEnd('Related_Data_Queries');
+    console.timeEnd('Supabase_Properties_Query');
+
+    // Combine the data (same logic as before)
+    const imagesMap = new Map<string, PropertyImageRow[]>();
+    const amenitiesMap = new Map<string, { id: string; name: string; icon: string }[]>();
+
+    // Group images by property_id
+    (imagesData || []).forEach((img: any) => {
+      if (!imagesMap.has(img.property_id)) {
+        imagesMap.set(img.property_id, []);
+      }
+      imagesMap.get(img.property_id)!.push({
+        image_url: img.image_url,
+        sort_order: img.sort_order
+      });
+    });
+
+    // Create amenities lookup map
+    const amenitiesLookup = new Map<string, { id: string; name: string; icon: string }>();
+    (amenitiesData || []).forEach((amenity: any) => {
+      amenitiesLookup.set(amenity.id, amenity);
+    });
+
+    // Group amenities by property_id
+    (propertyAmenitiesData || []).forEach((pa: any) => {
+      const amenity = amenitiesLookup.get(pa.amenity_id);
+      if (amenity) {
+        if (!amenitiesMap.has(pa.property_id)) {
+          amenitiesMap.set(pa.property_id, []);
+        }
+        amenitiesMap.get(pa.property_id)!.push(amenity);
+      }
+    });
+
+    // Map to PropertyRow format
+    const rows = propertiesData.map((p: any) => {
+      const row = p as PropertiesTableRow;
+      row.property_images = imagesMap.get(row.id!) || null;
+      row.property_amenities = amenitiesMap.get(row.id!)?.map(a => ({ amenities: a })) || null;
+      return row;
+    });
+
+    const result = rows.map((r) => toPropertyRow(r)).filter((r): r is PropertyRow => r != null);
+
+    // Cache the result
+    propertiesCache = { data: result, timestamp: Date.now() };
+
+    return result;
+
+  } catch (error) {
+    console.error("[Supabase] fetch properties error:", error);
+    console.timeEnd('Supabase_Properties_Query');
+    throw new Error(error.message || "Failed to load properties from database.");
+  }
 }
 
 export async function fetchAmenities(): Promise<{ id: string; name: string; icon: string }[]> {

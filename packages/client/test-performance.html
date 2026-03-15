@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Test</title>
+</head>
+<body>
+    <h1>Supabase Performance Test</h1>
+    <button id="testBtn">Run Performance Test</button>
+    <div id="results"></div>
+
+    <script type="module">
+        import { fetchPropertiesFromSupabase, clearPropertiesCache } from './src/lib/supabase.ts';
+
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = 'Testing...';
+
+            console.log('Starting performance test...');
+            console.time('Total_Test_Time');
+
+            try {
+                const properties = await fetchPropertiesFromSupabase();
+                console.log(`Fetched ${properties.length} properties`);
+                console.timeEnd('Total_Test_Time');
+
+                resultsDiv.innerHTML = `
+                    <h2>Test Results</h2>
+                    <p>Fetched ${properties.length} properties</p>
+                    <p>Check browser console for detailed timing</p>
+                    <button id="testCacheBtn">Test Cache (should be instant)</button>
+                    <button id="clearCacheBtn" style="margin-left: 10px;">Clear Cache</button>
+                `;
+
+                // Add cache test button
+                document.getElementById('testCacheBtn').addEventListener('click', async () => {
+                    console.log('Testing cached performance...');
+                    console.time('Cached_Test_Time');
+                    const cachedProperties = await fetchPropertiesFromSupabase();
+                    console.timeEnd('Cached_Test_Time');
+                    console.log(`Cached fetch returned ${cachedProperties.length} properties`);
+                    alert('Cache test complete - check console for timing');
+                });
+
+                // Add clear cache button
+                document.getElementById('clearCacheBtn').addEventListener('click', () => {
+                    clearPropertiesCache();
+                    alert('Cache cleared! Next fetch will be from server.');
+                });
+
+            } catch (error) {
+                console.error('Test failed:', error);
+                console.timeEnd('Total_Test_Time');
+                resultsDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
