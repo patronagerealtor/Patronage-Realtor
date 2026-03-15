@@ -7,7 +7,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Footer } from "../components/layout/Footer";
 import { Header } from "../components/layout/Header";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
@@ -98,10 +98,26 @@ function getPriceInLakhs(p: PropertyRow): number | null {
 }
 
 export default function Calculators() {
+  const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("smart-emi");
   const { properties } = useProperties();
   const [detailProperty, setDetailProperty] = useState<PropertyRow | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+
+  // Set activeTab based on URL path
+  useEffect(() => {
+    if (location === "/calculators/home-loan-emi-calculator") {
+      setActiveTab("smart-emi");
+    } else if (location === "/calculators/rent-vs-buy") {
+      setActiveTab("rent-vs-buy");
+    } else if (location === "/calculators/home-loan-eligibility") {
+      setActiveTab("eligibility");
+    } else if (location === "/calculators/ownership-cost") {
+      setActiveTab("ownership");
+    } else {
+      setActiveTab("smart-emi");
+    }
+  }, [location]);
 
   // --- 1. Loan Eligibility State ---
   const [eligIncome, setEligIncome] = useState(100000);
@@ -545,9 +561,19 @@ export default function Calculators() {
         </div>
 
         <Tabs
-          defaultValue="smart-emi"
+          value={activeTab}
           className="max-w-6xl mx-auto w-full"
-          onValueChange={setActiveTab}
+          onValueChange={(value) => {
+            if (value === "smart-emi") {
+              setLocation("/calculators/home-loan-emi-calculator");
+            } else if (value === "rent-vs-buy") {
+              setLocation("/calculators/rent-vs-buy");
+            } else if (value === "eligibility") {
+              setLocation("/calculators/home-loan-eligibility");
+            } else if (value === "ownership") {
+              setLocation("/calculators/ownership-cost");
+            }
+          }}
         >
           <div
             id="calculators-tabs"
