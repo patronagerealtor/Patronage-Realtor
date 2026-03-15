@@ -35,7 +35,7 @@ export default async function handler(req, res) {
 
     // Add caching headers for GET requests
     if (req.method === "GET") {
-      res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=3600');
+      res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=1800');
     }
 
     res.status(response.status).send(data);
