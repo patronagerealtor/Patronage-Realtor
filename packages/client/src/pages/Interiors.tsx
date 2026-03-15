@@ -1112,44 +1112,32 @@ export default function Interiors() {
   const handleCloseGallery = useCallback(() => setGalleryPopupImages(null), []);
 
   useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
-  const gallery = params.get("gallery");
+    const params = new URLSearchParams(window.location.search);
+    const gallery = params.get("gallery");
 
-  if (!gallery) return;
+    if (!gallery) return;
 
-<<<<<<< HEAD
-    // Directly open the gallery popup without click trigger
-    handleImageClick(gallery);
-    
-    // Scroll to gallery section
-    setTimeout(() => {
-      const element = document.getElementById("gallery");
-      if (element) element.scrollIntoView({ behavior: "smooth" });
-    }, 100);
-  }, [handleImageClick]);
-=======
-  let images: DesignImage[] = [];
+    let images: DesignImage[] = [];
 
-  if (gallery === "living") images = livingRoomImages;
-  else if (gallery === "bedroom") images = bedroomImages;
-  else if (gallery === "kitchen") images = kitchenImages;
-  else if (gallery === "bathroom") images = bathroomImages;
-  else if (gallery === "storage") images = storageImages;
+    if (gallery === "living") images = livingRoomImages;
+    else if (gallery === "bedroom") images = bedroomImages;
+    else if (gallery === "kitchen") images = kitchenImages;
+    else if (gallery === "bathroom") images = bathroomImages;
+    else if (gallery === "storage") images = storageImages;
 
-  if (images.length > 0) {
-    // Scroll to gallery section first, then open popup after scroll completes
-    setTimeout(() => {
-      const el = document.getElementById("gallery");
-      if (el) el.scrollIntoView({ behavior: "smooth" });
-    }, 100);
+    if (images.length > 0) {
+      // Scroll to gallery section first, then open popup after scroll completes
+      setTimeout(() => {
+        const el = document.getElementById("gallery");
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }, 100);
 
-    setTimeout(() => {
-      setGalleryPopupImages(images);
-      setGalleryCategory(gallery);
-    }, 600);
-  }
-}, []);
->>>>>>> refs/remotes/origin/main
+      setTimeout(() => {
+        setGalleryPopupImages(images);
+        setGalleryCategory(gallery);
+      }, 600);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
