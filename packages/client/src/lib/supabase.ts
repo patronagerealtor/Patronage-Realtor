@@ -280,6 +280,7 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
   console.time('Supabase_Properties_Query');
 
   // Fetch main properties data
+  console.time('Properties_Query');
   const { data: propertiesData, error: propertiesError } = await supabaseClient
     .from(PROPERTIES_TABLE)
     .select(
@@ -313,6 +314,7 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
     )
     .order("created_at", { ascending: false })
     .limit(24);
+  console.timeEnd('Properties_Query');
 
   if (propertiesError) {
     console.error("[Supabase] fetch properties error:", propertiesError);
@@ -327,6 +329,7 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
   const propertyIds = propertiesData.map(p => p.id);
 
   // Fetch related data in parallel
+  console.time('Related_Data_Queries');
   const [imagesResult, amenitiesResult] = await Promise.all([
     supabaseClient
       .from('property_images')
@@ -344,6 +347,7 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
       `)
       .in('property_id', propertyIds)
   ]);
+  console.timeEnd('Related_Data_Queries');
 
   console.timeEnd('Supabase_Properties_Query');
 
