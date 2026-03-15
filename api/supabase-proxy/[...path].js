@@ -33,6 +33,11 @@ export default async function handler(req, res) {
 
     const data = await response.text();
 
+    // Add caching headers for GET requests
+    if (req.method === "GET") {
+      res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=86400');
+    }
+
     res.status(response.status).send(data);
   } catch (error) {
     res.status(500).json({
