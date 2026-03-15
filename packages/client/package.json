@@ -7,7 +7,11 @@
     "dev": "node ../../node_modules/vite/bin/vite.js dev --port 5000",
     "build": "node ../../node_modules/vite/bin/vite.js build",
     "check": "tsc --noEmit",
-    "preview": "node ../../node_modules/vite/bin/vite.js preview"
+    "preview": "node ../../node_modules/vite/bin/vite.js preview",
+    "analyze": "ANALYZE=true npm run build",
+    "perf:audit": "npm run build && npm run preview",
+    "perf:monitor": "npm run build -- --sourcemap",
+    "perf:report": "echo 'Run: npx lighthouse https://patronagerealtor.com --chrome-flags=\"--headless\"'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
