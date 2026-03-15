@@ -1,6 +1,6 @@
 {/* Interiors.tsx */}
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { Button } from "../components/ui/button";
@@ -35,6 +35,7 @@ import {
   Check,
   X,
   Minus,
+  Share2,
 } from "lucide-react";
 
 import { env } from "../config/env";
@@ -817,72 +818,103 @@ const InteriorsGallerySection = React.memo(function InteriorsGallerySection(prop
   galleryPopupImages: DesignImage[] | null;
   onImageClick: (category: string) => void;
   onCloseGallery: () => void;
+  onShareGallery: () => void;
 }) {
-  const { galleryPopupImages, onImageClick, onCloseGallery } = props;
-  return (
-      <section id="gallery" className="relative py-20 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <Badge className="mb-4" variant="outline">
-              Portfolio
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 font-heading">
-              Existing Interior Designs
-            </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Explore our stunning collection — click a type above or an image below
-            </p>
-          </div>
+  const { galleryPopupImages, onImageClick, onCloseGallery, onShareGallery } = props;
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {designImages.map((image) => (
-              <div
-                key={image.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => onImageClick(image.category)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    onImageClick(image.category);
-                  }
-                }}
-                className="group relative overflow-hidden rounded-xl aspect-[4/3] cursor-pointer border border-border hover:border-primary/50 transition-colors"
-              >
-                <SupabaseImage
-                  src={image.image}
-                  alt={image.title}
-                  transformWidth={600}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <Badge className="mb-2">{galleryBadgeLabel(image.category)}</Badge>
-                    <h3 className="text-white text-xl font-bold">{image.title}</h3>
-                  </div>
+  return (
+    <section id="gallery" className="relative py-20 bg-muted/30">
+      <div className="container mx-auto px-4">
+
+        <div className="text-center mb-16">
+          <Badge className="mb-4" variant="outline">
+            Portfolio
+          </Badge>
+
+          <h2 className="text-4xl md:text-5xl font-bold mb-4 font-heading">
+            Existing Interior Designs
+          </h2>
+
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Explore our stunning collection — click a type above or an image below
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {designImages.map((image) => (
+            <div
+              key={image.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => onImageClick(image.category)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onImageClick(image.category);
+                }
+              }}
+              className="group relative overflow-hidden rounded-xl aspect-[4/3] cursor-pointer border border-border hover:border-primary/50 transition-colors"
+            >
+              <SupabaseImage
+                src={image.image}
+                alt={image.title}
+                transformWidth={600}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+
+                <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+
+                  <Badge className="mb-2">
+                    {galleryBadgeLabel(image.category)}
+                  </Badge>
+
+                  <h3 className="text-white text-xl font-bold">
+                    {image.title}
+                  </h3>
+
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+        </div>
 
-          {/* White full-screen popup after scroll */}
-          {galleryPopupImages !== null && (
-            <>
-              <div
-                className="fixed inset-0 z-40 bg-black/30"
-                aria-hidden
-                onClick={onCloseGallery}
-              />
-              <div
-                className="fixed inset-4 z-50 rounded-2xl bg-white shadow-2xl flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-300 md:inset-8"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="gallery-popup-title"
-              >
-                <div className="flex items-center justify-between gap-4 p-6 border-b border-gray-200 flex-shrink-0">
-                  <h3 id="gallery-popup-title" className="text-xl font-semibold text-gray-900">
-                    Gallery
-                  </h3>
+        {/* Gallery Popup */}
+        {galleryPopupImages !== null && (
+          <>
+            <div
+              className="fixed inset-0 z-40 bg-black/30"
+              aria-hidden
+              onClick={onCloseGallery}
+            />
+
+            <div
+              className="fixed inset-4 z-50 rounded-2xl bg-white shadow-2xl flex flex-col animate-in fade-in-0 slide-in-from-bottom-4 duration-300 md:inset-8"
+              role="dialog"
+              aria-modal="true"
+            >
+
+              {/* HEADER */}
+              <div className="flex items-center justify-between gap-4 p-6 border-b border-gray-200 flex-shrink-0">
+
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Sparkles className="h-4 w-4 text-black" />
+                  <span>
+                    Love this design? Share it with someone planning their dream home
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+
+                  <Button
+                    onClick={onShareGallery}
+                    className="bg-black text-white hover:bg-gray-800 flex items-center gap-2 px-4"
+                  >
+                    <Share2 className="h-4 w-4" />
+                    <span>Share</span>
+                  </Button>
+
                   <Button
                     variant="ghost"
                     size="icon"
@@ -892,33 +924,49 @@ const InteriorsGallerySection = React.memo(function InteriorsGallerySection(prop
                   >
                     <X className="h-5 w-5" />
                   </Button>
+
                 </div>
-                <div className="flex-1 overflow-y-auto p-6 min-h-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {galleryPopupImages.map((img) => (
-                      <div
+              </div>
+
+              {/* IMAGES */}
+              <div className="flex-1 overflow-y-auto p-6 min-h-0">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                  {galleryPopupImages.map((img) => (
+
+                    <div
                       key={img.id}
-                        className="overflow-hidden rounded-lg border border-gray-200 aspect-[4/3] bg-gray-100"
+                      className="overflow-hidden rounded-lg border border-gray-200 aspect-[4/3] bg-gray-100"
                     >
+
                       <SupabaseImage
                         src={img.image}
                         alt={img.title}
                         transformWidth={500}
                         className="w-full h-full object-cover"
                       />
-                        <p className="p-2 text-sm font-medium text-gray-900 truncate">{img.title}</p>
-                      </div>
+
+                      <p className="p-2 text-sm font-medium text-gray-900 truncate">
+                        {img.title}
+                      </p>
+
+                    </div>
+
                   ))}
-                  </div>
+
                 </div>
+
               </div>
-            </>
-          )}
-        </div>
-      </section>
+
+            </div>
+          </>
+        )}
+
+      </div>
+    </section>
   );
 });
-
 const InteriorsWhySection = React.memo(function InteriorsWhySection() {
   return (
       <section id="why-us" className="py-20">
@@ -988,6 +1036,7 @@ export default function Interiors() {
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [selectedBhk, setSelectedBhk] = useState<Bhk>(1);
   const [galleryPopupImages, setGalleryPopupImages] = useState<DesignImage[] | null>(null);
+  const [galleryCategory, setGalleryCategory] = useState<string | null>(null);
 
   const scrollToSection = useCallback((sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -1011,6 +1060,7 @@ export default function Interiors() {
         : designImages.filter((img) => img.category === categoryId);
     const toShow = images.length > 0 ? images : designImages;
     setTimeout(() => setGalleryPopupImages(toShow), 450);
+    setGalleryCategory(categoryId);
   }, []);
 
   const handleImageClick = useCallback((category: string) => {
@@ -1027,7 +1077,25 @@ export default function Interiors() {
                 ? storageImages
         : designImages.filter((img) => img.category === category);
     setGalleryPopupImages(images.length > 0 ? images : designImages);
+    setGalleryCategory(category);
   }, []);
+
+  const handleShareGallery = useCallback(() => {
+    if (!galleryCategory) return;
+
+    const url = `${window.location.origin}/interiors?gallery=${galleryCategory}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: "Interior Design Inspiration",
+        text: "Check out these interior designs!",
+        url: url,
+      });
+    } else {
+      navigator.clipboard.writeText(url);
+      alert("Gallery link copied to clipboard!");
+    }
+  }, [galleryCategory]);
 
   const handleClosePackageDialog = useCallback(() => {
     setSelectedPackage(null);
@@ -1035,6 +1103,15 @@ export default function Interiors() {
   }, []);
 
   const handleCloseGallery = useCallback(() => setGalleryPopupImages(null), []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const gallery = params.get("gallery");
+
+    if (!gallery) return;
+
+    handleImageClick(gallery);
+  }, [handleImageClick]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -1058,6 +1135,7 @@ export default function Interiors() {
         galleryPopupImages={galleryPopupImages}
         onImageClick={handleImageClick}
         onCloseGallery={handleCloseGallery}
+        onShareGallery={handleShareGallery}
       />
 
       <InteriorsWhySection />
