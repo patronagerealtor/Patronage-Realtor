@@ -74,7 +74,7 @@ export function Footer() {
               </a>
               <span> </span>
               <a
-                href="/interiors"
+                href="/design-studio"
                 className="hover:text-foreground transition-colors font-medium"
               >
                 Style it !
@@ -113,7 +113,7 @@ export function Footer() {
  
               <li>
                 <a
-                  href="/interiors"
+                  href="/design-studio"
                   className="hover:text-foreground transition-colors"
                 >
                   Design Studio

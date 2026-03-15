@@ -131,7 +131,7 @@ export function Header() {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <Link href="/interiors" className={navLinkClass} onClick={scrollToTop}>
+                <Link href="/design-studio" className={navLinkClass} onClick={scrollToTop}>
                   Design Studio
                 </Link>
               </NavigationMenuItem>
@@ -265,7 +265,7 @@ export function Header() {
                   Calculators
                 </Link>
                 <Link
-                  href="/interiors"
+                  href="/design-studio"
                   onClick={() => { scrollToTop(); setIsOpen(false); }}
                   className="text-lg font-medium"
                 >

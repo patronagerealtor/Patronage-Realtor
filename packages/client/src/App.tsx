@@ -69,7 +69,10 @@ function Router() {
       <Route path="/blogs/:id" component={Blogs} />
       <Route path="/blogs" component={Blogs} />
 
-      <Route path="/interiors" component={Interiors} />
+      <Route path="/interiors">
+        {() => <Redirect to="/design-studio" />}
+      </Route>
+      <Route path="/design-studio" component={Interiors} />
       <Route path="/about-us" component={AboutUs} />
       <Route path="/calculators" component={Calculators} />
       <Route path="/calculators/home-loan-emi-calculator" component={Calculators} />
