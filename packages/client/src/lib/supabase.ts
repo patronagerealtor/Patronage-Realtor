@@ -313,7 +313,7 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
     `
     )
     .order("created_at", { ascending: false })
-    .limit(24);
+    .limit(12);
   console.timeEnd('Properties_Query');
 
   if (propertiesError) {
@@ -328,31 +328,35 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
 
   const propertyIds = propertiesData.map(p => p.id);
 
-  // Fetch related data in parallel
+  // Fetch related data in parallel - simplified queries without nested selects
   console.time('Related_Data_Queries');
-  const [imagesResult, amenitiesResult] = await Promise.all([
+  const [imagesResult, propertyAmenitiesResult] = await Promise.all([
     supabaseClient
       .from('property_images')
       .select('property_id, image_url, sort_order')
       .in('property_id', propertyIds),
     supabaseClient
       .from('property_amenities')
-      .select(`
-        property_id,
-        amenities (
-          id,
-          name,
-          icon
-        )
-      `)
+      .select('property_id, amenity_id')
       .in('property_id', propertyIds)
   ]);
+
+  // Get unique amenity IDs and fetch amenities details
+  const amenityIds = [...new Set((propertyAmenitiesResult.data || []).map(pa => pa.amenity_id))];
+  const amenitiesResult = amenityIds.length > 0 ? await supabaseClient
+    .from('amenities')
+    .select('id, name, icon')
+    .in('id', amenityIds) : { data: [], error: null };
+
   console.timeEnd('Related_Data_Queries');
 
   console.timeEnd('Supabase_Properties_Query');
 
   if (imagesResult.error) {
     console.error("[Supabase] fetch images error:", imagesResult.error);
+  }
+  if (propertyAmenitiesResult.error) {
+    console.error("[Supabase] fetch property amenities error:", propertyAmenitiesResult.error);
   }
   if (amenitiesResult.error) {
     console.error("[Supabase] fetch amenities error:", amenitiesResult.error);
@@ -373,17 +377,20 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
     });
   });
 
+  // Create amenities lookup map
+  const amenitiesLookup = new Map<string, { id: string; name: string; icon: string }>();
+  (amenitiesResult.data || []).forEach(amenity => {
+    amenitiesLookup.set(amenity.id, amenity);
+  });
+
   // Group amenities by property_id
-  (amenitiesResult.data || []).forEach(pa => {
-    if (pa.amenities) {
+  (propertyAmenitiesResult.data || []).forEach(pa => {
+    const amenity = amenitiesLookup.get(pa.amenity_id);
+    if (amenity) {
       if (!amenitiesMap.has(pa.property_id)) {
         amenitiesMap.set(pa.property_id, []);
       }
-      amenitiesMap.get(pa.property_id)!.push({
-        id: pa.amenities.id,
-        name: pa.amenities.name,
-        icon: pa.amenities.icon
-      });
+      amenitiesMap.get(pa.property_id)!.push(amenity);
     }
   });
 
