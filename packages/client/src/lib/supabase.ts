@@ -278,7 +278,9 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
     );
   }
   console.time('Supabase_Properties_Query');
-  const { data, error } = await supabaseClient
+
+  // Fetch main properties data
+  const { data: propertiesData, error: propertiesError } = await supabaseClient
     .from(PROPERTIES_TABLE)
     .select(
       `
@@ -306,28 +308,89 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
       slug,
       description,
       rera_applicable,
-      rera_number,
-      property_images (
-        image_url,
-        sort_order
-      ),
-      property_amenities (
+      rera_number
+    `
+    )
+    .order("created_at", { ascending: false })
+    .limit(24);
+
+  if (propertiesError) {
+    console.error("[Supabase] fetch properties error:", propertiesError);
+    throw new Error(propertiesError.message || "Failed to load properties from database.");
+  }
+
+  if (!propertiesData || propertiesData.length === 0) {
+    console.timeEnd('Supabase_Properties_Query');
+    return [];
+  }
+
+  const propertyIds = propertiesData.map(p => p.id);
+
+  // Fetch related data in parallel
+  const [imagesResult, amenitiesResult] = await Promise.all([
+    supabaseClient
+      .from('property_images')
+      .select('property_id, image_url, sort_order')
+      .in('property_id', propertyIds),
+    supabaseClient
+      .from('property_amenities')
+      .select(`
+        property_id,
         amenities (
           id,
           name,
           icon
         )
-      )
-    `
-    )
-    .order("created_at", { ascending: false })
-    .limit(24);
+      `)
+      .in('property_id', propertyIds)
+  ]);
+
   console.timeEnd('Supabase_Properties_Query');
-  if (error) {
-    console.error("[Supabase] fetch properties error:", error);
-    throw new Error(error.message || "Failed to load properties from database.");
+
+  if (imagesResult.error) {
+    console.error("[Supabase] fetch images error:", imagesResult.error);
   }
-  const rows = (data ?? []) as PropertiesTableRow[];
+  if (amenitiesResult.error) {
+    console.error("[Supabase] fetch amenities error:", amenitiesResult.error);
+  }
+
+  // Combine the data
+  const imagesMap = new Map<string, PropertyImageRow[]>();
+  const amenitiesMap = new Map<string, { id: string; name: string; icon: string }[]>();
+
+  // Group images by property_id
+  (imagesResult.data || []).forEach(img => {
+    if (!imagesMap.has(img.property_id)) {
+      imagesMap.set(img.property_id, []);
+    }
+    imagesMap.get(img.property_id)!.push({
+      image_url: img.image_url,
+      sort_order: img.sort_order
+    });
+  });
+
+  // Group amenities by property_id
+  (amenitiesResult.data || []).forEach(pa => {
+    if (pa.amenities) {
+      if (!amenitiesMap.has(pa.property_id)) {
+        amenitiesMap.set(pa.property_id, []);
+      }
+      amenitiesMap.get(pa.property_id)!.push({
+        id: pa.amenities.id,
+        name: pa.amenities.name,
+        icon: pa.amenities.icon
+      });
+    }
+  });
+
+  // Map to PropertyRow format
+  const rows = propertiesData.map(p => {
+    const row = p as PropertiesTableRow;
+    row.property_images = imagesMap.get(row.id!) || null;
+    row.property_amenities = amenitiesMap.get(row.id!)?.map(a => ({ amenities: a })) || null;
+    return row;
+  });
+
   return rows.map((r) => toPropertyRow(r)).filter((r): r is PropertyRow => r != null);
 }
 
