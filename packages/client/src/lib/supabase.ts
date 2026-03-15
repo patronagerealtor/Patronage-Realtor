@@ -271,150 +271,48 @@ function toPropertyRow(row: PropertiesTableRow | null): PropertyRow | null {
   };
 }
 
-// Cache for properties data
-let propertiesCache: { data: PropertyRow[]; timestamp: number } | null = null;
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
-
 export function clearPropertiesCache() {
-  propertiesCache = null;
-  console.log('Properties cache cleared');
+  // Empty implementation: Caching is now natively handled by React Query in use-properties.ts
+  // This prevents build errors if imported elsewhere.
 }
 
 export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
-  // Check cache first
-  if (propertiesCache && (Date.now() - propertiesCache.timestamp) < CACHE_DURATION) {
-    console.log('Returning cached properties data');
-    return propertiesCache.data;
-  }
-
   if (!supabaseClient) {
     throw new Error(
       "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env to load properties."
     );
   }
+
   console.time('Supabase_Properties_Query');
 
-  try {
-    // Use direct fetch to bypass Supabase client overhead
-    console.time('Properties_Query');
-    const mainQueryUrl = `${supabaseUrl}/rest/v1/${PROPERTIES_TABLE}?select=id,title,location,price_value,price_min,price_max,beds,baths,sqft,construction_status,created_at,city,slug,description&order=created_at.desc`;
-    const response = await fetch(mainQueryUrl, {
-      headers: {
-        'apikey': supabaseAnonKey,
-        'Authorization': `Bearer ${supabaseAnonKey}`,
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=300', // 5 minute browser cache
-      },
-    });
+  const { data, error } = await supabaseClient
+    .from(PROPERTIES_TABLE)
+    .select(
+      `
+      id, title, location, address, developer, property_type, beds, baths, sqft, construction_status, created_at, city, possession_date, bhk_type, possession_by, latitude, longitude, google_map_link, price_value, price_min, price_max, slug, description, rera_applicable, rera_number,
+      property_images (
+        image_url,
+        sort_order
+      ),
+      property_amenities (
+        amenities (
+          id,
+          name,
+          icon
+        )
+      )
+    `
+    )
+    .order("created_at", { ascending: false });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
+  console.timeEnd('Supabase_Properties_Query');
 
-    const propertiesData = await response.json();
-    console.timeEnd('Properties_Query');
-
-    if (!propertiesData || propertiesData.length === 0) {
-      console.timeEnd('Supabase_Properties_Query');
-      return [];
-    }
-
-    const propertyIds = propertiesData.map((p: any) => p.id);
-
-    // Fetch related data using direct fetch
-    console.time('Related_Data_Queries');
-    const [imagesResponse, propertyAmenitiesResponse] = await Promise.all([
-      fetch(`${supabaseUrl}/rest/v1/property_images?select=property_id,image_url,sort_order&property_id=in.(${propertyIds.join(',')})`, {
-        headers: {
-          'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`,
-          'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=300',
-        },
-      }),
-      fetch(`${supabaseUrl}/rest/v1/property_amenities?select=property_id,amenity_id&property_id=in.(${propertyIds.join(',')})`, {
-        headers: {
-          'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`,
-          'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=300',
-        },
-      })
-    ]);
-
-    const [imagesData, propertyAmenitiesData] = await Promise.all([
-      imagesResponse.ok ? imagesResponse.json() : [],
-      propertyAmenitiesResponse.ok ? propertyAmenitiesResponse.json() : []
-    ]);
-
-    // Get unique amenity IDs and fetch amenities
-    const amenityIds = [...new Set((propertyAmenitiesData || []).map((pa: any) => pa.amenity_id))];
-    const amenitiesData = amenityIds.length > 0
-      ? await fetch(`${supabaseUrl}/rest/v1/amenities?select=id,name,icon&id=in.(${amenityIds.join(',')})`, {
-          headers: {
-            'apikey': supabaseAnonKey,
-            'Authorization': `Bearer ${supabaseAnonKey}`,
-            'Content-Type': 'application/json',
-            'Cache-Control': 'public, max-age=300',
-          },
-        }).then(r => r.ok ? r.json() : [])
-      : [];
-
-    console.timeEnd('Related_Data_Queries');
-    console.timeEnd('Supabase_Properties_Query');
-
-    // Combine the data (same logic as before)
-    const imagesMap = new Map<string, PropertyImageRow[]>();
-    const amenitiesMap = new Map<string, { id: string; name: string; icon: string }[]>();
-
-    // Group images by property_id
-    (imagesData || []).forEach((img: any) => {
-      if (!imagesMap.has(img.property_id)) {
-        imagesMap.set(img.property_id, []);
-      }
-      imagesMap.get(img.property_id)!.push({
-        image_url: img.image_url,
-        sort_order: img.sort_order
-      });
-    });
-
-    // Create amenities lookup map
-    const amenitiesLookup = new Map<string, { id: string; name: string; icon: string }>();
-    (amenitiesData || []).forEach((amenity: any) => {
-      amenitiesLookup.set(amenity.id, amenity);
-    });
-
-    // Group amenities by property_id
-    (propertyAmenitiesData || []).forEach((pa: any) => {
-      const amenity = amenitiesLookup.get(pa.amenity_id);
-      if (amenity) {
-        if (!amenitiesMap.has(pa.property_id)) {
-          amenitiesMap.set(pa.property_id, []);
-        }
-        amenitiesMap.get(pa.property_id)!.push(amenity);
-      }
-    });
-
-    // Map to PropertyRow format
-    const rows = propertiesData.map((p: any) => {
-      const row = p as PropertiesTableRow;
-      row.property_images = imagesMap.get(row.id!) || null;
-      row.property_amenities = amenitiesMap.get(row.id!)?.map(a => ({ amenities: a })) || null;
-      return row;
-    });
-
-    const result = rows.map((r) => toPropertyRow(r)).filter((r): r is PropertyRow => r != null);
-
-    // Cache the result
-    propertiesCache = { data: result, timestamp: Date.now() };
-
-    return result;
-
-  } catch (error) {
+  if (error) {
     console.error("[Supabase] fetch properties error:", error);
-    console.timeEnd('Supabase_Properties_Query');
     throw new Error(error.message || "Failed to load properties from database.");
   }
+  const rows = (data ?? []) as unknown as PropertiesTableRow[];
+  return rows.map((r) => toPropertyRow(r)).filter((r): r is PropertyRow => r != null);
 }
 
 export async function fetchAmenities(): Promise<{ id: string; name: string; icon: string }[]> {
