@@ -1105,13 +1105,32 @@ export default function Interiors() {
   const handleCloseGallery = useCallback(() => setGalleryPopupImages(null), []);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const gallery = params.get("gallery");
+  const params = new URLSearchParams(window.location.search);
+  const gallery = params.get("gallery");
 
-    if (!gallery) return;
+  if (!gallery) return;
 
-    handleImageClick(gallery);
-  }, [handleImageClick]);
+  let images: DesignImage[] = [];
+
+  if (gallery === "living") images = livingRoomImages;
+  else if (gallery === "bedroom") images = bedroomImages;
+  else if (gallery === "kitchen") images = kitchenImages;
+  else if (gallery === "bathroom") images = bathroomImages;
+  else if (gallery === "storage") images = storageImages;
+
+  if (images.length > 0) {
+    // Scroll to gallery section first, then open popup after scroll completes
+    setTimeout(() => {
+      const el = document.getElementById("gallery");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+
+    setTimeout(() => {
+      setGalleryPopupImages(images);
+      setGalleryCategory(gallery);
+    }, 600);
+  }
+}, []);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
