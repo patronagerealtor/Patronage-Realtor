@@ -13,15 +13,15 @@ export function setupWebVitalsMonitoring() {
       // Monitor LCP (Largest Contentful Paint)
       const lcpObserver = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1];
-        console.debug("[PERF] LCP:", lastEntry.renderTime || lastEntry.loadTime);
+        const lastEntry = entries[entries.length - 1] as any;
+        console.debug("[PERF] LCP:", (lastEntry.renderTime || lastEntry.loadTime) as number);
       });
       lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
 
       // Monitor FID/INP (Input Delay)
       const fidObserver = new PerformanceObserver((list) => {
         for (const entry of list.getEntries()) {
-          console.debug("[PERF] FID/INP:", entry.processingDuration);
+          console.debug("[PERF] FID/INP:", (entry as any).processingDuration);
         }
       });
       fidObserver.observe({ entryTypes: ["first-input", "event"] });
@@ -150,9 +150,9 @@ export function scheduleTask(task: () => void, priority: "high" | "normal" | "lo
   const isHighPriority = priority === "high";
   const timeout = priority === "low" ? 5000 : priority === "normal" ? 2000 : 0;
 
-  if ("scheduler" in window && "yield" in window.scheduler) {
+  if ("scheduler" in window && "yield" in (window as any).scheduler) {
     // PERF: Use Scheduler API if available for better TBT control
-    (window.scheduler as any).yield().then(task);
+    ((window as any).scheduler as any).yield().then(task);
   } else if (isHighPriority) {
     microtask(() => task());
   } else if ("requestIdleCallback" in window) {

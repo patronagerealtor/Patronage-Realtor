@@ -16,8 +16,8 @@ export function useDeferredState<T>(initialState: T): [T, (value: T) => void] {
   );
 
   const deferredSetState = useCallback((value: T) => {
-    if ("scheduler" in window && "yield" in window.scheduler) {
-      (window.scheduler as any).yield().then(() => setState(value));
+    if ("scheduler" in window && "yield" in (window as any).scheduler) {
+      ((window as any).scheduler as any).yield().then(() => setState(value));
     } else if ("requestIdleCallback" in window) {
       requestIdleCallback(() => setState(value), { timeout: 1000 });
     } else {
@@ -201,10 +201,10 @@ export function useMemoComputation<T>(
  * Useful for virtualization and lazy loading
  */
 export function useIsInViewport<T extends Element>(): [
-  React.RefObject<T>,
+  React.RefObject<T | null>,
   boolean
 ] {
-  const elementRef = useRef<T>(null);
+  const elementRef = useRef<T | null>(null);
   const [isVisible, setIsVisible] = useDeferredState(false);
 
   useEffect(() => {
@@ -225,7 +225,7 @@ export function useIsInViewport<T extends Element>(): [
     };
   }, [setIsVisible]);
 
-  return [elementRef, isVisible];
+  return [elementRef as React.RefObject<T | null>, isVisible];
 }
 
 /**

@@ -77,7 +77,7 @@ const OFFLINE_FALLBACK = `
 `;
 
 // PERF: Install event - cache critical assets immediately
-self.addEventListener("install", (event: ExtendableEvent) => {
+self.addEventListener("install", (event) => {
   console.log("[SW] Installing service worker...");
   
   event.waitUntil(
@@ -94,7 +94,7 @@ self.addEventListener("install", (event: ExtendableEvent) => {
 });
 
 // PERF: Activate event - cleanup old caches
-self.addEventListener("activate", (event: ExtendableEvent) => {
+self.addEventListener("activate", (event) => {
   console.log("[SW] Activating service worker...");
   
   event.waitUntil(
@@ -115,7 +115,7 @@ self.addEventListener("activate", (event: ExtendableEvent) => {
 });
 
 // PERF: Fetch event - implement caching strategies
-self.addEventListener("fetch", (event: FetchEvent) => {
+self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
@@ -224,12 +224,12 @@ self.addEventListener("fetch", (event: FetchEvent) => {
 });
 
 // PERF: Helper function to determine if a path is a static asset
-function isStaticAsset(pathname: string): boolean {
+function isStaticAsset(pathname) {
   return /\.(js|css|woff2?|png|jpg|jpeg|gif|svg|ico)$/i.test(pathname);
 }
 
 // PERF: Helper function to fetch and cache in background
-function fetchAndCache(request: Request): Promise<Response | undefined> {
+function fetchAndCache(request) {
   return fetch(request).then((response) => {
     if (response.status === 200) {
       const responseClone = response.clone();
@@ -242,7 +242,7 @@ function fetchAndCache(request: Request): Promise<Response | undefined> {
 }
 
 // PERF: Message handler for client communication
-self.addEventListener("message", (event: ExtendableMessageEvent) => {
+self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
