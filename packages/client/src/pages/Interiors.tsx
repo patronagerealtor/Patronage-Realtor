@@ -1081,21 +1081,28 @@ export default function Interiors() {
   }, []);
 
   const handleShareGallery = useCallback(() => {
-    if (!galleryCategory) return;
+    // Get the current category from state or infer from the popup
+    const categoryToShare = galleryCategory || (galleryPopupImages?.[0]?.category);
+    
+    if (!categoryToShare) return;
 
-    const url = `${window.location.origin}/interiors?gallery=${galleryCategory}`;
+    const url = `${window.location.origin}/interiors?gallery=${encodeURIComponent(categoryToShare)}`;
 
     if (navigator.share) {
       navigator.share({
         title: "Interior Design Inspiration",
         text: "Check out these interior designs!",
         url: url,
+      }).catch(() => {
+        // Fallback if share fails
+        navigator.clipboard.writeText(url);
+        alert("Gallery link copied to clipboard!");
       });
     } else {
       navigator.clipboard.writeText(url);
       alert("Gallery link copied to clipboard!");
     }
-  }, [galleryCategory]);
+  }, [galleryCategory, galleryPopupImages]);
 
   const handleClosePackageDialog = useCallback(() => {
     setSelectedPackage(null);
@@ -1110,7 +1117,14 @@ export default function Interiors() {
 
     if (!gallery) return;
 
+    // Directly open the gallery popup without click trigger
     handleImageClick(gallery);
+    
+    // Scroll to gallery section
+    setTimeout(() => {
+      const element = document.getElementById("gallery");
+      if (element) element.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   }, [handleImageClick]);
 
   return (
