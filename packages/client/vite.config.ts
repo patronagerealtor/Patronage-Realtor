@@ -64,55 +64,29 @@ export default defineConfig({
         : path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: true,
     chunkSizeWarningLimit: 1024,
-    // PERF: Enable minification with Terser for smaller bundles
+    // Standard minification with sensible defaults
     minify: "terser",
     terserOptions: {
       compress: {
-        drop_console: process.env.NODE_ENV === "production",
-        pure_funcs: ["console.log", "console.info"],
+        drop_console: false, // Keep console for debugging
       },
       format: {
         comments: false,
       },
     },
-    // PERF: Optimize rollup bundle splitting for better long-term caching
+    // Conservative rollup configuration for reliability
     rollupOptions: {
       output: {
-        // PERF: Manual chunk strategy - vendor libs separated from app code
         manualChunks: {
           "vendor-react": ["react", "react-dom"],
           "vendor-query": ["@tanstack/react-query"],
-          "vendor-motion": ["framer-motion"],
-          "vendor-supabase": ["@supabase/supabase-js"],
-        },
-        // PERF: Consistent chunk naming for cache busting
-        chunkFileNames: (chunkInfo) => {
-          if (chunkInfo.name === "index") {
-            return "chunks/main-[hash].js";
-          }
-          return "chunks/[name]-[hash].js";
-        },
-        // PERF: Hash all assets for long-term caching
-        entryFileNames: "js/[name]-[hash].js",
-        assetFileNames: (assetInfo) => {
-          const info = assetInfo.name.split(".");
-          const ext = info[info.length - 1];
-          if (/png|jpe?g|gif|svg/.test(ext)) {
-            return "images/[name]-[hash][extname]";
-          } else if (ext === "css") {
-            return "css/[name]-[hash][extname]";
-          } else if (ext === "woff" || ext === "woff2") {
-            return "fonts/[name]-[hash][extname]";
-          }
-          return "assets/[name]-[hash][extname]";
         },
       },
     },
-    // PERF: Only generate source maps in dev
-    sourcemap: process.env.NODE_ENV !== "production",
-    // PERF: Split CSS into separate chunks for better caching
+    // Source maps disabled for production
+    sourcemap: false,
+    // Standard CSS splitting
     cssCodeSplit: true,
-    cssMinify: "lightningcss",
   },
   server: {
     host: "0.0.0.0",
