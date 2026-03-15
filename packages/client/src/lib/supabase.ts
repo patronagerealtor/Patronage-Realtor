@@ -277,11 +277,36 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
       "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env to load properties."
     );
   }
+  console.time('Supabase_Properties_Query');
   const { data, error } = await supabaseClient
     .from(PROPERTIES_TABLE)
     .select(
       `
-      *,
+      id,
+      title,
+      location,
+      address,
+      developer,
+      property_type,
+      beds,
+      baths,
+      sqft,
+      construction_status,
+      created_at,
+      city,
+      possession_date,
+      bhk_type,
+      possession_by,
+      latitude,
+      longitude,
+      google_map_link,
+      price_value,
+      price_min,
+      price_max,
+      slug,
+      description,
+      rera_applicable,
+      rera_number,
       property_images (
         image_url,
         sort_order
@@ -295,7 +320,9 @@ export async function fetchPropertiesFromSupabase(): Promise<PropertyRow[]> {
       )
     `
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(24);
+  console.timeEnd('Supabase_Properties_Query');
   if (error) {
     console.error("[Supabase] fetch properties error:", error);
     throw new Error(error.message || "Failed to load properties from database.");

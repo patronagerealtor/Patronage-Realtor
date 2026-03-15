@@ -499,8 +499,9 @@ export default function Calculators() {
   const totalBudgetLakhs = totalBudgetRupees / 1e5;
   const relatedProperties = useMemo(() => {
     if (totalBudgetRupees <= 0) return [];
-    const minL = Math.max(0, totalBudgetLakhs - 5);
-    const maxL = totalBudgetLakhs + 5;
+    const marginLakhs = RELATED_PROPERTY_MARGIN_RUPEE / 1e5; // 5 lakhs
+    const minL = Math.max(0, totalBudgetLakhs - marginLakhs);
+    const maxL = totalBudgetLakhs + marginLakhs;
     return properties.filter((p): p is PropertyRow => {
       const valueInLakhs = getPriceInLakhs(p);
       if (valueInLakhs == null || Number.isNaN(valueInLakhs)) return false;
