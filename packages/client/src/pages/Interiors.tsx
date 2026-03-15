@@ -1,6 +1,6 @@
 {/* Interiors.tsx */}
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { Header } from "../components/layout/Header";
 import { Footer } from "../components/layout/Footer";
 import { Button } from "../components/ui/button";
@@ -1037,6 +1037,7 @@ export default function Interiors() {
   const [selectedBhk, setSelectedBhk] = useState<Bhk>(1);
   const [galleryPopupImages, setGalleryPopupImages] = useState<DesignImage[] | null>(null);
   const [galleryCategory, setGalleryCategory] = useState<string | null>(null);
+  const processedGalleryRef = useRef<boolean>(false);
 
   const scrollToSection = useCallback((sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -1086,7 +1087,7 @@ export default function Interiors() {
     
     if (!categoryToShare) return;
 
-    const url = `${window.location.origin}/interiors?gallery=${encodeURIComponent(categoryToShare)}`;
+    const url = `${window.location.origin}/design-studio?gallery=${encodeURIComponent(categoryToShare)}`;
 
     if (navigator.share) {
       navigator.share({
@@ -1112,10 +1113,18 @@ export default function Interiors() {
   const handleCloseGallery = useCallback(() => setGalleryPopupImages(null), []);
 
   useEffect(() => {
+    // Only process gallery param once
+    if (processedGalleryRef.current) return;
+    
     const params = new URLSearchParams(window.location.search);
     const gallery = params.get("gallery");
 
-    if (!gallery) return;
+    console.log("[DEBUG] useEffect running, gallery param:", gallery);
+
+    if (!gallery) {
+      processedGalleryRef.current = true;
+      return;
+    }
 
     let images: DesignImage[] = [];
 
@@ -1125,17 +1134,26 @@ export default function Interiors() {
     else if (gallery === "bathroom") images = bathroomImages;
     else if (gallery === "storage") images = storageImages;
 
+    console.log("[DEBUG] Found images:", images.length, "for gallery:", gallery);
+
     if (images.length > 0) {
-      // Scroll to gallery section first, then open popup after scroll completes
+      console.log("[DEBUG] Setting gallery popup images");
+      processedGalleryRef.current = true;
+      
+      // Set popup immediately
+      setGalleryPopupImages(images);
+      setGalleryCategory(gallery);
+
+      // Scroll to gallery section
       setTimeout(() => {
         const el = document.getElementById("gallery");
-        if (el) el.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-
-      setTimeout(() => {
-        setGalleryPopupImages(images);
-        setGalleryCategory(gallery);
-      }, 600);
+        console.log("[DEBUG] Scrolling to gallery element:", el ? "found" : "not found");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 300);
+    } else {
+      processedGalleryRef.current = true;
     }
   }, []);
 
