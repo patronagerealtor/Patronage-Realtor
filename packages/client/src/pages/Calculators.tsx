@@ -35,6 +35,7 @@ import { formatIndianPrice, getDisplayPrice } from "../lib/formatIndianPrice";
 import { PlaceholderImage } from "../components/shared/PlaceholderImage";
 import { SupabaseImage } from "../components/shared/SupabaseImage";
 import { PropertyDetailDialog } from "../components/property-detail/PropertyDetailDialog";
+import analytics from "../lib/analytics";
 import {
   Accordion,
   AccordionContent,
@@ -666,6 +667,11 @@ export default function Calculators() {
                           type="button"
                           className="underline"
                           onClick={() => {
+                            analytics.trackEvent('calculator_input', {
+                            type: 'loan_amount',
+                            method: 'manual_edit',
+                            calculator_type: 'smart_emi'
+                          });
                             setSmartLoanManuallyEdited(false);
                             setSmartLoanAmount(Math.max(0, smartPropertyPrice - smartDownPayment));
                           }}

@@ -17,6 +17,7 @@ import { ContactCard } from "./sections/ContactCard";
 import { FloorPlanRequestDialog } from "./sections/FloorPlanRequestDialog";
 import { Button } from "../ui/button";
 import { useToast } from "../../hooks/use-toast";
+import analytics from "../../lib/analytics";
 
 
 const EMPTY_SIMILAR_PROPERTIES: PropertyRow[] = [];
@@ -109,7 +110,17 @@ export function PropertyDetailDialog({
   }));
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !property) return;
+    
+    // Track property view
+    analytics.trackEvent('property_view', {
+      property_id: property.id,
+      property_type: property.property_type,
+      property_title: property.title,
+      price: property.price,
+      location: property.location
+    });
+    
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = "";

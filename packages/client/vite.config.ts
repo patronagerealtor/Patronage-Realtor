@@ -39,7 +39,11 @@ export default defineConfig({
   // Load .env from repo root so VITE_SUPABASE_* are available
   envDir: path.resolve(import.meta.dirname, "../../"),
   plugins: [
-    react(),
+    react({
+      babel: {
+        plugins: ['styled-jsx/babel']
+      }
+    }),
     tailwindcss(),
     metaImagesPlugin(),
     indexNowKeyFilePlugin(),

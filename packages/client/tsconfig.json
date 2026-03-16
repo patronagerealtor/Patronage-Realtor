@@ -19,6 +19,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@shared/*": ["../shared/src/*"]
-    }
+    },
+    "types": ["styled-jsx"]
   }
 }
