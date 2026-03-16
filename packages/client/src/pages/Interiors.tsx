@@ -20,6 +20,7 @@ import { Badge } from "../components/ui/badge";
 import { InteriorPriceCalculator } from "../components/interiors/InteriorPriceCalculator";
 import { InteriorsHero } from "../components/interiors/InteriorsHero";
 import { SupabaseImage } from "../components/shared/SupabaseImage";
+import GudiPadwaOffer from "../components/marketing/GudiPadwaOffer";
 import {
   Sparkles,
   ArrowRight,
@@ -1160,6 +1161,7 @@ export default function Interiors() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
+      <GudiPadwaOffer />
 
       <InteriorsHero onScrollToSection={scrollToSection} />
 

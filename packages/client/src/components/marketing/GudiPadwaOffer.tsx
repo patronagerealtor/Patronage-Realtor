@@ -1,0 +1,588 @@
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import { env } from '../../config/env';
+
+// Supabase client
+const supabase = createClient(env.supabaseUrl, env.supabaseAnonKey);
+
+interface LeadData {
+  name: string;
+  phone: string;
+  email: string;
+  propertyType: string;
+  sourcePage: string;
+}
+
+const GudiPadwaOffer: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [formData, setFormData] = useState<LeadData>({
+    name: '',
+    phone: '',
+    email: '',
+    propertyType: '',
+    sourcePage: '/design-studio'
+  });
+  const [errors, setErrors] = useState<Partial<LeadData>>({});
+
+  // Check if we're on the design-studio page
+  useEffect(() => {
+    if (window.location.pathname !== '/design-studio') {
+      return;
+    }
+  }, []);
+
+  // Send data to Google Sheets via webhook
+  const sendToGoogleSheet = async (data: LeadData) => {
+    try {
+      // Direct Google Apps Script webhook
+      const webhookUrl = 'https://script.google.com/macros/s/AKfycby0VUKW6idgXDHoSjV0nWYOiKfzGuOgp5a1J6Yi8K3k16Q7eaanrCXb7a31ZDkVfQ9S/exec';
+      
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: data.name,
+          phone: data.phone,
+          email: data.email,
+          propertyType: data.propertyType,
+          source: data.sourcePage
+        }),
+        mode: 'no-cors' // This prevents CORS errors but won't give us response details
+      });
+      
+      console.log('Google Sheets request sent (no-cors mode)');
+      
+    } catch (error) {
+      console.error('Error sending to Google Sheets:', error);
+      // Don't throw error - allow form submission to succeed even if Google Sheets fails
+    }
+  };
+
+  // Validate form
+  const validateForm = (): boolean => {
+    const newErrors: Partial<LeadData> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+      newErrors.phone = 'Please enter a valid 10-digit Indian phone number';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    if (!formData.propertyType) {
+      newErrors.propertyType = 'Property type is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Insert into Supabase
+      const { data: insertData, error } = await supabase
+        .from('gudi_padwa_leads')
+        .insert({
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          property_type: formData.propertyType,
+          source_page: formData.sourcePage,
+          created_at: new Date().toISOString()
+        })
+        .select();
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+
+      console.log('Lead saved successfully:', insertData);
+
+      // Send to Google Sheets (non-blocking)
+      sendToGoogleSheet(formData);
+
+      // Show success message
+      setShowSuccess(true);
+      
+      // Reset form
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        propertyType: '',
+        sourcePage: '/design-studio'
+      });
+
+      // Close modal after 3 seconds
+      setTimeout(() => {
+        setIsModalOpen(false);
+        setShowSuccess(false);
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Error submitting form: ${errorMessage}. Please try again.`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error for this field
+    if (errors[name as keyof LeadData]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  // Only render on design-studio page
+  if (window.location.pathname !== '/design-studio') {
+    return null;
+  }
+
+  return (
+    <>
+      {/* Offer Ticker */}
+      <div className="gudi-padwa-ticker">
+        <div className="ticker-content" onClick={() => setIsModalOpen(true)}>
+          <span className="ticker-text">
+            🎉 Gudi Padwa Special • Book your interior project for ₹999 •
+            🎁 Complimentary Gifts: AC | TV | Fridge | Washing Machine •
+            🏡 Luxury Interiors Designed for Your Dream Home Starting at just 2.99L*•
+            ⏳ Offer Valid Till 19 March • Click to Claim Offer
+          </span>
+        </div>
+      </div>
+
+      {/* Popup Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            {/* Close Button */}
+            <button 
+              className="close-button" 
+              onClick={() => setIsModalOpen(false)}
+              aria-label="Close modal"
+            >
+              ×
+            </button>
+
+            {/* Modal Content */}
+            <div className="modal-content">
+              {showSuccess ? (
+                <div className="success-message">
+                  <div className="success-icon">🎉</div>
+                  <h2>Offer Claimed Successfully!</h2>
+                  <p>Our team will contact you shortly with your exclusive Gudi Padwa offer details.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="modal-header">
+                    <h2>Gudi Padwa Interior Offer</h2>
+                    <p>Book your interior project for ₹999 and receive exclusive festive gifts.</p>
+                  </div>
+
+                  <form onSubmit={handleSubmit} className="offer-form">
+                    <div className="form-group">
+                      <label htmlFor="name">Name *</label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className={errors.name ? 'error' : ''}
+                        placeholder="Enter your full name"
+                      />
+                      {errors.name && <span className="error-message">{errors.name}</span>}
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="phone">Phone Number *</label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className={errors.phone ? 'error' : ''}
+                        placeholder="Enter 10-digit phone number"
+                        maxLength={10}
+                      />
+                      {errors.phone && <span className="error-message">{errors.phone}</span>}
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="email">Email *</label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className={errors.email ? 'error' : ''}
+                        placeholder="Enter your email address"
+                      />
+                      {errors.email && <span className="error-message">{errors.email}</span>}
+                    </div>
+
+                    <div className="form-group">
+                      <label htmlFor="propertyType">Property Type *</label>
+                      <select
+                        id="propertyType"
+                        name="propertyType"
+                        value={formData.propertyType}
+                        onChange={handleInputChange}
+                        className={errors.propertyType ? 'error' : ''}
+                      >
+                        <option value="">Select property type</option>
+                        <option value="1 BHK">1 BHK</option>
+                        <option value="2 BHK">2 BHK</option>
+                        <option value="3 BHK">3 BHK</option>
+                        <option value="4 BHK">4 BHK</option>
+                        <option value="Villa">Villa</option>
+                      </select>
+                      {errors.propertyType && <span className="error-message">{errors.propertyType}</span>}
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="submit-button"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Submitting...' : 'Claim Offer'}
+                    </button>
+                  </form>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        /* Ticker Styles */
+        .gudi-padwa-ticker {
+          position: fixed;
+          top: 65px;
+          left: 0;
+          right: 0;
+          background: linear-gradient(135deg, #0F1B2B 0%, #1a2332 100%);
+          color: #D4AF37;
+          padding: 12px 0;
+          z-index: 1000;
+          overflow: hidden;
+          box-shadow: 0 2px 20px rgba(212, 175, 55, 0.3);
+          border-bottom: 2px solid #D4AF37;
+        }
+
+        .ticker-content {
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: inline-block;
+          padding: 0 20px;
+        }
+
+        .ticker-content:hover {
+          transform: scale(1.02);
+          filter: brightness(1.2);
+        }
+
+        .ticker-text {
+          display: inline-block;
+          font-size: 16px;
+          font-weight: 600;
+          white-space: nowrap;
+          animation: scroll-left 25s linear infinite;
+          letter-spacing: 1px;
+        }
+
+        @keyframes scroll-left {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+
+        .gudi-padwa-ticker:hover .ticker-text {
+          animation-play-state: paused;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(15, 27, 43, 0.85);
+          backdrop-filter: blur(10px);
+          z-index: 2000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .modal-card {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+          backdrop-filter: blur(20px);
+          border-radius: 20px;
+          box-shadow: 0 20px 60px rgba(15, 27, 43, 0.3), 0 0 0 1px rgba(212, 175, 55, 0.2);
+          max-width: 500px;
+          width: 100%;
+          max-height: 90vh;
+          overflow-y: auto;
+          position: relative;
+          animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+          from {
+            transform: translateY(50px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        .close-button {
+          position: absolute;
+          top: 15px;
+          right: 15px;
+          width: 40px;
+          height: 40px;
+          border: none;
+          background: rgba(15, 27, 43, 0.1);
+          border-radius: 50%;
+          font-size: 24px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+          color: #0F1B2B;
+        }
+
+        .close-button:hover {
+          background: rgba(15, 27, 43, 0.2);
+          transform: rotate(90deg);
+        }
+
+        .modal-content {
+          padding: 40px 30px 30px;
+        }
+
+        .modal-header {
+          text-align: center;
+          margin-bottom: 30px;
+        }
+
+        .modal-header h2 {
+          color: #0F1B2B;
+          font-size: 28px;
+          font-weight: 700;
+          margin-bottom: 10px;
+          background: linear-gradient(135deg, #0F1B2B, #D4AF37);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .modal-header p {
+          color: #64748b;
+          font-size: 16px;
+          line-height: 1.5;
+        }
+
+        .form-group {
+          margin-bottom: 20px;
+        }
+
+        .form-group label {
+          display: block;
+          margin-bottom: 8px;
+          color: #0F1B2B;
+          font-weight: 600;
+          font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+          width: 100%;
+          padding: 12px 16px;
+          border: 2px solid #e2e8f0;
+          border-radius: 12px;
+          font-size: 16px;
+          transition: all 0.3s ease;
+          background: white;
+          color: #0F1B2B;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+          outline: none;
+          border-color: #D4AF37;
+          box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .form-group input.error,
+        .form-group select.error {
+          border-color: #ef4444;
+        }
+
+        .error-message {
+          display: block;
+          color: #ef4444;
+          font-size: 12px;
+          margin-top: 5px;
+        }
+
+        .submit-button {
+          width: 100%;
+          padding: 14px 24px;
+          background: linear-gradient(135deg, #D4AF37 0%, #f4d03f 100%);
+          color: #0F1B2B;
+          border: none;
+          border-radius: 12px;
+          font-size: 16px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .submit-button:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .submit-button:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .success-message {
+          text-align: center;
+          padding: 20px;
+        }
+
+        .success-icon {
+          font-size: 60px;
+          margin-bottom: 20px;
+          animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+          }
+          40% {
+            transform: translateY(-20px);
+          }
+          60% {
+            transform: translateY(-10px);
+          }
+        }
+
+        .success-message h2 {
+          color: #0F1B2B;
+          font-size: 24px;
+          font-weight: 700;
+          margin-bottom: 10px;
+        }
+
+        .success-message p {
+          color: #64748b;
+          font-size: 16px;
+          line-height: 1.5;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 640px) {
+          .gudi-padwa-ticker {
+            padding: 10px 0;
+          }
+
+          .ticker-text {
+            font-size: 14px;
+          }
+
+          .modal-card {
+            margin: 10px;
+            max-height: 95vh;
+          }
+
+          .modal-content {
+            padding: 30px 20px 20px;
+          }
+
+          .modal-header h2 {
+            font-size: 24px;
+          }
+
+          .form-group input,
+          .form-group select {
+            padding: 10px 14px;
+            font-size: 16px; /* Prevents zoom on iOS */
+          }
+        }
+
+        @media (max-width: 480px) {
+          .ticker-text {
+            font-size: 12px;
+          }
+
+          .modal-header h2 {
+            font-size: 20px;
+          }
+
+          .modal-header p {
+            font-size: 14px;
+          }
+        }
+      `}</style>
+    </>
+  );
+};
+
+export default GudiPadwaOffer;
