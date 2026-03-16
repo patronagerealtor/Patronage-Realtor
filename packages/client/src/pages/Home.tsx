@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Hero } from "@/components/home/Hero";
-import { Reels } from "@/components/home/Reels";
 import { WhyChooseUs } from "@/components/home/WhyChooseUs";
 import { FeaturedProperties } from "@/components/home/FeaturedProperties";
 import { Interiors } from "@/components/home/Interiors";
@@ -30,12 +29,11 @@ export default function Home() {
       <Header />
 
       <main className="flex-grow relative">
-        <Hero />
-        <Reels />
-        <WhyChooseUs />
+        <Hero />        
         <FeaturedProperties />
         <Interiors />
         <AboutPreview />
+        <WhyChooseUs />
         <ContactCTA />
       </main>
 
