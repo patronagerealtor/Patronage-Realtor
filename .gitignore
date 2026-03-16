@@ -10,4 +10,4 @@ vite.config.ts.*
 # Local state (DO NOT COMMIT)
 .local/
 *.bin
-.env
+.env*
