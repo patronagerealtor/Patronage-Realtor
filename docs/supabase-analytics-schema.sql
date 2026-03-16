@@ -33,9 +33,13 @@ CREATE INDEX IF NOT EXISTS idx_session_summaries_intent_score ON session_summari
 ALTER TABLE user_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE session_summaries ENABLE ROW LEVEL SECURITY;
 
--- Allow anonymous users to insert events
-CREATE POLICY "Anyone can insert user events" ON user_events
+-- Allow anyone to insert events (anon key from edge function)
+CREATE POLICY "Allow insert user events" ON user_events
   FOR INSERT WITH CHECK (true);
+
+-- Allow service role to insert events
+CREATE POLICY "Service role can insert events" ON user_events
+  FOR INSERT WITH CHECK (auth.role() = 'service_role');
 
 -- Allow service role to read all events
 CREATE POLICY "Service role can read user events" ON user_events

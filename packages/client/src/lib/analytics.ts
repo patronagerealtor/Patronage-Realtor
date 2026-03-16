@@ -21,6 +21,8 @@ class Analytics {
 
   constructor() {
     this.sessionId = this.getOrCreateSessionId();
+    console.log('[v0] Analytics initialized with session ID:', this.sessionId);
+    console.log('[v0] Analytics online status:', this.isOnline);
     this.setupEventListeners();
     this.setupOnlineListener();
     this.processQueue();
@@ -172,14 +174,24 @@ class Analytics {
 
   private async sendEvent(event: AnalyticsEvent): Promise<void> {
     const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/track-event`;
-    console.log('Sending analytics event to:', url);
-    console.log('Event data:', {
+    console.log('[v0] Analytics sending event to:', url);
+    console.log('[v0] Event data:', {
       session_id: this.sessionId,
       event_name: event.eventName,
       page_path: event.pagePath,
       metadata: event.metadata,
       user_agent: navigator.userAgent
     });
+
+    if (!import.meta.env.VITE_SUPABASE_URL) {
+      console.error('[v0] VITE_SUPABASE_URL is not set!');
+      throw new Error('VITE_SUPABASE_URL environment variable is missing');
+    }
+
+    if (!import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      console.error('[v0] VITE_SUPABASE_ANON_KEY is not set!');
+      throw new Error('VITE_SUPABASE_ANON_KEY environment variable is missing');
+    }
 
     const response = await fetch(url, {
       method: 'POST',
@@ -196,15 +208,15 @@ class Analytics {
       })
     });
 
-    console.log('Analytics response status:', response.status);
+    console.log('[v0] Analytics response status:', response.status);
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Analytics error response:', errorText);
+      console.error('[v0] Analytics error response:', errorText);
       throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
     
-    console.log('Analytics event sent successfully');
+    console.log('[v0] Analytics event sent successfully');
   }
 }
 
