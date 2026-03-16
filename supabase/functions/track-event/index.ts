@@ -22,9 +22,12 @@ serve(async (req) => {
 
   try {
     const { session_id, event_name, page_path, metadata, user_agent } = await req.json();
+    
+    console.log('[v0] [track-event] Received event:', { session_id, event_name, page_path });
 
     // Validate required fields
     if (!session_id || !event_name || !page_path) {
+      console.log('[v0] [track-event] Missing required fields:', { session_id, event_name, page_path });
       return new Response('Missing required fields', { 
         status: 400, 
         headers: corsHeaders 
@@ -34,10 +37,14 @@ serve(async (req) => {
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    
+    console.log('[v0] [track-event] Supabase URL:', supabaseUrl ? 'Set' : 'Missing');
+    console.log('[v0] [track-event] Service key:', supabaseServiceKey ? 'Set' : 'Missing');
+    
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Insert event
-    const { error } = await supabase
+    const { error, data } = await supabase
       .from('user_events')
       .insert({
         session_id,
@@ -48,23 +55,31 @@ serve(async (req) => {
       });
 
     if (error) {
-      console.error('Supabase error:', error);
-      return new Response('Database error', { 
+      console.error('[v0] [track-event] Supabase error:', error);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: error.message,
+        details: error
+      }), { 
         status: 500, 
-        headers: corsHeaders 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
+    console.log('[v0] [track-event] Event inserted successfully:', data);
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    console.error('Edge function error:', error);
-    return new Response('Internal server error', { 
+    console.error('[v0] [track-event] Edge function error:', error);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: error instanceof Error ? error.message : String(error)
+    }), { 
       status: 500, 
-      headers: corsHeaders 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
 });
