@@ -33,12 +33,13 @@ export async function setupVite(server: Server, app: Express) {
 
   app.use(vite.middlewares);
 
-  app.use("/{*path}", async (req, res, next) => {
+  app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
 
     try {
       const clientTemplate = path.resolve(
         import.meta.dirname,
+        "..",
         "..",
         "client",
         "index.html",
@@ -50,10 +51,31 @@ export async function setupVite(server: Server, app: Express) {
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`,
       );
-      const page = await vite.transformIndexHtml(url, template);
+      template = await vite.transformIndexHtml(url, template);
+
+      // 1. Load the server entry
+      const { render } = await vite.ssrLoadModule("/src/entry-server.tsx");
+      
+      // 2. Render the app string
+      const appHtml = await render(url);
+      
+      // 3. Inject it into the HTML
+      const page = template.replace(`<!--ssr-outlet-->`, appHtml);
+
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
+      
+      const errMsg = (e as Error).message || String(e);
+      if (errMsg.includes("window is not defined") || errMsg.includes("document is not defined") || errMsg.includes("navigator is not defined")) {
+        console.error("\n❌ [SSR Execution Error]");
+        console.error(`Your React code tried to access a browser-only API during Server-Side Rendering (Node.js).`);
+        console.error(`Error: ${errMsg}\n`);
+        console.error(`👉 Quick Fix: Wrap the code accessing window/document inside a useEffect() hook, or gate it with: if (typeof window !== "undefined") { ... }\n`);
+      } else {
+        console.error("\n❌ [SSR Render Error]:", e, "\n");
+      }
+      
       next(e);
     }
   });

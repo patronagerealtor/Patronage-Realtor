@@ -1,11 +1,10 @@
-import { createRoot } from "react-dom/client";
+import { hydrateRoot } from "react-dom/client";
 import { requireEnv } from "./config/env";
 import App from "./App";
 import "./index.css";
 
 requireEnv();
 
-// Render app immediately
-const root = createRoot(document.getElementById("root")!);
-root.render(<App />);
+// Hydrate the statically generated DOM
+hydrateRoot(document.getElementById("root")!, <App />);
 
