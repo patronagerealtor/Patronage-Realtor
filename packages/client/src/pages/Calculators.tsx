@@ -272,8 +272,8 @@ export default function Calculators() {
     const maxAffordableLoan =
       safeMonthlyEmi > 0
         ? safeMonthlyEmi *
-          ((Math.pow(1 + rate, months) - 1) /
-            (rate * Math.pow(1 + rate, months)))
+        ((Math.pow(1 + rate, months) - 1) /
+          (rate * Math.pow(1 + rate, months)))
         : 0;
 
     setEligResults({
@@ -404,8 +404,8 @@ export default function Calculators() {
     const maxAffordableLoan =
       safeMonthlyEmi > 0
         ? safeMonthlyEmi *
-          ((Math.pow(1 + rate, months) - 1) /
-            (rate * Math.pow(1 + rate, months)))
+        ((Math.pow(1 + rate, months) - 1) /
+          (rate * Math.pow(1 + rate, months)))
         : 0;
 
     let verdict = "Affordable";
@@ -628,7 +628,7 @@ export default function Calculators() {
 
               {/* --- INPUT PANEL --- */}
               <Card className="lg:col-span-5 p-6 space-y-6 border-t-4 border-t-primary flex flex-col">
-              <div className="space-y-4 flex-1 flex flex-col justify-between">
+                <div className="space-y-4 flex-1 flex flex-col justify-between">
 
                   {/* 1 & 2. Property Price + Down Payment side by side */}
                   <div className="grid grid-cols-2 gap-4">
@@ -658,7 +658,6 @@ export default function Calculators() {
                     <div className="flex items-center justify-between">
                       <Label>Loan Amount (₹)</Label>
                       <span className="text-xs text-muted-foreground bg-muted/40 px-2 py-0.5 rounded">
-                        Auto = Price − Down Payment
                       </span>
                     </div>
                     <Input
@@ -825,11 +824,10 @@ export default function Calculators() {
 
                 {/* Stats: EMI + Risk */}
                 <Card
-                  className={`p-6 flex flex-col justify-between h-fit min-h-full ${
-                    smartResults.riskLevel === "Safe"
-                      ? "bg-green-50/50 dark:bg-green-900/10"
-                      : "bg-red-50/50 dark:bg-red-900/10"
-                  }`}
+                  className={`p-6 flex flex-col justify-between h-fit min-h-full ${smartResults.riskLevel === "Safe"
+                    ? "bg-green-50/50 dark:bg-green-900/10"
+                    : "bg-red-50/50 dark:bg-red-900/10"
+                    }`}
                 >
                   <div>
                     <p className="text-sm text-muted-foreground uppercase tracking-wider">
@@ -844,11 +842,10 @@ export default function Calculators() {
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <span
-                        className={`text-xs font-bold px-2 py-1 rounded-full ${
-                          smartResults.riskLevel === "Safe"
-                            ? "bg-green-200 text-green-800"
-                            : "bg-red-200 text-red-800"
-                        }`}
+                        className={`text-xs font-bold px-2 py-1 rounded-full ${smartResults.riskLevel === "Safe"
+                          ? "bg-green-200 text-green-800"
+                          : "bg-red-200 text-red-800"
+                          }`}
                       >
                         {smartResults.riskLevel}
                       </span>
@@ -919,15 +916,15 @@ export default function Calculators() {
                       </div>
                     </div>
                     <div className="flex items-center justify-between mt-4 pt-3 border-t border-green-200 dark:border-green-800">
-  <p className="text-sm font-bold text-muted-foreground">
-    {smartPrepaymentAfterYears === 0
-      ? "Prepayment applied at start of loan"
-      : `Prepayment applied after ${smartPrepaymentAfterYears} year${smartPrepaymentAfterYears > 1 ? "s" : ""} of EMI payments`}
-  </p>
-  <p className="text-sm font-bold text-muted-foreground text-right">
-    EMI stays at {formatCurrency(smartResults.monthlyEmi)} — only tenure shortens
-  </p>
-</div>
+                      <p className="text-sm font-bold text-muted-foreground">
+                        {smartPrepaymentAfterYears === 0
+                          ? "Prepayment applied at start of loan"
+                          : `Prepayment applied after ${smartPrepaymentAfterYears} year${smartPrepaymentAfterYears > 1 ? "s" : ""} of EMI payments`}
+                      </p>
+                      <p className="text-sm font-bold text-muted-foreground text-right">
+                        EMI stays at {formatCurrency(smartResults.monthlyEmi)} — only tenure shortens
+                      </p>
+                    </div>
                   </Card>
                 )}
 
@@ -1125,8 +1122,8 @@ export default function Calculators() {
               TAB 2: RENT VS BUY (UNCHANGED)
           ============================================================ */}
           <TabsContent value="rent-vs-buy">
-          <div className="grid lg:grid-cols-12 gap-6 lg:items-stretch">
-          <Card className="lg:col-span-5 p-6 space-y-6 h-fit">
+            <div className="grid lg:grid-cols-12 gap-6 lg:items-stretch">
+              <Card className="lg:col-span-5 p-6 space-y-6 h-fit">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Monthly Rent (₹)</Label>
@@ -1480,11 +1477,10 @@ export default function Calculators() {
                         role="radio"
                         aria-checked={costGender === "male"}
                         onClick={() => setCostGender("male")}
-                        className={`flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors duration-200 ${
-                          costGender === "male"
-                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                            : "bg-muted/30 border-border text-muted-foreground hover:bg-muted/50 hover:border-primary/30"
-                        }`}
+                        className={`flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors duration-200 ${costGender === "male"
+                          ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                          : "bg-muted/30 border-border text-muted-foreground hover:bg-muted/50 hover:border-primary/30"
+                          }`}
                       >
                         Male (7%)
                       </button>
@@ -1493,11 +1489,10 @@ export default function Calculators() {
                         role="radio"
                         aria-checked={costGender === "female"}
                         onClick={() => setCostGender("female")}
-                        className={`flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors duration-200 ${
-                          costGender === "female"
-                            ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                            : "bg-muted/30 border-border text-muted-foreground hover:bg-muted/50 hover:border-primary/30"
-                        }`}
+                        className={`flex-1 px-4 py-2.5 rounded-lg border text-sm font-medium transition-colors duration-200 ${costGender === "female"
+                          ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                          : "bg-muted/30 border-border text-muted-foreground hover:bg-muted/50 hover:border-primary/30"
+                          }`}
                       >
                         Female (6%)
                       </button>
@@ -1842,7 +1837,7 @@ export default function Calculators() {
           if (!open) setDetailProperty(null);
         }}
         similarProperties={relatedProperties.filter((p) => p.id !== detailProperty?.id).slice(0, 4)}
-        onSimilarPropertySelect={(property) => setDetailProperty(property as PropertyRow)}      />
+        onSimilarPropertySelect={(property) => setDetailProperty(property as PropertyRow)} />
     </div>
   );
 }
