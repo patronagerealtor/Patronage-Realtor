@@ -63,7 +63,7 @@ export default defineConfig({
         ? path.resolve(import.meta.dirname, "../server/dist/public")
         : path.resolve(import.meta.dirname, "dist"),
     emptyOutDir: true,
-    chunkSizeWarningLimit: 1024,
+    chunkSizeWarningLimit: 2000,
     // Standard minification with sensible defaults
     minify: "terser",
     terserOptions: {
@@ -80,6 +80,8 @@ export default defineConfig({
         manualChunks: {
           "vendor-react": ["react", "react-dom"],
           "vendor-query": ["@tanstack/react-query"],
+          "vendor-recharts": ["recharts"],
+          "vendor-icons": ["lucide-react"],
         },
       },
     },
