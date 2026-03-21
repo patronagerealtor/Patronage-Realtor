@@ -545,6 +545,14 @@ export default function Calculators() {
       "content",
       "Calculate EMI, loan eligibility, rent vs buy & ownership cost instantly. Smart real estate financial tools for Indian property buyers in 2026."
     );
+
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.setAttribute("rel", "canonical");
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute("href", `https://patronagerealtor.in${location === "/calculators" ? "/calculators/home-loan-emi-calculator" : location}`);
   }
 
   return (
