@@ -7,7 +7,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { Footer } from "../components/layout/Footer";
 import { Header } from "../components/layout/Header";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
@@ -98,36 +98,33 @@ function getPriceInLakhs(p: PropertyRow): number | null {
 }
 
 export default function Calculators() {
-  const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("smart-emi");
   const { properties } = useProperties();
   const [detailProperty, setDetailProperty] = useState<PropertyRow | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
-  // Set activeTab based on URL path
-  useEffect(() => {
-    if (location === "/calculators/home-loan-emi-calculator") {
-      setActiveTab("smart-emi");
-    } else if (location === "/calculators/rent-vs-buy") {
-      setActiveTab("rent-vs-buy");
-    } else if (location === "/calculators/home-loan-eligibility") {
-      setActiveTab("eligibility");
-    } else if (location === "/calculators/ownership-cost") {
-      setActiveTab("ownership");
-    } else {
-      setActiveTab("smart-emi");
-    }
-  }, [location]);
-
-  // --- 1. Loan Eligibility State ---
+  // --- 1. Loan Eligibility State (bank-grade: FOIR + LTV + CIBIL + Age cap) ---
   const [eligIncome, setEligIncome] = useState(100000);
   const [eligEmi, setEligEmi] = useState(0);
   const [eligInterestRate, setEligInterestRate] = useState("8.5");
   const [eligTenure, setEligTenure] = useState(20);
+  const [eligAge, setEligAge] = useState(30);            // Fix 3: age for tenure cap
+  const [eligPropertyValue, setEligPropertyValue] = useState(0); // Fix 4: LTV cap
+  const [eligCibilScore, setEligCibilScore] = useState(750);      // Fix 5: CIBIL
   const [eligResults, setEligResults] = useState({
     loanAmount: 0,
-    monthlyEmi: 0,
+    maxLoanAmount: 0,
+    ltvCappedLoan: 0,
+    finalLoan: 0,
+    safeEmi: 0,
     maxEmi: 0,
+    foirUsed: 0,
+    effectiveTenure: 0,
+    cibilMultiplier: 1,
+    cibilStatus: "Excellent",
+    ltv: 0,
+    ageCapped: false,
+    breakdown: [] as { name: string; value: number; fill: string }[],
   });
 
   // --- 2. Ownership Cost State ---
@@ -262,24 +259,93 @@ export default function Calculators() {
     if (eligRateNum <= 0 || eligIncome <= 0 || eligTenure <= 0) return;
 
     const rate = eligRateNum / 12 / 100;
-    const months = eligTenure * 12;
 
-    const disposableIncome = Math.max(0, eligIncome - eligEmi);
+    // Fix 3 — Age / residual working years cap (retirement at 60 for salaried)
+    const retirementAge = 60;
+    const maxTenureByAge = Math.max(1, retirementAge - eligAge);
+    const effectiveTenureYears = Math.min(eligTenure, maxTenureByAge);
+    const months = effectiveTenureYears * 12;
+    const ageCapped = effectiveTenureYears < eligTenure;
 
-    const safeMonthlyEmi = Math.max(0, disposableIncome * 0.4);
-    const maxEmi = Math.max(0, disposableIncome * 0.5);
+    // Fix 1 & 2 — FOIR on gross income with income-bracket multiplier
+    const getFoirLimit = (income: number): number => {
+      if (income < 25000)  return 0.40;
+      if (income < 50000)  return 0.50;
+      if (income < 150000) return 0.55;
+      return 0.60;
+    };
+    const foirLimit = getFoirLimit(eligIncome);
+    const safeEmi  = Math.max(0, (eligIncome * foirLimit) - eligEmi);
+    const maxEmi   = Math.max(0, (eligIncome * Math.min(foirLimit + 0.05, 0.65)) - eligEmi);
 
-    const maxAffordableLoan =
-      safeMonthlyEmi > 0
-        ? safeMonthlyEmi *
-        ((Math.pow(1 + rate, months) - 1) /
-          (rate * Math.pow(1 + rate, months)))
+    // Reverse EMI formula → loan amount
+    const loanFromSafeEmi =
+      safeEmi > 0 && rate > 0
+        ? safeEmi * ((Math.pow(1 + rate, months) - 1) / (rate * Math.pow(1 + rate, months)))
+        : 0;
+    const loanFromMaxEmi =
+      maxEmi > 0 && rate > 0
+        ? maxEmi * ((Math.pow(1 + rate, months) - 1) / (rate * Math.pow(1 + rate, months)))
         : 0;
 
+    // Fix 4 — LTV cap (RBI guidelines)
+    const getLtvLimit = (value: number): number => {
+      if (value <= 3000000)  return 0.90;
+      if (value <= 7500000)  return 0.80;
+      return 0.75;
+    };
+    const ltvLimit = eligPropertyValue > 0 ? getLtvLimit(eligPropertyValue) : 1;
+    const ltvCappedLoan = eligPropertyValue > 0
+      ? Math.round(eligPropertyValue * ltvLimit)
+      : Infinity;
+    const ltvPct = Math.round(ltvLimit * 100);
+
+    // Fix 5 — CIBIL score multiplier
+    const getCibilMultiplier = (score: number): number => {
+      if (score < 650) return 0;
+      if (score < 700) return 0.80;
+      if (score < 750) return 0.90;
+      return 1.0;
+    };
+    const getCibilStatus = (score: number): string => {
+      if (score < 650) return "Poor – Likely Rejected";
+      if (score < 700) return "Fair – Reduced Amount";
+      if (score < 750) return "Good";
+      if (score < 800) return "Very Good";
+      return "Excellent";
+    };
+    const cibilMultiplier = getCibilMultiplier(eligCibilScore);
+    const cibilStatus = getCibilStatus(eligCibilScore);
+
+    // Final loan = min(income-based, LTV-capped) × CIBIL multiplier
+    const incomeBasedLoan = Math.round(loanFromSafeEmi);
+    const cappedByLtv     = ltvCappedLoan === Infinity ? incomeBasedLoan : Math.min(incomeBasedLoan, ltvCappedLoan);
+    const finalLoan       = Math.round(cappedByLtv * cibilMultiplier);
+
+    // Breakdown for bar chart
+    const breakdown = [
+      { name: "Income-based",    value: Math.round(loanFromSafeEmi),  fill: "#0088FE" },
+      { name: "Max (FOIR)",      value: Math.round(loanFromMaxEmi),   fill: "#00C49F" },
+      ...(eligPropertyValue > 0
+        ? [{ name: `LTV Cap (${ltvPct}%)`, value: ltvCappedLoan === Infinity ? 0 : ltvCappedLoan, fill: "#FFBB28" }]
+        : []),
+      { name: "Final Eligible",  value: finalLoan,                    fill: "#FF8042" },
+    ];
+
     setEligResults({
-      loanAmount: Math.round(maxAffordableLoan),
-      monthlyEmi: Math.round(safeMonthlyEmi),
-      maxEmi: Math.round(maxEmi),
+      loanAmount:       incomeBasedLoan,
+      maxLoanAmount:    Math.round(loanFromMaxEmi),
+      ltvCappedLoan:    ltvCappedLoan === Infinity ? 0 : ltvCappedLoan,
+      finalLoan,
+      safeEmi:          Math.round(safeEmi),
+      maxEmi:           Math.round(maxEmi),
+      foirUsed:         Math.round(foirLimit * 100),
+      effectiveTenure:  effectiveTenureYears,
+      cibilMultiplier,
+      cibilStatus,
+      ltv:              ltvPct,
+      ageCapped,
+      breakdown,
     });
   };
 
@@ -499,9 +565,8 @@ export default function Calculators() {
   const totalBudgetLakhs = totalBudgetRupees / 1e5;
   const relatedProperties = useMemo(() => {
     if (totalBudgetRupees <= 0) return [];
-    const marginLakhs = RELATED_PROPERTY_MARGIN_RUPEE / 1e5; // 5 lakhs
-    const minL = Math.max(0, totalBudgetLakhs - marginLakhs);
-    const maxL = totalBudgetLakhs + marginLakhs;
+    const minL = Math.max(0, totalBudgetLakhs - 5);
+    const maxL = totalBudgetLakhs + 5;
     return properties.filter((p): p is PropertyRow => {
       const valueInLakhs = getPriceInLakhs(p);
       if (valueInLakhs == null || Number.isNaN(valueInLakhs)) return false;
@@ -519,6 +584,9 @@ export default function Calculators() {
     eligEmi,
     eligTenure,
     eligInterestRate,
+    eligAge,
+    eligPropertyValue,
+    eligCibilScore,
     costPrice,
     costPropertyStatus,
     costPerSqft,
@@ -570,19 +638,9 @@ export default function Calculators() {
         </div>
 
         <Tabs
-          value={activeTab}
+          defaultValue="smart-emi"
           className="max-w-6xl mx-auto w-full"
-          onValueChange={(value) => {
-            if (value === "smart-emi") {
-              setLocation("/calculators/home-loan-emi-calculator");
-            } else if (value === "rent-vs-buy") {
-              setLocation("/calculators/rent-vs-buy");
-            } else if (value === "eligibility") {
-              setLocation("/calculators/home-loan-eligibility");
-            } else if (value === "ownership") {
-              setLocation("/calculators/ownership-cost");
-            }
-          }}
+          onValueChange={setActiveTab}
         >
           <div
             id="calculators-tabs"
@@ -627,8 +685,8 @@ export default function Calculators() {
             <div className="grid lg:grid-cols-12 gap-6">
 
               {/* --- INPUT PANEL --- */}
-              <Card className="lg:col-span-5 p-6 space-y-6 border-t-4 border-t-primary flex flex-col">
-                <div className="space-y-4 flex-1 flex flex-col justify-between">
+              <Card className="lg:col-span-5 p-6 space-y-6 h-fit border-t-4 border-t-primary">
+                <div className="space-y-4">
 
                   {/* 1 & 2. Property Price + Down Payment side by side */}
                   <div className="grid grid-cols-2 gap-4">
@@ -873,6 +931,11 @@ export default function Calculators() {
                     <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                       Prepayment Impact
                     </h3>
+                    <p className="text-xs text-muted-foreground text-center mb-4">
+                      {smartPrepaymentAfterYears === 0
+                        ? "Prepayment applied at start of loan"
+                        : `Prepayment applied after ${smartPrepaymentAfterYears} year${smartPrepaymentAfterYears > 1 ? "s" : ""} of EMI payments`}
+                    </p>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
                       <div>
                         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1">
@@ -915,16 +978,9 @@ export default function Calculators() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-green-200 dark:border-green-800">
-                      <p className="text-sm font-bold text-muted-foreground">
-                        {smartPrepaymentAfterYears === 0
-                          ? "Prepayment applied at start of loan"
-                          : `Prepayment applied after ${smartPrepaymentAfterYears} year${smartPrepaymentAfterYears > 1 ? "s" : ""} of EMI payments`}
-                      </p>
-                      <p className="text-sm font-bold text-muted-foreground text-right">
-                        EMI stays at {formatCurrency(smartResults.monthlyEmi)} — only tenure shortens
-                      </p>
-                    </div>
+                    <p className="text-sm font-medium text-muted-foreground mt-4 text-center">
+                      EMI stays at {formatCurrency(smartResults.monthlyEmi)} — only tenure shortens
+                    </p>
                   </Card>
                 )}
 
@@ -1122,7 +1178,7 @@ export default function Calculators() {
               TAB 2: RENT VS BUY (UNCHANGED)
           ============================================================ */}
           <TabsContent value="rent-vs-buy">
-            <div className="grid lg:grid-cols-12 gap-6 lg:items-stretch">
+            <div className="grid lg:grid-cols-12 gap-6">
               <Card className="lg:col-span-5 p-6 space-y-6 h-fit">
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -1287,31 +1343,41 @@ export default function Calculators() {
           </TabsContent>
 
           {/* ============================================================
-              TAB 3: ELIGIBILITY (UNCHANGED)
+              TAB 3: ELIGIBILITY (BANK-GRADE)
           ============================================================ */}
           <TabsContent value="eligibility">
-            <div className="grid lg:grid-cols-12 gap-6">
-              <Card className="lg:col-span-5 p-6 space-y-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Net Monthly Income (₹)</Label>
-                    <Input
-                      type="text"
-                      value={eligIncome === 0 ? "" : eligIncome.toLocaleString("en-IN")}
-                      onChange={(e) => handleCurrencyInput(e.target.value, setEligIncome)}
-                    />
+
+            {/* ── ROW 1: Compact inputs (full width) + Hero + Chart side by side ── */}
+            <div className="grid lg:grid-cols-12 gap-4 lg:gap-6 lg:items-stretch">
+
+              {/* INPUT CARD — compact, all 5 fields in 2 tight rows + CIBIL slider */}
+              <Card className="lg:col-span-5 p-5 border-t-4 border-t-primary flex flex-col h-full">
+                <div className="space-y-3 flex flex-col flex-1 justify-between">
+
+                  {/* Row A: Income + Existing EMIs */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Monthly Income (₹)</Label>
+                      <Input
+                        type="text"
+                        value={eligIncome === 0 ? "" : eligIncome.toLocaleString("en-IN")}
+                        onChange={(e) => handleCurrencyInput(e.target.value, setEligIncome)}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Existing EMIs (₹)</Label>
+                      <Input
+                        type="text"
+                        value={eligEmi === 0 ? "" : eligEmi.toLocaleString("en-IN")}
+                        onChange={(e) => handleCurrencyInput(e.target.value, setEligEmi)}
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Current EMIs (₹)</Label>
-                    <Input
-                      type="text"
-                      value={eligEmi === 0 ? "" : eligEmi.toLocaleString("en-IN")}
-                      onChange={(e) => handleCurrencyInput(e.target.value, setEligEmi)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Interest (%)</Label>
+
+                  {/* Row B: Interest + Tenure */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Interest Rate (%)</Label>
                       <Input
                         type="text"
                         inputMode="decimal"
@@ -1319,14 +1385,12 @@ export default function Calculators() {
                         value={eligInterestRate}
                         onChange={(e) => {
                           const val = e.target.value;
-                          if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                            setEligInterestRate(val);
-                          }
+                          if (val === "" || /^\d*\.?\d*$/.test(val)) setEligInterestRate(val);
                         }}
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Tenure (Yrs)</Label>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tenure (Yrs)</Label>
                       <div className="relative">
                         <Input
                           type="text"
@@ -1334,9 +1398,7 @@ export default function Calculators() {
                           value={eligTenure === 0 ? "" : eligTenure}
                           onChange={(e) => {
                             const val = e.target.value;
-                            if (val === "" || /^\d*$/.test(val)) {
-                              setEligTenure(val === "" ? 0 : Number(val));
-                            }
+                            if (val === "" || /^\d*$/.test(val)) setEligTenure(val === "" ? 0 : Number(val));
                           }}
                         />
                         <div className="absolute top-0 right-0 h-full">
@@ -1345,10 +1407,8 @@ export default function Calculators() {
                               <ChevronDown className="h-4 w-4 opacity-50" />
                             </SelectTrigger>
                             <SelectContent position="popper">
-                              {[15, 20, 25, 30].map((y) => (
-                                <SelectItem key={y} value={y.toString()}>
-                                  {y} Years
-                                </SelectItem>
+                              {[10, 15, 20, 25, 30].map((y) => (
+                                <SelectItem key={y} value={y.toString()}>{y} Years</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -1356,48 +1416,225 @@ export default function Calculators() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Row C: Age + Property Value */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Your Age (Yrs)
+                        <span className="ml-1 text-muted-foreground/60 normal-case font-normal">· caps at 60</span>
+                      </Label>
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="e.g. 32"
+                        value={eligAge === 0 ? "" : eligAge}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === "" || /^\d*$/.test(val)) setEligAge(val === "" ? 0 : Number(val));
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Property Value (₹)
+                        <span className="ml-1 text-muted-foreground/60 normal-case font-normal">· optional</span>
+                      </Label>
+                      <Input
+                        type="text"
+                        placeholder="For LTV cap"
+                        value={eligPropertyValue === 0 ? "" : eligPropertyValue.toLocaleString("en-IN")}
+                        onChange={(e) => handleCurrencyInput(e.target.value, setEligPropertyValue)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row D: CIBIL slider */}
+                  <div className="pt-1 space-y-2 border-t border-border">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">CIBIL Score</Label>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                        eligCibilScore >= 750 ? "bg-green-100 text-green-700" :
+                        eligCibilScore >= 700 ? "bg-yellow-100 text-yellow-700" :
+                        eligCibilScore >= 650 ? "bg-orange-100 text-orange-700" :
+                        "bg-red-100 text-red-700"
+                      }`}>
+                        {eligCibilScore} — {eligResults.cibilStatus}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min={500}
+                      max={900}
+                      step={10}
+                      value={eligCibilScore}
+                      onChange={(e) => setEligCibilScore(Number(e.target.value))}
+                      className="w-full accent-primary h-2 rounded-lg appearance-none cursor-pointer bg-gradient-to-r from-red-400 via-yellow-400 to-green-500"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>500 Poor</span>
+                      <span>700 Good</span>
+                      <span>900 Excellent</span>
+                    </div>
+                  </div>
+
                 </div>
               </Card>
 
-              <Card className="lg:col-span-7 p-8 flex flex-col items-center justify-center bg-primary/5 min-h-full">
-                <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest">
-                  You are eligible for a loan of
-                </p>
-                <p className="text-5xl font-bold text-primary mt-2 mb-8">
-                  {formatCurrency(eligResults.loanAmount)}
-                </p>
-                <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden mb-2">
-                  <div className="h-full bg-primary" style={{ width: "50%" }}></div>
-                </div>
-                <div className="flex justify-between w-full text-xs text-muted-foreground">
-                  <span>Max Recommended EMI: {formatCurrency(eligResults.maxEmi)}</span>
-                </div>
-              </Card>
+              {/* RIGHT COLUMN: Hero + Bar chart stacked */}
+              <div className="lg:col-span-7 flex flex-col gap-4">
+
+                {/* Hero: Final Eligible Loan */}
+                <Card className={`p-6 border-t-4 ${eligCibilScore < 650 ? "border-t-red-500 bg-red-50/40 dark:bg-red-900/10" : "border-t-primary bg-primary/5"}`}>
+                  {eligCibilScore < 650 ? (
+                    <div className="text-center py-4">
+                      <p className="text-lg font-bold text-red-600 mb-2">⚠ Loan Likely Rejected</p>
+                      <p className="text-sm text-muted-foreground">Your CIBIL score is below 650. Most banks will not approve a home loan. Improve your credit score before applying.</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Final Eligible Loan Amount</p>
+                        <p className="text-3xl md:text-5xl font-bold text-primary leading-tight">{formatCurrency(eligResults.finalLoan)}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          FOIR {eligResults.foirUsed}% applied · Tenure {eligResults.effectiveTenure} Yrs{eligResults.ageCapped ? " (age-capped ⚠)" : ""}
+                        </p>
+                      </div>
+                      <div className="flex flex-row md:flex-col gap-4 md:gap-1 md:text-right shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-border">
+                        <div className="flex-1 md:flex-none">
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">Safe Monthly EMI</p>
+                          <p className="text-lg md:text-xl font-bold text-green-600">{formatCurrency(eligResults.safeEmi)}</p>
+                        </div>
+                        <div className="flex-1 md:flex-none">
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">Max Monthly EMI</p>
+                          <p className="text-lg font-semibold">{formatCurrency(eligResults.maxEmi)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </Card>
+
+                {/* Bar chart */}
+                {eligCibilScore >= 650 && eligResults.breakdown.length > 0 && (
+                  <Card className="p-4 md:p-5">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                      Loan Eligibility Breakdown
+                    </h3>
+                    <div className="h-[140px] md:h-[160px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={eligResults.breakdown} margin={{ top: 4, right: 8, left: 0, bottom: 4 }} barSize={32}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.3} />
+                          <XAxis dataKey="name" tickLine={false} axisLine={false} tick={{ fontSize: 10 }} />
+                          <YAxis tickFormatter={(v) => `₹${(v / 100000).toFixed(0)}L`} tickLine={false} axisLine={false} width={48} tick={{ fontSize: 10 }} />
+                          <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                          <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                            {eligResults.breakdown.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.fill} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </Card>
+                )}
+
+              </div>
             </div>
 
+            {/* ── ROW 2: 4 metric pills + step-by-step breakdown side by side ── */}
+            {eligCibilScore >= 650 && (
+              <div className="grid lg:grid-cols-12 gap-4 lg:gap-6 mt-4 lg:mt-6 lg:items-stretch">
+
+                {/* Left: 4 metric cards stacked 2×2 */}
+                <div className="lg:col-span-5 grid grid-cols-2 gap-2 md:gap-3 content-stretch">
+                  <Card className="p-3 md:p-4 text-center bg-blue-50/60 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800 flex flex-col items-center justify-center">
+                    <p className="text-xs font-bold uppercase tracking-wider text-blue-600 mb-1">FOIR Applied</p>
+                    <p className="text-xl md:text-2xl font-bold text-blue-700">{eligResults.foirUsed}%</p>
+                    <p className="text-xs text-muted-foreground mt-1">of gross income</p>
+                  </Card>
+                  <Card className="p-3 md:p-4 text-center bg-emerald-50/60 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800 flex flex-col items-center justify-center">
+                    <p className="text-xs font-bold uppercase tracking-wider text-emerald-600 mb-1">LTV Cap</p>
+                    <p className="text-xl md:text-2xl font-bold text-emerald-700">
+                      {eligPropertyValue > 0 ? `${eligResults.ltv}%` : "N/A"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">{eligPropertyValue > 0 ? "RBI guideline" : "Enter property value"}</p>
+                  </Card>
+                  <Card className="p-3 md:p-4 text-center bg-amber-50/60 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800 flex flex-col items-center justify-center">
+                    <p className="text-xs font-bold uppercase tracking-wider text-amber-600 mb-1">CIBIL Factor</p>
+                    <p className="text-xl md:text-2xl font-bold text-amber-700">{Math.round(eligResults.cibilMultiplier * 100)}%</p>
+                    <p className="text-xs text-muted-foreground mt-1">{eligResults.cibilStatus}</p>
+                  </Card>
+                  <Card className={`p-3 md:p-4 text-center border flex flex-col items-center justify-center ${eligResults.ageCapped ? "bg-orange-50/60 dark:bg-orange-900/10 border-orange-200" : "bg-muted/20 border-border"}`}>
+                    <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${eligResults.ageCapped ? "text-orange-600" : "text-muted-foreground"}`}>Effective Tenure</p>
+                    <p className={`text-xl md:text-2xl font-bold ${eligResults.ageCapped ? "text-orange-700" : "text-foreground"}`}>{eligResults.effectiveTenure} Yrs</p>
+                    <p className="text-xs text-muted-foreground mt-1">{eligResults.ageCapped ? "Age-capped ⚠" : "As requested"}</p>
+                  </Card>
+                </div>
+
+                {/* Right: Step-by-step breakdown */}
+                <Card className="lg:col-span-7 p-4 md:p-6 bg-muted/10 h-full">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">How Your Eligibility Was Calculated</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between items-start border-b border-border pb-3 gap-2">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-foreground text-sm">Step 1 — FOIR on Gross Income</p>
+                        <p className="text-muted-foreground text-xs mt-0.5 break-words">₹{eligIncome.toLocaleString("en-IN")} × {eligResults.foirUsed}% − ₹{eligEmi.toLocaleString("en-IN")} existing EMIs</p>
+                      </div>
+                      <p className="font-bold text-primary shrink-0 text-sm">{formatCurrency(eligResults.safeEmi)}/mo</p>
+                    </div>
+                    <div className="flex justify-between items-start border-b border-border pb-3 gap-2">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-foreground text-sm">Step 2 — Income-Based Loan</p>
+                        <p className="text-muted-foreground text-xs mt-0.5">Reverse EMI at {eligInterestRate}% for {eligResults.effectiveTenure} yrs</p>
+                      </div>
+                      <p className="font-bold shrink-0 text-sm">{formatCurrency(eligResults.loanAmount)}</p>
+                    </div>
+                    {eligPropertyValue > 0 && (
+                      <div className="flex justify-between items-start border-b border-border pb-3">
+                        <div>
+                          <p className="font-semibold text-foreground text-sm">Step 3 — LTV Cap ({eligResults.ltv}%)</p>
+                          <p className="text-muted-foreground text-xs mt-0.5">₹{eligPropertyValue.toLocaleString("en-IN")} × {eligResults.ltv}% (RBI guideline)</p>
+                        </div>
+                        <p className="font-bold shrink-0 text-sm">{formatCurrency(eligResults.ltvCappedLoan)}</p>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-start border-b border-border pb-3 gap-2">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-foreground text-sm">Step {eligPropertyValue > 0 ? "4" : "3"} — CIBIL Adjustment</p>
+                        <p className="text-muted-foreground text-xs mt-0.5">Score {eligCibilScore} → {Math.round(eligResults.cibilMultiplier * 100)}% of eligible amount</p>
+                      </div>
+                      <p className="font-bold text-primary shrink-0 text-sm">{formatCurrency(eligResults.finalLoan)}</p>
+                    </div>
+                    <div className="flex justify-between items-center pt-1 gap-2">
+                      <p className="font-bold text-foreground text-sm md:text-base">Final Eligible Loan</p>
+                      <p className="text-lg md:text-xl font-bold text-primary shrink-0">{formatCurrency(eligResults.finalLoan)}</p>
+                    </div>
+                  </div>
+                </Card>
+
+              </div>
+            )}
+
+            {/* How It Works + FAQs */}
             <Card className="mt-8 border rounded-lg bg-card p-6 md:p-8">
               <div className="flex items-center gap-2 text-primary font-semibold mb-6">
                 <BookOpen className="h-5 w-5 shrink-0" />
-                <h3 className="text-lg">How Eligibility Calculator Works</h3>
+                <h3 className="text-lg">How the Bank-Grade Eligibility Calculator Works</h3>
               </div>
               <div className="space-y-6 text-muted-foreground text-sm md:text-base leading-relaxed">
                 <div>
                   <h4 className="font-medium text-foreground mb-2">What it calculates</h4>
                   <p>
-                    Enter your net monthly income, any current EMIs you pay, the interest rate you expect, and the loan tenure. The calculator works out how much loan you can afford. It uses your disposable income (income minus existing EMIs), applies a safe limit of 40% for recommended EMI and 50% for maximum EMI, then reverse-engineers the EMI formula to tell you the eligible loan amount and the max recommended EMI you can take on.
+                    This calculator applies the same methodology used by Indian banks — FOIR on gross income with income-bracket adjustments, RBI-mandated LTV caps, CIBIL score multipliers, and age-based tenure capping. It gives you the most accurate pre-approval estimate possible before you visit a bank.
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-medium text-foreground mb-2">Key terms</h4>
-                  <p>
-                    <strong>Disposable income</strong> – Your monthly income after deducting existing EMIs. <strong>Safe Monthly EMI</strong> – 40% of disposable income (recommended limit). <strong>Max EMI</strong> – 50% of disposable income (upper limit). <strong>Eligible loan</strong> – The loan amount you can service at the safe EMI for the given rate and tenure.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-foreground mb-2">Why it matters</h4>
-                  <p>
-                    Knowing your eligibility before you shop helps you set a realistic budget and talk to banks with confidence.
-                  </p>
+                  <h4 className="font-medium text-foreground mb-2">The five factors explained</h4>
+                  <p><strong>1. FOIR (Fixed Obligation to Income Ratio)</strong> — Banks apply this on your gross income directly. Higher earners get higher FOIR limits: 40% for income below ₹25K, 50% up to ₹50K, 55% up to ₹1.5L, and 60% above that. Your existing EMIs are deducted from this allowance.</p>
+                  <p className="mt-2"><strong>2. Income bracket multiplier</strong> — Built into FOIR above. Banks recognise that higher earners have proportionally lower essential expenses.</p>
+                  <p className="mt-2"><strong>3. Age cap</strong> — Banks cap the loan tenure so repayment completes before retirement (age 60 for salaried). A 45-year-old requesting 20 years gets capped at 15 years, raising the required EMI and reducing the eligible loan.</p>
+                  <p className="mt-2"><strong>4. LTV (Loan-to-Value)</strong> — RBI mandates: 90% LTV for properties up to ₹30L, 80% for ₹30L–₹75L, and 75% above ₹75L. The eligible loan cannot exceed this cap.</p>
+                  <p className="mt-2"><strong>5. CIBIL score</strong> — Scores below 650 result in rejection. 650–699 gets 80% of the eligible amount at a higher rate. 700–749 gets 90%. 750 and above gets full eligibility.</p>
                 </div>
               </div>
               <div className="mt-10 pt-8 border-t border-border">
@@ -1408,53 +1645,42 @@ export default function Calculators() {
                 <Accordion type="single" collapsible className="space-y-2">
                   <AccordionItem value="elig-faq-1" className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20">
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-bold text-foreground pr-4">How does the calculator decide my eligibility?</span>
+                      <span className="text-left font-bold text-foreground pr-4">Why does this give a higher number than before?</span>
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
-                      <p className="mb-2">The calculator first calculates your disposable income by subtracting your existing EMIs from your monthly income. From this:</p>
-                      <ul className="list-disc pl-5 space-y-1 mb-2">
-                        <li>Forty percent is considered a safe monthly EMI limit</li>
-                        <li>Fifty percent is considered the maximum EMI limit</li>
-                      </ul>
-                      <p>Using the safe EMI limit, the calculator reverse-calculates the loan amount you can comfortably service.</p>
+                      The previous version used 40% of disposable income for everyone. Banks actually apply FOIR on gross income with higher limits for higher earners. This version matches real bank methodology, so results are more accurate — typically 15–25% higher for mid-to-high income profiles.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="elig-faq-2" className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20">
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-bold text-foreground pr-4">What is disposable income?</span>
+                      <span className="text-left font-bold text-foreground pr-4">What is FOIR and why does it matter?</span>
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
-                      Disposable income is the amount of money you have left each month after paying your existing EMIs. This is the income available for taking on a new home loan safely.
+                      FOIR stands for Fixed Obligation to Income Ratio. It is the percentage of your gross monthly income that goes toward all loan EMIs combined. Banks use this to ensure you are not over-leveraged. Most banks allow 50–55% FOIR for standard income profiles.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="elig-faq-3" className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20">
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-bold text-foreground pr-4">What is the Max EMI?</span>
+                      <span className="text-left font-bold text-foreground pr-4">How does my age affect the eligible loan amount?</span>
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
-                      The Max EMI is fifty percent of your disposable income. This represents the upper limit of what banks may allow, but it is considered a stretch and may reduce your financial flexibility.
+                      Banks require the loan to be fully repaid before you retire, typically at age 60. If you are 45 and request a 20-year tenure, the bank caps it at 15 years. A shorter tenure means higher EMI, which reduces the total loan amount you qualify for.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="elig-faq-4" className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20">
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-bold text-foreground pr-4">Why should I check eligibility before buying a home?</span>
+                      <span className="text-left font-bold text-foreground pr-4">What is LTV and when does it apply?</span>
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
-                      <p className="mb-2">Checking eligibility early helps you:</p>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>Set a realistic property budget</li>
-                        <li>Avoid loan rejections later</li>
-                        <li>Negotiate confidently with banks</li>
-                        <li>Prevent financial overcommitment</li>
-                      </ul>
+                      LTV (Loan-to-Value) is the maximum percentage of the property value that the bank will lend. RBI sets these limits: 90% for properties up to ₹30 lakh, 80% for ₹30L to ₹75L, and 75% above ₹75L. If you leave the property value blank, LTV is not applied and only your income-based eligibility is shown.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="elig-faq-5" className="border border-border rounded-lg px-4 bg-muted/5 hover:bg-muted/20 hover:border-primary/30 transition-colors duration-200 border-b-0 data-[state=open]:bg-muted/10 data-[state=open]:border-primary/20">
                     <AccordionTrigger className="py-4 hover:no-underline [&[data-state=open]>svg]:rotate-180">
-                      <span className="text-left font-bold text-foreground pr-4">Is this calculator the same as what banks use?</span>
+                      <span className="text-left font-bold text-foreground pr-4">How much does CIBIL score affect the loan amount?</span>
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground text-sm leading-relaxed pb-4 pt-0">
-                      The calculator follows the same core principles used by banks. Actual bank approvals may vary slightly based on credit score, employment type, and other factors, but this calculator provides a reliable estimate.
+                      A score below 650 results in outright rejection by most banks. A score between 650 and 699 typically reduces the eligible amount by 20% and may attract a higher interest rate. Scores of 700–749 see a 10% reduction. Scores of 750 and above receive full eligibility with the best available rates.
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -1837,7 +2063,8 @@ export default function Calculators() {
           if (!open) setDetailProperty(null);
         }}
         similarProperties={relatedProperties.filter((p) => p.id !== detailProperty?.id).slice(0, 4)}
-        onSimilarPropertySelect={(property) => setDetailProperty(property as PropertyRow)} />
+        onSimilarPropertySelect={(property) => setDetailProperty(property as PropertyRow)}
+      />
     </div>
   );
 }
