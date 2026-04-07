@@ -292,7 +292,7 @@ const AkshayTritiyaOffer: React.FC = () => {
           background: linear-gradient(135deg, #0F1B2B 0%, #1a2332 100%);
           color: #D4AF37;
           padding: 12px 0;
-          z-index: 1000;
+          z-index: 30;
           overflow: hidden;
           box-shadow: 0 2px 20px rgba(212, 175, 55, 0.3);
           border-bottom: 2px solid #D4AF37;
