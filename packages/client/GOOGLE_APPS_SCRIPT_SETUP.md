@@ -1,6 +1,6 @@
 # Google Apps Script Webhook Setup
 
-This file contains the Google Apps Script code for the Gudi Padwa leads webhook.
+This file contains the Google Apps Script code for the Akshay Tritiya leads webhook.
 
 ## Setup Instructions
 
@@ -15,16 +15,16 @@ This file contains the Google Apps Script code for the Gudi Padwa leads webhook.
    - Set "Execute as" to "Me" (your Google account)
    - Set "Who has access" to "Anyone"
    - Click "Deploy"
-   - Copy the Web app URL and update it in the GudiPadwaOffer.tsx component
+   - Copy the Web app URL and update it in the AkshayTritiyaOffer.tsx component
 
 ## Google Apps Script Code
 
 ```javascript
-// Google Apps Script for Gudi Padwa Leads Webhook
+// Google Apps Script for Akshay Tritiya Leads Webhook
 // Replace 'YOUR_SPREADSHEET_ID' with your actual Google Sheet ID
 
 const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
-const SHEET_NAME = 'Gudi Padwa Leads';
+const SHEET_NAME = 'Akshay Tritiya Leads';
 
 function doPost(e) {
   try {
@@ -84,7 +84,7 @@ function doPost(e) {
 
 // Function to create a new spreadsheet and return its ID
 function createSpreadsheet() {
-  const ss = SpreadsheetApp.create('Gudi Padwa Leads Database');
+  const ss = SpreadsheetApp.create('Akshay Tritiya Leads Database');
   const sheet = ss.getActiveSheet();
   sheet.setName(SHEET_NAME);
   
@@ -150,4 +150,4 @@ After deployment, your webhook URL will look like:
 https://script.google.com/macros/s/SCRIPT_ID/exec
 ```
 
-Replace `YOUR_WEBHOOK_URL_HERE` in the GudiPadwaOffer.tsx component with this URL.
+Replace `YOUR_WEBHOOK_URL_HERE` in the AkshayTritiyaOffer.tsx component with this URL.

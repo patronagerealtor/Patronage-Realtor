@@ -1,6 +1,6 @@
-// Google Apps Script Webhook for Gudi Padwa Leads
+// Google Apps Script Webhook for Akshay Tritiya Leads
 function doGet(e) {
-  return HtmlService.createHtmlOutput("Hello! This is the Gudi Padwa Leads webhook. Please use POST requests.");
+  return HtmlService.createHtmlOutput("Hello! This is the Akshay Tritiya Leads webhook. Please use POST requests.");
 }
 
 function doOptions(e) {

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useLocation } from 'wouter';
 import { createClient } from '@supabase/supabase-js';
 import { env } from '../../config/env';
 
@@ -13,7 +14,8 @@ interface LeadData {
   sourcePage: string;
 }
 
-const GudiPadwaOffer: React.FC = () => {
+const AkshayTritiyaOffer: React.FC = () => {
+  const [location] = useLocation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -26,19 +28,12 @@ const GudiPadwaOffer: React.FC = () => {
   });
   const [errors, setErrors] = useState<Partial<LeadData>>({});
 
-  // Check if we're on the design-studio page
-  useEffect(() => {
-    if (window.location.pathname !== '/design-studio') {
-      return;
-    }
-  }, []);
-
   // Send data to Google Sheets via webhook
   const sendToGoogleSheet = async (data: LeadData) => {
     try {
       // Direct Google Apps Script webhook
       const webhookUrl = 'https://script.google.com/macros/s/AKfycby0VUKW6idgXDHoSjV0nWYOiKfzGuOgp5a1J6Yi8K3k16Q7eaanrCXb7a31ZDkVfQ9S/exec';
-      
+
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: {
@@ -53,9 +48,9 @@ const GudiPadwaOffer: React.FC = () => {
         }),
         mode: 'no-cors' // This prevents CORS errors but won't give us response details
       });
-      
+
       console.log('Google Sheets request sent (no-cors mode)');
-      
+
     } catch (error) {
       console.error('Error sending to Google Sheets:', error);
       // Don't throw error - allow form submission to succeed even if Google Sheets fails
@@ -93,7 +88,7 @@ const GudiPadwaOffer: React.FC = () => {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -103,7 +98,7 @@ const GudiPadwaOffer: React.FC = () => {
     try {
       // Insert into Supabase
       const { data: insertData, error } = await supabase
-        .from('gudi_padwa_leads')
+        .from('akshay_tritiya_leads')
         .insert({
           name: formData.name,
           phone: formData.phone,
@@ -126,7 +121,7 @@ const GudiPadwaOffer: React.FC = () => {
 
       // Show success message
       setShowSuccess(true);
-      
+
       // Reset form
       setFormData({
         name: '',
@@ -155,7 +150,7 @@ const GudiPadwaOffer: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     // Clear error for this field
     if (errors[name as keyof LeadData]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
@@ -163,31 +158,31 @@ const GudiPadwaOffer: React.FC = () => {
   };
 
   // Only render on design-studio page
-  if (window.location.pathname !== '/design-studio') {
+  if (location !== '/design-studio') {
     return null;
   }
 
   return (
     <>
       {/* Offer Ticker */}
-      <div className="gudi-padwa-ticker">
-        <div className="ticker-content" onClick={() => setIsModalOpen(true)}>
-          <span className="ticker-text">
-            🎉 Gudi Padwa Special • Book your interior project for ₹999 •
+      <div className="akshay-tritiya-ticker">
+        <div className="akshay-ticker-content" onClick={() => setIsModalOpen(true)}>
+          <span className="akshay-ticker-text">
+            ✨ Akshay Tritiya Special • Book your interior project for ₹999 •
             🎁 Complimentary Gifts: AC | TV | Fridge | Washing Machine •
             🏡 Luxury Interiors Designed for Your Dream Home Starting at just 2.99L*•
-            ⏳ Offer Valid Till 19 March • Click to Claim Offer
+            ⏳ Offer Valid Till 20 April • Click to Claim Offer
           </span>
         </div>
       </div>
 
       {/* Popup Modal */}
       {isModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <div className="akshay-modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="akshay-modal-card" onClick={(e) => e.stopPropagation()}>
             {/* Close Button */}
             <button 
-              className="close-button" 
+              className="akshay-close-button" 
               onClick={() => setIsModalOpen(false)}
               aria-label="Close modal"
             >
@@ -195,22 +190,22 @@ const GudiPadwaOffer: React.FC = () => {
             </button>
 
             {/* Modal Content */}
-            <div className="modal-content">
+            <div className="akshay-modal-content">
               {showSuccess ? (
-                <div className="success-message">
-                  <div className="success-icon">🎉</div>
+                <div className="akshay-success-message">
+                  <div className="akshay-success-icon">🎉</div>
                   <h2>Offer Claimed Successfully!</h2>
-                  <p>Our team will contact you shortly with your exclusive Gudi Padwa offer details.</p>
+                  <p>Our team will contact you shortly with your exclusive Akshay Tritiya offer details.</p>
                 </div>
               ) : (
                 <>
-                  <div className="modal-header">
-                    <h2>Gudi Padwa Interior Offer</h2>
+                  <div className="akshay-modal-header">
+                    <h2>Akshay Tritiya Interior Offer</h2>
                     <p>Book your interior project for ₹999 and receive exclusive festive gifts.</p>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="offer-form">
-                    <div className="form-group">
+                  <form onSubmit={handleSubmit} className="akshay-offer-form">
+                    <div className="akshay-form-group">
                       <label htmlFor="name">Name *</label>
                       <input
                         type="text"
@@ -221,10 +216,10 @@ const GudiPadwaOffer: React.FC = () => {
                         className={errors.name ? 'error' : ''}
                         placeholder="Enter your full name"
                       />
-                      {errors.name && <span className="error-message">{errors.name}</span>}
+                      {errors.name && <span className="akshay-error-message">{errors.name}</span>}
                     </div>
 
-                    <div className="form-group">
+                    <div className="akshay-form-group">
                       <label htmlFor="phone">Phone Number *</label>
                       <input
                         type="tel"
@@ -236,10 +231,10 @@ const GudiPadwaOffer: React.FC = () => {
                         placeholder="Enter 10-digit phone number"
                         maxLength={10}
                       />
-                      {errors.phone && <span className="error-message">{errors.phone}</span>}
+                      {errors.phone && <span className="akshay-error-message">{errors.phone}</span>}
                     </div>
 
-                    <div className="form-group">
+                    <div className="akshay-form-group">
                       <label htmlFor="email">Email *</label>
                       <input
                         type="email"
@@ -250,10 +245,10 @@ const GudiPadwaOffer: React.FC = () => {
                         className={errors.email ? 'error' : ''}
                         placeholder="Enter your email address"
                       />
-                      {errors.email && <span className="error-message">{errors.email}</span>}
+                      {errors.email && <span className="akshay-error-message">{errors.email}</span>}
                     </div>
 
-                    <div className="form-group">
+                    <div className="akshay-form-group">
                       <label htmlFor="propertyType">Property Type *</label>
                       <select
                         id="propertyType"
@@ -269,12 +264,12 @@ const GudiPadwaOffer: React.FC = () => {
                         <option value="4 BHK">4 BHK</option>
                         <option value="Villa">Villa</option>
                       </select>
-                      {errors.propertyType && <span className="error-message">{errors.propertyType}</span>}
+                      {errors.propertyType && <span className="akshay-error-message">{errors.propertyType}</span>}
                     </div>
 
                     <button
                       type="submit"
-                      className="submit-button"
+                      className="akshay-submit-button"
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? 'Submitting...' : 'Claim Offer'}
@@ -287,9 +282,9 @@ const GudiPadwaOffer: React.FC = () => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         /* Ticker Styles */
-        .gudi-padwa-ticker {
+        .akshay-tritiya-ticker {
           position: fixed;
           top: 65px;
           left: 0;
@@ -303,28 +298,28 @@ const GudiPadwaOffer: React.FC = () => {
           border-bottom: 2px solid #D4AF37;
         }
 
-        .ticker-content {
+        .akshay-ticker-content {
           cursor: pointer;
           transition: all 0.3s ease;
           display: inline-block;
           padding: 0 20px;
         }
 
-        .ticker-content:hover {
+        .akshay-ticker-content:hover {
           transform: scale(1.02);
           filter: brightness(1.2);
         }
 
-        .ticker-text {
+        .akshay-ticker-text {
           display: inline-block;
           font-size: 16px;
           font-weight: 600;
           white-space: nowrap;
-          animation: scroll-left 25s linear infinite;
+          animation: akshay-scroll-left 25s linear infinite;
           letter-spacing: 1px;
         }
 
-        @keyframes scroll-left {
+        @keyframes akshay-scroll-left {
           0% {
             transform: translateX(100%);
           }
@@ -333,12 +328,12 @@ const GudiPadwaOffer: React.FC = () => {
           }
         }
 
-        .gudi-padwa-ticker:hover .ticker-text {
+        .akshay-tritiya-ticker:hover .akshay-ticker-text {
           animation-play-state: paused;
         }
 
         /* Modal Styles */
-        .modal-overlay {
+        .akshay-modal-overlay {
           position: fixed;
           top: 0;
           left: 0;
@@ -351,15 +346,15 @@ const GudiPadwaOffer: React.FC = () => {
           align-items: center;
           justify-content: center;
           padding: 20px;
-          animation: fadeIn 0.3s ease;
+          animation: akshay-fadeIn 0.3s ease;
         }
 
-        @keyframes fadeIn {
+        @keyframes akshay-fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
         }
 
-        .modal-card {
+        .akshay-modal-card {
           background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
           backdrop-filter: blur(20px);
           border-radius: 20px;
@@ -369,10 +364,10 @@ const GudiPadwaOffer: React.FC = () => {
           max-height: 90vh;
           overflow-y: auto;
           position: relative;
-          animation: slideUp 0.3s ease;
+          animation: akshay-slideUp 0.3s ease;
         }
 
-        @keyframes slideUp {
+        @keyframes akshay-slideUp {
           from {
             transform: translateY(50px);
             opacity: 0;
@@ -383,7 +378,7 @@ const GudiPadwaOffer: React.FC = () => {
           }
         }
 
-        .close-button {
+        .akshay-close-button {
           position: absolute;
           top: 15px;
           right: 15px;
@@ -401,21 +396,21 @@ const GudiPadwaOffer: React.FC = () => {
           color: #0F1B2B;
         }
 
-        .close-button:hover {
+        .akshay-close-button:hover {
           background: rgba(15, 27, 43, 0.2);
           transform: rotate(90deg);
         }
 
-        .modal-content {
+        .akshay-modal-content {
           padding: 40px 30px 30px;
         }
 
-        .modal-header {
+        .akshay-modal-header {
           text-align: center;
           margin-bottom: 30px;
         }
 
-        .modal-header h2 {
+        .akshay-modal-header h2 {
           color: #0F1B2B;
           font-size: 28px;
           font-weight: 700;
@@ -426,17 +421,17 @@ const GudiPadwaOffer: React.FC = () => {
           background-clip: text;
         }
 
-        .modal-header p {
+        .akshay-modal-header p {
           color: #64748b;
           font-size: 16px;
           line-height: 1.5;
         }
 
-        .form-group {
+        .akshay-form-group {
           margin-bottom: 20px;
         }
 
-        .form-group label {
+        .akshay-form-group label {
           display: block;
           margin-bottom: 8px;
           color: #0F1B2B;
@@ -444,8 +439,8 @@ const GudiPadwaOffer: React.FC = () => {
           font-size: 14px;
         }
 
-        .form-group input,
-        .form-group select {
+        .akshay-form-group input,
+        .akshay-form-group select {
           width: 100%;
           padding: 12px 16px;
           border: 2px solid #e2e8f0;
@@ -456,26 +451,26 @@ const GudiPadwaOffer: React.FC = () => {
           color: #0F1B2B;
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
+        .akshay-form-group input:focus,
+        .akshay-form-group select:focus {
           outline: none;
           border-color: #D4AF37;
           box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
         }
 
-        .form-group input.error,
-        .form-group select.error {
+        .akshay-form-group input.error,
+        .akshay-form-group select.error {
           border-color: #ef4444;
         }
 
-        .error-message {
+        .akshay-error-message {
           display: block;
           color: #ef4444;
           font-size: 12px;
           margin-top: 5px;
         }
 
-        .submit-button {
+        .akshay-submit-button {
           width: 100%;
           padding: 14px 24px;
           background: linear-gradient(135deg, #D4AF37 0%, #f4d03f 100%);
@@ -491,28 +486,28 @@ const GudiPadwaOffer: React.FC = () => {
           box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
         }
 
-        .submit-button:hover:not(:disabled) {
+        .akshay-submit-button:hover:not(:disabled) {
           transform: translateY(-2px);
           box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
         }
 
-        .submit-button:disabled {
+        .akshay-submit-button:disabled {
           opacity: 0.6;
           cursor: not-allowed;
         }
 
-        .success-message {
+        .akshay-success-message {
           text-align: center;
           padding: 20px;
         }
 
-        .success-icon {
+        .akshay-success-icon {
           font-size: 60px;
           margin-bottom: 20px;
-          animation: bounce 0.6s ease;
+          animation: akshay-bounce 0.6s ease;
         }
 
-        @keyframes bounce {
+        @keyframes akshay-bounce {
           0%, 20%, 50%, 80%, 100% {
             transform: translateY(0);
           }
@@ -524,14 +519,14 @@ const GudiPadwaOffer: React.FC = () => {
           }
         }
 
-        .success-message h2 {
+        .akshay-success-message h2 {
           color: #0F1B2B;
           font-size: 24px;
           font-weight: 700;
           margin-bottom: 10px;
         }
 
-        .success-message p {
+        .akshay-success-message p {
           color: #64748b;
           font-size: 16px;
           line-height: 1.5;
@@ -539,44 +534,44 @@ const GudiPadwaOffer: React.FC = () => {
 
         /* Responsive Design */
         @media (max-width: 640px) {
-          .gudi-padwa-ticker {
+          .akshay-tritiya-ticker {
             padding: 10px 0;
           }
 
-          .ticker-text {
+          .akshay-ticker-text {
             font-size: 14px;
           }
 
-          .modal-card {
+          .akshay-modal-card {
             margin: 10px;
             max-height: 95vh;
           }
 
-          .modal-content {
+          .akshay-modal-content {
             padding: 30px 20px 20px;
           }
 
-          .modal-header h2 {
+          .akshay-modal-header h2 {
             font-size: 24px;
           }
 
-          .form-group input,
-          .form-group select {
+          .akshay-form-group input,
+          .akshay-form-group select {
             padding: 10px 14px;
             font-size: 16px; /* Prevents zoom on iOS */
           }
         }
 
         @media (max-width: 480px) {
-          .ticker-text {
+          .akshay-ticker-text {
             font-size: 12px;
           }
 
-          .modal-header h2 {
+          .akshay-modal-header h2 {
             font-size: 20px;
           }
 
-          .modal-header p {
+          .akshay-modal-header p {
             font-size: 14px;
           }
         }
@@ -585,4 +580,4 @@ const GudiPadwaOffer: React.FC = () => {
   );
 };
 
-export default GudiPadwaOffer;
+export default AkshayTritiyaOffer;

@@ -49,6 +49,7 @@ import InvestmentDetails from "./pages/InvestmentDetails";
 import { Webinar } from "./pages/Webinar";
 import { LoginPage, ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AuthPhoneGate } from "./components/auth/AuthPhoneGate";
+import AkshayTritiyaOffer from "./components/marketing/AkshayTritiyaOffer";
 
 import { env } from "./config/env";
 const dataEntryAllowedEmails = env.dataEntryAllowedEmail || "";
@@ -102,6 +103,7 @@ function App({ ssrPath }: { ssrPath?: string }) {
             <Analytics />
             <SpeedInsights />
             <AuthPhoneGate>
+              <AkshayTritiyaOffer />
               <Router />
             </AuthPhoneGate>
           </TooltipProvider>
