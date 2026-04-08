@@ -17,10 +17,10 @@ const inputClass =
 export function ContactCard({ onSubmit }: ContactCardProps) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.currentTarget;
-    const name = (form.elements.namedItem("name") as HTMLInputElement)?.value?.trim() ?? "";
-    const email = (form.elements.namedItem("email") as HTMLInputElement)?.value?.trim() ?? "";
-    const phone = (form.elements.namedItem("phone") as HTMLInputElement)?.value?.trim() ?? "";
+    const formData = new FormData(e.currentTarget);
+    const name = String(formData.get("name") || "").trim();
+    const email = String(formData.get("email") || "").trim();
+    const phone = String(formData.get("phone") || "").trim();
     if (onSubmit) onSubmit({ name, email, phone });
   };
 
@@ -48,6 +48,7 @@ export function ContactCard({ onSubmit }: ContactCardProps) {
               name="name"
               placeholder="Full Name"
               autoComplete="name"
+              required
               className={inputClass}
             />
           </div>
@@ -61,6 +62,7 @@ export function ContactCard({ onSubmit }: ContactCardProps) {
               name="phone"
               placeholder="Mobile Number"
               autoComplete="tel"
+              required
               className={inputClass}
             />
           </div>
@@ -74,6 +76,7 @@ export function ContactCard({ onSubmit }: ContactCardProps) {
               name="email"
               placeholder="Email Address"
               autoComplete="email"
+              required
               className={inputClass}
             />
           </div>

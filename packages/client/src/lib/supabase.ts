@@ -710,18 +710,39 @@ export type InsertContactLeadResult =
 export async function insertContactLead(
   row: ContactLeadInsert
 ): Promise<InsertContactLeadResult> {
-  const payload = {
+  const payload: any = {
     name: row.name.trim(),
     email: row.email.trim(),
     phone: row.phone.trim(),
-    property_id: row.property_id,
     property_title: row.property_title.trim(),
     lead_type: row.lead_type ?? "site_visit",
   };
+
+  // Only include property_id if it looks like a valid ID (not placeholder '1', '2', etc.)
+  const pid = row.property_id?.trim();
+  if (pid && pid.length > 5) {
+    payload.property_id = pid;
+  }
+
+  // If the table was created without a default ID, we provide one.
+  // We use a UUID if possible, otherwise Supabase might handle it if it has a default.
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    payload.id = crypto.randomUUID();
+  }
+
   if (!supabaseClient) return { success: false, error: "Backend not configured." };
-  const { data, error } = await supabaseClient.from(CONTACT_LEADS_TABLE).insert(payload).select("id").single();
-  if (error) return { success: false, error: error.message || "Database error." };
-  return data?.id ? { success: true, id: String(data.id) } : { success: false, error: "No id returned" };
+  
+  const { data, error } = await supabaseClient
+    .from(CONTACT_LEADS_TABLE)
+    .insert(payload)
+    .select("id")
+    .single();
+
+  if (error) {
+    console.error("[Supabase] insertContactLead error:", error);
+    return { success: false, error: error.message || "Database error." };
+  }
+  return data?.id ? { success: true, id: String(data.id) } : { success: true, id: "unknown" };
 }
 
 export async function fetchContactLeads(): Promise<ContactLeadRow[]> {
