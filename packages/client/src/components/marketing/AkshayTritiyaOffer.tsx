@@ -169,9 +169,8 @@ const AkshayTritiyaOffer: React.FC = () => {
         <div className="akshay-ticker-content" onClick={() => setIsModalOpen(true)}>
           <span className="akshay-ticker-text">
             ✨ Akshay Tritiya Special • Book your interior project for ₹999 •
-            🎁 Complimentary Gifts: AC | TV | Fridge | Washing Machine •
             🏡 Luxury Interiors Designed for Your Dream Home Starting at just 2.99L*•
-            ⏳ Offer Valid Till 20 April • Click to Claim Offer
+            ⏳ Offer Valid Till 19 April • Click to Claim Offer
           </span>
         </div>
       </div>
