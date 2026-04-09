@@ -14,8 +14,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Calculator, Lock } from "lucide-react";
+import { Calculator, Lock, Unlock, Loader2 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
+import { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabase";
+import { useToast } from "../../hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 
 type CustomizationLevel = "low" | "medium" | "high";
 
@@ -63,8 +73,8 @@ export function InteriorPriceCalculator() {
   const [state, dispatch] = useReducer(calculatorReducer, initialState);
   const { bhk, pkg, renovation, customization, area } = state;
   const { user } = useAuth();
-  const showQuote = !!user;
-
+  
+  // Calculate price at the top so it's always ready for handlers
   const price = calculatePrice({
     bhk,
     packageTier: pkg,
@@ -72,6 +82,80 @@ export function InteriorPriceCalculator() {
     renovation,
     customization,
   });
+
+  // Lead form state
+  const [isLeadFormOpen, setIsLeadFormOpen] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [leadName, setLeadName] = useState("");
+  const [leadPhone, setLeadPhone] = useState("");
+  const [formError, setFormError] = useState("");
+  const { toast } = useToast();
+
+  const showQuote = isUnlocked;
+
+  const handleUnlockClick = () => {
+    // Pre-fill if user info is available
+    if (user) {
+      setLeadName(user.user_metadata?.full_name || "");
+      // Note: user.phone might be available depending on supabase config
+      setLeadPhone(user.phone || "");
+    }
+    setIsLeadFormOpen(true);
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!leadName || !leadPhone) {
+      setFormError("Please fill in all fields");
+      return;
+    }
+
+    if (!/^[6-9]\d{9}$/.test(leadPhone)) {
+      setFormError("Please enter a valid 10-digit phone number");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFormError("");
+
+    try {
+      if (!supabase) throw new Error("Database not connected");
+
+      const { error } = await supabase
+        .from("interior_calculator_leads")
+        .insert({
+          name: leadName,
+          phone: leadPhone,
+          bhk: bhk,
+          package_tier: pkg,
+          carpet_area: area || 0,
+          renovation,
+          customization,
+          estimated_min: price.min,
+          estimated_max: price.max,
+          source_page: window.location.pathname
+        });
+
+      if (error) throw error;
+
+      // Save to localStorage
+      localStorage.setItem("interior_quote_unlocked", "true");
+      
+      setIsUnlocked(true);
+      setIsLeadFormOpen(false);
+
+      toast({
+        title: "Quote Unlocked!",
+        description: "You can now see your estimated interior cost.",
+      });
+    } catch (err: any) {
+      console.error("Error saving lead:", err);
+      setFormError(err.message || "Failed to save. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const band = AREA_BANDS[bhk];
 
@@ -200,17 +284,20 @@ export function InteriorPriceCalculator() {
                     <div className="rounded-full bg-primary/10 p-4 mb-4">
                       <Lock className="h-8 w-8 text-primary" aria-hidden />
                     </div>
-                    <h3 className="text-lg font-semibold mb-1">Sign up to see your Quote and Floor Plan</h3>
+                    <h3 className="text-lg font-semibold mb-1">Unlock your Quote and Floor Plan</h3>
                     <p className="text-sm text-muted-foreground mb-6 max-w-sm">
-                      Create an account to view your estimated cost range and access floor plan options.
+                      Get an instant estimate for your dream home by unlocking the results.
                     </p>
                     <div className="flex flex-wrap gap-3 justify-center">
-                      <Link href="/login">
-                        <Button variant="default">Sign up</Button>
-                      </Link>
-                      <Link href="/login">
-                        <Button variant="outline">Sign in</Button>
-                      </Link>
+                      <Button 
+                        variant="default" 
+                        size="lg"
+                        onClick={handleUnlockClick}
+                        className="font-bold px-8"
+                      >
+                        <Unlock className="mr-2 h-4 w-4" />
+                        Unlock Quote
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -218,6 +305,58 @@ export function InteriorPriceCalculator() {
             </div>
           </div>
         </div>
+
+        {/* Lead Capture Dialog */}
+        <Dialog open={isLeadFormOpen} onOpenChange={setIsLeadFormOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Unlock Your Custom Quote</DialogTitle>
+              <DialogDescription>
+                Provide your details to see the instant estimate and download the floor plan options.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleFormSubmit} className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="lead-name">Name</Label>
+                <Input
+                  id="lead-name"
+                  placeholder="Your Name"
+                  value={leadName}
+                  onChange={(e) => setLeadName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lead-phone">Phone Number</Label>
+                <Input
+                  id="lead-phone"
+                  type="tel"
+                  placeholder="10-digit phone number"
+                  value={leadPhone}
+                  onChange={(e) => setLeadPhone(e.target.value)}
+                  maxLength={10}
+                  required
+                />
+              </div>
+              {formError && (
+                <p className="text-sm font-medium text-destructive">{formError}</p>
+              )}
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Unlocking...
+                  </>
+                ) : (
+                  "Unlock Now"
+                )}
+              </Button>
+              <p className="text-[10px] text-center text-muted-foreground">
+                By clicking "Unlock Now", you agree to be contacted for a free design consultation.
+              </p>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );
