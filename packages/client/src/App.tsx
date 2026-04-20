@@ -103,7 +103,6 @@ function App({ ssrPath }: { ssrPath?: string }) {
             <Analytics />
             <SpeedInsights />
             <AuthPhoneGate>
-              <AkshayTritiyaOffer />
               <Router />
             </AuthPhoneGate>
           </TooltipProvider>

@@ -1,0 +1,34 @@
+# ---------------------------------------------------------------------------
+# Supabase – database (Data Entry, properties, leads, etc.). Media = Cloudinary.
+# ---------------------------------------------------------------------------
+VITE_SUPABASE_2_URL=https://mesitliepxtjzwkgtggs.supabase.co
+VITE_SUPABASE_2_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lc2l0bGllcHh0anp3a2d0Z2dzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyODY1NDYsImV4cCI6MjA4Nzg2MjU0Nn0.YxOoWeqsdeCk-oWItE6HHxuZFDral5jW3c3fOgHttPk
+
+# ---------------------------------------------------------------------------
+VITE_CLOUDINARY_CLOUD_NAME=dk0k1fcfr
+# Preset for images (property images, webinar proofs, etc.)
+VITE_CLOUDINARY_UPLOAD_PRESET=property_images
+# Preset for videos (reels). Used by cloudinaryUploadVideo.
+VITE_CLOUDINARY_UPLOAD_PRESET_VIDEO=reels_resedential
+
+# ---------------------------------------------------------------------------
+# Google OAuth (client – only VITE_* is needed for this Vite app)
+# ---------------------------------------------------------------------------
+VITE_GOOGLE_CLIENT_ID=118716119680-n6ifldp4muflfpfl9csh719f77ucl5i9.apps.googleusercontent.com
+
+# Site URL used for OAuth redirect (e.g. http://localhost:5000). Leave empty to use current window origin.
+VITE_APP_URL=http://localhost:5000
+
+# Redirect path after sign-in (e.g. /dashboard, /data-entry, /). Used when no ?redirect= in URL.
+VITE_AFTER_SIGNIN_REDIRECT=/
+
+# Data Entry: only this email can access /data-entry (leave empty to allow any signed-in user)
+VITE_DATA_ENTRY_ALLOWED_EMAIL=patronagerealtor@gmail.com
+
+# ---------------------------------------------------------------------------
+# Server only (used when you run `npm run dev` / the Express app)
+# Set a long random string in production.
+# ---------------------------------------------------------------------------
+JWT_SECRET=change-me-in-production
+
+VITE_GOOGLE_SHEETS_ENDPOINT=https://script.google.com/macros/s/AKfycby0VUKW6idgXDHoSjV0nWYOiKfzGuOgp5a1J6Yi8K3k16Q7eaanrCXb7a31ZDkVfQ9S/exec
